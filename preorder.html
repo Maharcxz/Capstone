@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-Ordering - Trinity Optimum Vision Center</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/BaseStyles.css">
+    <link rel="stylesheet" href="CSS/AboutUsPageStyles.css">
+    <link rel="stylesheet" href="CSS/AdminPageStyles.css">
+    <link rel="stylesheet" href="CSS/ConfirmationStyles.css">
+    <link rel="stylesheet" href="CSS/ContactUsPageStyles.css">
+    <link rel="stylesheet" href="CSS/FrameEditStyles.css">
+    <link rel="stylesheet" href="CSS/FrameTypesMenuHeaderStyles.css">
+    <link rel="stylesheet" href="CSS/HeaderStyles.css">
+    <link rel="stylesheet" href="CSS/LogInModalStyles.css">
+    <link rel="stylesheet" href="CSS/NotificationIconPanelStyles.css">
+    <link rel="stylesheet" href="CSS/Pre-OrderStyles.css">
+    <link rel="stylesheet" href="CSS/ProductGridStyles.css">
+    <link rel="stylesheet" href="CSS/ResponsiveNotifStyles.css">
+    <link rel="stylesheet" href="CSS/SidebarStyles.css">
+
+    <script src="JS/AuthHandlers.js"></script>
+    <script src="JS/ContentEditingFunc.js"></script>
+    <script src="JS/EventListenerFunc.js"></script>
+    <script src="JS/FrameCategoryFunc.js"></script>
+    <script src="JS/FrameEditingModal.js"></script>
+    <script src="JS/NotificationFunc.js"></script>
+    <script src="JS/PassToggleFunc.js"></script>
+    <script src="JS/Script.js"></script>
+    <script src="JS/SeachFunc.js"></script>
+    <script src="JS/SidebarFunc.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1 class="maintitle">T R I N I T Y</h1>
+                <p class="subtitle">OPTIMUM VISION CENTER</p>
+            </div>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="contact.html" class="nav-link">Contact Us</a>
+                    <a href="about.html" class="nav-link">About Us</a>
+                </div>
+                <div class="nav-right">
+                    <div class="nav-icons">
+                        <span class="mail-icon">✉</span>
+                    </div>
+                    <button class="login-btn" onclick="showLoginModal()">
+                        <span class="user-icon">👤</span>
+                        Admin Mode
+                    </button>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Login Modal -->
+        <div class="login-modal-overlay" id="loginModalOverlay" onclick="hideLoginModal()">
+            <div class="login-modal" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <div class="glasses-icon">
+                        <svg viewBox="0 0 100 60" class="glasses-svg">
+                            <path d="M15 25 Q50 15 85 25 Q90 30 85 35 Q80 40 70 40 L60 40 Q55 35 50 35 Q45 35 40 40 L30 40 Q20 40 15 35 Q10 30 15 25 Z" 
+                                fill="none" stroke="white" stroke-width="3"/>
+                            <circle cx="25" cy="32" r="12" fill="none" stroke="white" stroke-width="3"/>
+                            <circle cx="75" cy="32" r="12" fill="none" stroke="white" stroke-width="3"/>
+                            <rect x="68" y="25" width="14" height="14" rx="2" fill="none" stroke="white" stroke-width="2"/>
+                            <text x="75" y="34" text-anchor="middle" fill="white" font-size="8" font-weight="bold">AR</text>
+                        </svg>
+                    </div>
+                    <h2 class="modal-title">WELCOME</h2>
+                </div>
+                
+                <form class="login-form">
+                    <div class="input-group">
+                        <span class="input-icon">✉</span>
+                        <input type="email" placeholder="Email Address" class="login-input" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" placeholder="Password" class="login-input" id="passwordInput" required>
+                        <span class="password-toggle" onclick="togglePassword()">👁</span>
+                    </div>
+                    
+                    <button type="submit" class="modal-login-btn">Log In</button>
+                    
+                    <div class="guest-option">
+                        <span class="continue-text">Or continue as</span>
+                        <button type="button" class="guest-btn" onclick="hideLoginModal()">Guest</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Pre-Order Content -->
+        <main class="preorder-content">
+            <h2 class="preorder-page-title">PRE-ORDERING</h2>
+            
+            <div class="preorder-form-container">
+                <form class="preorder-page-form">
+                    <div class="form-row">
+                        <div class="form-column">
+                            <div class="form-field">
+                                <label class="field-label">Full Name</label>
+                                <div class="name-inputs">
+                                    <input type="text" placeholder="First Name" class="name-input" name="firstName" required>
+                                    <input type="text" placeholder="Last Name" class="name-input" name="lastName" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-field">
+                                <label class="field-label">Email</label>
+                                <input type="email" placeholder="email@example.com" class="full-input" required>
+                            </div>
+                            
+                            <div class="form-field">
+                                <label class="field-label">Phone Number</label>
+                                <input type="tel" placeholder="+63" class="full-input" required>
+                            </div>
+                            
+                            <div class="form-field">
+                                <label class="field-label">Quantity</label>
+                                <select class="quantity-select" required>
+                                    <option value="">Select Quantity</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10+</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-column">
+                            <div class="form-field">
+                                <label class="field-label">Note</label>
+                                <textarea placeholder="Add your note here..." class="note-textarea"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" onclick="window.history.back()">Cancel</button>
+                        <button type="submit" class="submit-btn">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</html>

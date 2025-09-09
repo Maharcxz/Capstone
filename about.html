@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Trinity Optimum Vision Center</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/BaseStyles.css">
+    <link rel="stylesheet" href="CSS/AboutUsPageStyles.css">
+    <link rel="stylesheet" href="CSS/AdminPageStyles.css">
+    <link rel="stylesheet" href="CSS/ConfirmationStyles.css">
+    <link rel="stylesheet" href="CSS/ContactUsPageStyles.css">
+    <link rel="stylesheet" href="CSS/FrameEditStyles.css">
+    <link rel="stylesheet" href="CSS/FrameTypesMenuHeaderStyles.css">
+    <link rel="stylesheet" href="CSS/HeaderStyles.css">
+    <link rel="stylesheet" href="CSS/LogInModalStyles.css">
+    <link rel="stylesheet" href="CSS/NotificationIconPanelStyles.css">
+    <link rel="stylesheet" href="CSS/Pre-OrderStyles.css">
+    <link rel="stylesheet" href="CSS/ProductGridStyles.css">
+    <link rel="stylesheet" href="CSS/ResponsiveNotifStyles.css">
+    <link rel="stylesheet" href="CSS/SidebarStyles.css">
+
+    <script src="JS/AuthHandlers.js"></script>
+    <script src="JS/ContentEditingFunc.js"></script>
+    <script src="JS/EventListenerFunc.js"></script>
+    <script src="JS/FrameCategoryFunc.js"></script>
+    <script src="JS/FrameEditingModal.js"></script>
+    <script src="JS/NotificationFunc.js"></script>
+    <script src="JS/PassToggleFunc.js"></script>
+    <script src="JS/Script.js"></script>
+    <script src="JS/SeachFunc.js"></script>
+    <script src="JS/SidebarFunc.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1 class="maintitle">T R I N I T Y</h1>
+                <p class="subtitle">OPTIMUM VISION CENTER</p>
+            </div>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="contact.html" class="nav-link">Contact Us</a>
+                    <a href="about.html" class="nav-link active">About Us</a>
+                    <a href="preorders.html" class="nav-link admin-only" id="preOrdersNav" style="display: none;">Pre-Orders</a>
+                </div>
+                <div class="nav-right">
+                    <div class="nav-icons">
+                        <div class="notification-wrapper">
+                            <span class="notification-icon" onclick="toggleNotifications()">🔔</span>
+                            <span class="notification-badge" id="notificationBadge">0</span>
+                        </div>
+                    </div>
+                    <div class="auth-section">
+                        <button class="login-btn" id="authButton" onclick="handleAuthClick()">
+                            <span class="user-icon">👤</span>
+                            <span id="authButtonText">Admin Mode</span>
+                        </button>
+                        <div class="admin-dropdown" id="adminDropdown">
+                            <button class="dropdown-item" onclick="switchToGuestMode()">Switch to Guest View</button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Notifications Panel -->
+        <div class="notifications-panel" id="notificationsPanel">
+            <div class="notifications-header">
+                <h3>Pre-Order Notifications</h3>
+                <span class="close-notifications" onclick="hideNotifications()">×</span>
+            </div>
+            <div class="notifications-list" id="notificationsList">
+                <div class="empty-notifications">
+                    <p>No pre-orders yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Us Content -->
+        <main class="about-content">
+            <h2 class="about-title">ABOUT US</h2>
+            
+            <div class="editable-content" id="aboutContent">
+                <p class="about-paragraph">
+                    Welcome To Trinity Optimum Vision Center — Your Trusted Partner In Eye Care And Eyewear Innovation. We Specialize In Providing High-Quality Eyeglasses, Frames, And Lenses Tailored To Your Style And Vision Needs.
+                </p>
+
+                <p class="about-paragraph">
+                    Our Mission Is To Blend Advanced Technology With Personalized Service, Offering You A Seamless Virtual Eyeglass Try-On Experience Using Cutting-Edge Augmented Reality (AR). Whether You're Shopping For New Frames Or Need Expert Advice, Trinity Is Here To Help You See Better And Look Great.
+                </p>
+
+                <p class="about-paragraph">
+                    We Are Committed To Excellence In Eyewear, Customer Satisfaction, And Continuous Innovation.
+                </p>
+            </div>
+            
+            <button class="edit-content-btn admin-only" id="editAboutBtn" style="display: none;" onclick="openEditModal('about')">
+                Edit Content
+            </button>
+        </main>
+    </div>
+
+    <!-- Edit Content Modal -->
+    <div class="edit-modal-overlay" id="editModalOverlay" style="display: none;">
+        <div class="edit-modal">
+            <div class="edit-modal-header">
+                <h3>Edit Content</h3>
+                <button class="close-edit-modal" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div class="edit-modal-content">
+                <textarea id="editTextarea" placeholder="Enter content here..."></textarea>
+                <div class="edit-modal-actions">
+                    <button class="save-edit-btn" onclick="saveEditedContent()">Save Changes</button>
+                    <button class="cancel-edit-btn" onclick="closeEditModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,47 @@
+/* About Us Page Styles */
+.about-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 0;
+    line-height: 1.6;
+}
+
+.about-title {
+    font-size: 36px;
+    font-weight: normal;
+    letter-spacing: 4px;
+    margin-bottom: 40px;
+    color: white;
+    margin-left: 0;
+}
+
+.about-paragraph {
+    font-size: 18px;
+    margin-bottom: 30px;
+    color: white;
+    line-height: 1.8;
+    text-align: left;
+    text-indent: 2em;
+}
+
+.about-paragraph:last-child {
+    margin-bottom: 0;
+}
+
+/* About Page Responsive */
+@media (max-width: 768px) {
+    .about-content {    
+        padding: 30px 0;
+    }
+    
+    .about-title {
+        font-size: 28px;
+        letter-spacing: 3px;
+        margin-left: 0;
+    }
+    
+    .about-paragraph {
+        font-size: 16px;
+        margin-bottom: 25px;
+    }
+}

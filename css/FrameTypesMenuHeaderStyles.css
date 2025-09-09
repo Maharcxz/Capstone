@@ -1,0 +1,50 @@
+/* Frame Types Menu */
+.frame-types-menu {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding-left: 0;
+    margin-left: 0;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.frame-types-menu:hover {
+    opacity: 0.8;
+}
+
+.menu-icon {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    cursor: pointer;
+}
+
+.menu-icon span {
+    width: 20px;
+    height: 2px;
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+.menu-text {
+    font-size: 16px;
+    color: white;
+}
+
+/* Frame Type Header Styles */
+.frame-type-header {
+    margin-bottom: 30px;
+    text-align: left;
+    padding-left: 0;
+}
+
+.frame-type-title {
+    font-size: 24px;
+    font-weight: normal;
+    letter-spacing: 2px;
+    color: white;
+    margin: 0;
+    text-transform: uppercase;
+}

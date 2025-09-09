@@ -1,0 +1,70 @@
+/* Sidebar Overlay */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 999;
+}
+
+.sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 300px;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    transition: left 0.3s ease;
+    z-index: 1000;
+    padding-top: 100px;
+    overflow-y: auto;
+}
+
+.sidebar.active {
+    left: 0;
+}
+
+.sidebar-content {
+    padding: 20px;
+}
+
+.frame-category {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 15px 20px;
+    font-size: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.frame-category:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding-left: 30px;
+}
+
+.frame-category:last-child {
+    border-bottom: none;
+}
+
+/* Main content shift when sidebar is open */
+.main-content {
+    transition: margin-left 0.3s ease;
+    margin-left: 0;
+}
+
+.main-content.shifted {
+    margin-left: 300px;
+}

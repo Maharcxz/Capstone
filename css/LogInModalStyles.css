@@ -1,0 +1,153 @@
+/* Login Modal Styles */
+.login-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.login-modal-overlay.active {
+    display: flex;
+}
+
+.login-modal {
+    background-color: #540000;
+    border-radius: 20px;
+    padding: 40px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.glasses-icon {
+    margin-bottom: 20px;
+}
+
+.glasses-svg {
+    width: 80px;
+    height: 50px;
+}
+
+.modal-title {
+    color: white;
+    font-size: 24px;
+    font-weight: normal;
+    letter-spacing: 3px;
+    margin: 0;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    color: white;
+    font-size: 16px;
+    z-index: 1;
+}
+
+.login-input {
+    width: 100%;
+    padding: 15px 50px;
+    background-color: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    color: white;
+    font-size: 16px;
+}
+
+.login-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.login-input:focus {
+    outline: none;
+    border-color: white;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 15px;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    z-index: 1;
+}
+
+.modal-login-btn {
+    background-color: transparent;
+    color: white;
+    border: 2px solid white;
+    padding: 15px;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+}
+
+.modal-login-btn:hover {
+    background-color: white;
+    color: #540000;
+}
+
+.guest-option {
+    text-align: center;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.continue-text {
+    color: white;
+    font-size: 14px;
+}
+
+.guest-btn {
+    background-color: transparent;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 10px 30px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.guest-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}

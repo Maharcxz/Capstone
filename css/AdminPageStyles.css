@@ -1,0 +1,220 @@
+/* Admin Styles */
+.auth-section {
+    position: relative;
+}
+
+.admin-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 10px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 1000;
+}
+
+.admin-dropdown.active {
+    display: block;
+}
+
+.dropdown-item {
+    background: none;
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.admin-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    justify-content: center;
+}
+
+.admin-btn {
+    background: #540000;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.admin-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.edit-content-btn {
+    background: #540000;
+    color: white;
+    border: 2px solid white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 30px;
+    transition: all 0.3s ease;
+}
+
+.edit-content-btn:hover {
+    background: white;
+    color: #540000;
+}
+
+.search-frame-section {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+}
+
+.search-container {
+    flex: 1;
+}
+
+.search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    color: white;
+    font-size: 16px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 15px 50px;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    color: white;
+    font-size: 16px;
+}
+
+.search-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: white;
+}
+
+.search-hint {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    margin-top: 5px;
+    margin-left: 15px;
+}
+
+/* Pre-Orders Admin Page */
+.preorders-admin-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 0;
+}
+
+.preorders-title {
+    font-size: 36px;
+    font-weight: normal;
+    letter-spacing: 4px;
+    margin-bottom: 40px;
+    color: white;
+    text-align: center;
+}
+
+.preorders-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+}
+
+.stat-card h3 {
+    color: white;
+    font-size: 16px;
+    margin-bottom: 15px;
+    font-weight: normal;
+}
+
+.stat-number {
+    color: white;
+    font-size: 36px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.preorders-list {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 30px;
+}
+
+.preorders-list h3 {
+    color: white;
+    font-size: 20px;
+    margin-bottom: 20px;
+    font-weight: normal;
+}
+
+.preorder-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+.preorder-info h4 {
+    color: white;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.preorder-info p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    margin: 2px 0;
+}
+
+.preorder-actions {
+    display: flex;
+    gap: 10px;
+}
