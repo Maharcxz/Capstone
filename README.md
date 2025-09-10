@@ -1,2 +1,2 @@
-# Website Development
-Capstone Project
+# WebDev
+Capstone Proj

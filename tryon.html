@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Try-On (AR)</title>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/2.2.1/aframe/build/aframe-ar.js"></script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: white;
+      color: #540000;
+      bgitorder: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 16px;
+      z-index: 9999;
+    }
+    .back-btn:hover {
+      background: #ddd;
+    }
+  </style>
+</head>
+<body>
+  <button class="back-btn" onclick="window.location.href='index.html'">⬅ Back</button>
+
+  <!-- AR.js Scene -->
+  <a-scene embedded arjs>
+    <!-- Marker based AR -->
+    <a-marker preset="hiro">
+      <!-- Example: Glasses box model (placeholder) -->
+      <a-box position="0 0.5 0" material="color: red;"></a-box>
+    </a-marker>
+    <a-entity gltf-model="url(./Assets/glasses.glb)" scale="0.5 0.5 0.5" position="0 0 0"></a-entity>
+
+  </a-scene>
+</body>
+</html>
