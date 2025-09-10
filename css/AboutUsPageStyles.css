@@ -7,7 +7,7 @@
 }
 
 .about-paragraph {
-    font-family: poppins, sans-serif;
+    font-family: poppins, sans-serif !important;
 }
 
 .about-title {

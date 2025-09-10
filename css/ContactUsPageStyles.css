@@ -1,4 +1,9 @@
 /* Contact Us Page Styles */
+
+.contact-description, .contact-info, .business-hours, .contact-footer {
+    font-family: poppins, sans-serif !important;
+}
+
 .contact-content {
     max-width: 800px;
     margin: 0 auto;
