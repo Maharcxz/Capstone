@@ -20,7 +20,20 @@ function initializeEventListeners() {
     if (loginForm) {
         loginForm.addEventListener('submit', function(event) {
             event.preventDefault();
-            switchToAdminMode();
+            
+            const email = loginForm.querySelector('input[type="email"]').value;
+            const password = loginForm.querySelector('input[type="password"]').value;
+            
+            // Use Firebase Authentication
+            firebaseServices.signInWithEmailAndPassword(email, password)
+                .then(user => {
+                    console.log('Logged in successfully:', user.email);
+                    switchToAdminMode();
+                })
+                .catch(error => {
+                    console.error('Login error:', error);
+                    alert('Login failed: ' + error.message);
+                });
         });
     }
 

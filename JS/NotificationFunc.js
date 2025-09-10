@@ -16,7 +16,6 @@ function hideNotifications() {
 
 function addPreOrderNotification(frameName, customerName, orderDetails) {
     const notification = {
-        id: Date.now(),
         frameName: frameName || 'Titanium Slim Frame',
         customerName: customerName || 'Customer',
         message: `Pre-order confirmed for "${frameName || 'Titanium Slim Frame'}". We'll contact you when available.`,
@@ -25,50 +24,87 @@ function addPreOrderNotification(frameName, customerName, orderDetails) {
         status: 'confirmed'
     };
     
-    preOrderNotifications.unshift(notification);
-    localStorage.setItem('preOrderNotifications', JSON.stringify(preOrderNotifications));
-    updateNotificationBadge();
-    updateNotificationsList();
+    // Save to Firebase
+    firebaseServices.savePreOrderToFirebase(notification)
+        .then(() => {
+            // Update UI
+            updateNotificationBadge();
+            updateNotificationsList();
+        })
+        .catch(error => {
+            console.error('Error saving pre-order notification:', error);
+        });
 }
 
 function updateNotificationBadge() {
     const badge = document.getElementById('notificationBadge');
-    const count = preOrderNotifications.length;
     
-    if (badge) {
-        badge.textContent = count;
-        if (count === 0) {
-            badge.classList.add('hidden');
-        } else {
-            badge.classList.remove('hidden');
-        }
-    }
+    // Get count from Firebase
+    firebaseServices.getAllPreOrders()
+        .then(preOrders => {
+            const count = preOrders.length;
+            
+            if (badge) {
+                badge.textContent = count;
+                if (count === 0) {
+                    badge.classList.add('hidden');
+                } else {
+                    badge.classList.remove('hidden');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error getting pre-order count:', error);
+            if (badge) {
+                badge.textContent = '0';
+                badge.classList.add('hidden');
+            }
+        });
 }
 
 function updateNotificationsList() {
     const list = document.getElementById('notificationsList');
     if (!list) return;
     
-    if (preOrderNotifications.length === 0) {
-        list.innerHTML = '<div class="empty-notifications"><p>No pre-orders yet</p></div>';
-        return;
-    }
+    // Show loading state
+    list.innerHTML = '<div class="loading-notifications"><p>Loading...</p></div>';
     
-    list.innerHTML = preOrderNotifications.map(notification => `
-        <div class="notification-item" onclick="showNotificationDetails('${notification.id}')">
-            <div class="notification-title">${notification.frameName}</div>
-            <div class="notification-message">${notification.message}</div>
-            <div class="notification-time">${formatNotificationTime(notification.timestamp)}</div>
-        </div>
-    `).join('');
+    // Get notifications from Firebase
+    firebaseServices.getAllPreOrders()
+        .then(preOrders => {
+            if (preOrders.length === 0) {
+                list.innerHTML = '<div class="empty-notifications"><p>No pre-orders yet</p></div>';
+                return;
+            }
+            
+            list.innerHTML = preOrders.map(notification => `
+                <div class="notification-item" onclick="showNotificationDetails('${notification.id}')">
+                    <div class="notification-title">${notification.frameName}</div>
+                    <div class="notification-message">${notification.message}</div>
+                    <div class="notification-time">${formatNotificationTime(notification.timestamp)}</div>
+                </div>
+            `).join('');
+        })
+        .catch(error => {
+            console.error('Error getting pre-orders:', error);
+            list.innerHTML = '<div class="error-notifications"><p>Error loading notifications</p></div>';
+        });
 }
 
 function showNotificationDetails(notificationId) {
-    const notification = preOrderNotifications.find(n => n.id === parseInt(notificationId));
-    if (notification) {
-        hideNotifications();
-        showConfirmationModal(notification);
-    }
+    // Get notification details from Firebase
+    firebaseServices.db.ref('preOrders/' + notificationId).once('value')
+        .then(snapshot => {
+            const notification = snapshot.val();
+            if (notification) {
+                notification.id = notificationId;
+                hideNotifications();
+                showConfirmationModal(notification);
+            }
+        })
+        .catch(error => {
+            console.error('Error getting notification details:', error);
+        });
 }
 
 function showConfirmationModal(notification) {
