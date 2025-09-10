@@ -140,7 +140,7 @@
 
 .edit-btn {
     flex: 1;
-    background-color: transparent;
+    background: #540000;
     color: white;
     border: 2px solid white;
     padding: 12px;
