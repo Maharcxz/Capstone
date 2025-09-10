@@ -61,10 +61,10 @@
                     <div class="nav-icons">
                         <span class="mail-icon">✉</span>
                     </div>
-                    <button class="login-btn" onclick="showLoginModal()">
+                    <a href="login.html" class="login-btn">
                         <span class="user-icon">👤</span>
-                        LOG IN
-                    </button>
+                        Admin Login
+                    </a>
                 </div>
             </nav>
         </header>
@@ -114,8 +114,8 @@
             
             <div class="confirmation-container">
                 <div class="confirmation-message">
-                    <p class="thank-you-message">
-                        THANK YOU FOR YOUR INTEREST IN THE "TITANIUM SLIM FRAME".
+                    <p class="thank-you-message" id="thankYouMessage">
+                        THANK YOU FOR YOUR INTEREST IN OUR FRAMES.
                     </p>
                     
                     <p class="confirmation-details">
@@ -133,8 +133,24 @@
             
             <div class="confirmation-actions">
                 <button class="return-home-btn" onclick="window.location.href='index.html'">Return to Home</button>
+                <button class="new-preorder-btn" onclick="window.location.href='preorder.html'">Submit Another Pre-Order</button>
             </div>
         </main>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const frameName = urlParams.get('frameName');
+            
+            // Update thank you message if frame name is provided
+            if (frameName) {
+                const thankYouMessage = document.getElementById('thankYouMessage');
+                if (thankYouMessage) {
+                    thankYouMessage.textContent = `THANK YOU FOR YOUR INTEREST IN THE "${frameName.toUpperCase()}".`;
+                }
+            }
+        });
+    </script>
 </body>
 </html>

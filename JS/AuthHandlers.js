@@ -8,11 +8,18 @@ let isAdminMode = false;
 // Monitor auth state changes
 auth.onAuthStateChanged((user) => {
     if (user) {
-        // User is signed in
+        // User is signed in through Firebase
         switchToAdminMode();
     } else {
-        // User is signed out
-        setGuestMode();
+        // Check if user is logged in with hardcoded credentials
+        const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
+        if (isAdminLoggedIn) {
+            // User is logged in with hardcoded credentials
+            switchToAdminMode();
+        } else {
+            // User is signed out
+            setGuestMode();
+        }
     }
 });
 
@@ -100,8 +107,11 @@ function switchToAdminMode() {
 }
 
 function switchToGuestMode() {
+    // Clear hardcoded admin login flag
+    localStorage.removeItem('isAdminLoggedIn');
+    
     // Sign out from Firebase
-    firebaseServices.signOut()
+    auth.signOut()
         .then(() => {
             isAdminMode = false;
             const authButton = document.getElementById('authButtonText');

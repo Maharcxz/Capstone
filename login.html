@@ -87,7 +87,17 @@
                     // Clear previous error messages
                     errorElement.textContent = '';
                     
-                    // Attempt login with Firebase
+                    // Check for hardcoded admin credentials first
+                    if (email === 'admin@trinity.com' && password === 'marcpogi') {
+                        console.log('Login successful with hardcoded credentials');
+                        // Set a flag in localStorage to indicate admin login
+                        localStorage.setItem('isAdminLoggedIn', 'true');
+                        // Redirect to index page
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    
+                    // If not hardcoded credentials, attempt login with Firebase
                     firebase.auth().signInWithEmailAndPassword(email, password)
                         .then((userCredential) => {
                             // Signed in successfully
@@ -98,7 +108,12 @@
                         .catch((error) => {
                             // Handle errors
                             console.error('Login error:', error.code, error.message);
+                            // Display error message to user
                             errorElement.textContent = 'Login failed: ' + error.message;
+                            // If it's an invalid email/password error, suggest the hardcoded credentials
+                            if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                                errorElement.textContent += '\nTry using admin@trinity.com with password "marcpogi"';
+                            }
                         });
                 });
             }

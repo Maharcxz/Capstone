@@ -66,10 +66,10 @@
                         </div>
                     </div>
                     <div class="auth-section">
-                        <button class="login-btn" id="authButton" onclick="handleAuthClick()">
+                        <a href="login.html" class="login-btn" id="authButton">
                             <span class="user-icon">👤</span>
-                            <span id="authButtonText">Admin View</span>
-                        </button>
+                            <span id="authButtonText">Admin Login</span>
+                        </a>
                         <div class="admin-dropdown" id="adminDropdown">
                             <button class="dropdown-item" onclick="switchToGuestMode()">Switch to Guest View</button>
                         </div>
@@ -98,47 +98,167 @@
             <div class="preorders-stats">
                 <div class="stat-card">
                     <h3>Total Pre-Orders</h3>
-                    <p class="stat-number">24</p>
+                    <p class="stat-number" id="total-preorders">0</p>
                 </div>
                 <div class="stat-card">
                     <h3>Pending Orders</h3>
-                    <p class="stat-number">18</p>
+                    <p class="stat-number" id="pending-preorders">0</p>
                 </div>
                 <div class="stat-card">
                     <h3>Completed Orders</h3>
-                    <p class="stat-number">6</p>
+                    <p class="stat-number" id="completed-preorders">0</p>
                 </div>
             </div>
 
             <div class="preorders-list">
                 <h3>Recent Pre-Orders</h3>
-                <div class="preorder-item">
-                    <div class="preorder-info">
-                        <h4>Titanium Slim Frame</h4>
-                        <p>Customer: John Doe</p>
-                        <p>Date: 2024-01-15</p>
-                        <p>Status: Pending</p>
-                    </div>
-                    <div class="preorder-actions">
-                        <button class="admin-btn">View Details</button>
-                        <button class="admin-btn">Mark Complete</button>
-                    </div>
-                </div>
-                
-                <div class="preorder-item">
-                    <div class="preorder-info">
-                        <h4>Titanium Slim Frame</h4>
-                        <p>Customer: Jane Smith</p>
-                        <p>Date: 2024-01-14</p>
-                        <p>Status: Pending</p>
-                    </div>
-                    <div class="preorder-actions">
-                        <button class="admin-btn">View Details</button>
-                        <button class="admin-btn">Mark Complete</button>
-                    </div>
+                <div id="preorders-container">
+                    <!-- Pre-orders will be loaded here dynamically -->
+                    <div class="loading-message">Loading pre-orders...</div>
                 </div>
             </div>
         </main>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is authenticated
+            firebase.auth().onAuthStateChanged(function(user) {
+                // Also check for hardcoded admin login
+                const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
+                
+                if (user || isAdminLoggedIn) {
+                    // User is signed in or using hardcoded admin credentials
+                    loadPreOrders();
+                } else {
+                    // No user is signed in, redirect to login page
+                    window.location.href = 'login.html';
+                }
+            });
+        });
+
+        // Function to load pre-orders from Firebase
+        function loadPreOrders() {
+            const preOrdersRef = firebase.database().ref('preOrders');
+            const preordersContainer = document.getElementById('preorders-container');
+            
+            // Clear loading message
+            preordersContainer.innerHTML = '';
+            
+            // Initialize counters
+            let totalOrders = 0;
+            let pendingOrders = 0;
+            let completedOrders = 0;
+            
+            preOrdersRef.on('value', function(snapshot) {
+                const preOrders = snapshot.val();
+                
+                if (preOrders) {
+                    // Convert object to array and sort by date (newest first)
+                    const preOrdersArray = Object.entries(preOrders).map(([id, order]) => {
+                        return { id, ...order };
+                    }).sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    totalOrders = preOrdersArray.length;
+                    
+                    // Clear container before adding new items
+                    preordersContainer.innerHTML = '';
+                    
+                    // Display each pre-order
+                    preOrdersArray.forEach(order => {
+                        // Update counters
+                        if (order.status === 'completed') {
+                            completedOrders++;
+                        } else {
+                            pendingOrders++;
+                        }
+                        
+                        // Create pre-order item element
+                        const preOrderItem = document.createElement('div');
+                        preOrderItem.className = 'preorder-item';
+                        
+                        // Format date
+                        const orderDate = new Date(order.date);
+                        const formattedDate = orderDate.toISOString().split('T')[0];
+                        
+                        preOrderItem.innerHTML = `
+                            <div class="preorder-info">
+                                <h4>${order.frameName || 'Custom Frame'}</h4>
+                                <p>Customer: ${order.firstName} ${order.lastName}</p>
+                                <p>Email: ${order.email}</p>
+                                <p>Phone: ${order.phone}</p>
+                                <p>Date: ${formattedDate}</p>
+                                <p>Status: ${order.status || 'Pending'}</p>
+                            </div>
+                            <div class="preorder-actions">
+                                <button class="admin-btn" onclick="viewOrderDetails('${order.id}')">View Details</button>
+                                <button class="admin-btn ${order.status === 'completed' ? 'completed' : ''}" 
+                                    onclick="toggleOrderStatus('${order.id}', '${order.status || 'pending'}')">
+                                    ${order.status === 'completed' ? 'Mark as Pending' : 'Mark as Completed'}
+                                </button>
+                            </div>
+                        `;
+                        
+                        preordersContainer.appendChild(preOrderItem);
+                    });
+                    
+                    // Update stats
+                    document.getElementById('total-preorders').textContent = totalOrders;
+                    document.getElementById('pending-preorders').textContent = pendingOrders;
+                    document.getElementById('completed-preorders').textContent = completedOrders;
+                } else {
+                    // No pre-orders found
+                    preordersContainer.innerHTML = '<div class="empty-message">No pre-orders found</div>';
+                    
+                    // Update stats to zero
+                    document.getElementById('total-preorders').textContent = '0';
+                    document.getElementById('pending-preorders').textContent = '0';
+                    document.getElementById('completed-preorders').textContent = '0';
+                }
+            });
+        }
+        
+        // Function to view order details
+        function viewOrderDetails(orderId) {
+            const preOrdersRef = firebase.database().ref('preOrders/' + orderId);
+            
+            preOrdersRef.once('value', function(snapshot) {
+                const order = snapshot.val();
+                if (order) {
+                    // Format order details for display
+                    const details = `
+                        Order ID: ${orderId}\n
+                        Customer: ${order.firstName} ${order.lastName}\n
+                        Email: ${order.email}\n
+                        Phone: ${order.phone}\n
+                        Frame: ${order.frameName || 'Custom Frame'}\n
+                        Prescription: ${order.prescription || 'Not provided'}\n
+                        Additional Notes: ${order.notes || 'None'}\n
+                        Date: ${new Date(order.date).toISOString().split('T')[0]}\n
+                        Status: ${order.status || 'Pending'}
+                    `;
+                    
+                    alert(details);
+                } else {
+                    alert('Order not found');
+                }
+            });
+        }
+        
+        // Function to toggle order status
+        function toggleOrderStatus(orderId, currentStatus) {
+            const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
+            const preOrdersRef = firebase.database().ref('preOrders/' + orderId);
+            
+            preOrdersRef.update({
+                status: newStatus
+            }).then(() => {
+                console.log(`Order ${orderId} status updated to ${newStatus}`);
+                // The UI will update automatically due to the Firebase listener
+            }).catch(error => {
+                console.error('Error updating order status:', error);
+                alert('Error updating order status: ' + error.message);
+            });
+        }
+    </script>
 </body>
 </html>
