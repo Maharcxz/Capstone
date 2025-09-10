@@ -6,6 +6,10 @@
     line-height: 1.6;
 }
 
+.about-paragraph {
+    font-family: poppins, sans-serif;
+}
+
 .about-title {
     font-size: 36px;
     font-weight: normal;

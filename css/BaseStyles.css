@@ -6,8 +6,8 @@ html {
 }
 
 body {
-    font-family: "Poppins", sans-serif;
     background-color: #540000;
+    font-family: poppins, sans-serif;
     color: white;
     min-height: 100vh;
     overflow-y: auto;
@@ -24,7 +24,7 @@ body {
 
 .subtitle {
     font-family: 'Cinzel', serif;
-    font-size: 40px;
+    font-size: 18px !important;
     font-weight: 300;
     color: white;
     text-align: center;
