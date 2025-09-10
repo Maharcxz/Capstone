@@ -1,12 +1,12 @@
 // Firebase Authentication handlers
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+// Using Firebase Auth from the compatibility version
 
 // Initialize Firebase Auth
-const auth = getAuth();
+const auth = firebase.auth();
 let isAdminMode = false;
 
 // Monitor auth state changes
-onAuthStateChanged(auth, (user) => {
+auth.onAuthStateChanged((user) => {
     if (user) {
         // User is signed in
         switchToAdminMode();
@@ -46,7 +46,7 @@ function toggleAdminDropdown() {
 }
 
 function loginWithFirebase(email, password) {
-    signInWithEmailAndPassword(auth, email, password)
+    auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
             // Signed in successfully
             const user = userCredential.user;
@@ -60,7 +60,7 @@ function loginWithFirebase(email, password) {
 }
 
 function logoutFromFirebase() {
-    signOut(auth).then(() => {
+    auth.signOut().then(() => {
         // Sign-out successful
         switchToGuestMode();
     }).catch((error) => {
@@ -69,17 +69,24 @@ function logoutFromFirebase() {
 }
 
 function switchToAdminMode() {
+    console.log('Switching to admin mode...');
     isAdminMode = true;
     const authButton = document.getElementById('authButtonText');
     const preOrdersNav = document.getElementById('preOrdersNav');
     const adminButtons = document.querySelectorAll('.admin-buttons');
     const editButtons = document.querySelectorAll('.edit-content-btn');
     
-    if (authButton) authButton.textContent = 'Admin View';
+    console.log('authButton found:', authButton !== null);
+    if (authButton) {
+        authButton.textContent = 'Admin View';
+        console.log('Set authButton text to:', authButton.textContent);
+    }
+    
     if (preOrdersNav) preOrdersNav.style.display = 'block';
     
     // Add admin-mode class to body to hide guest-only elements
     document.body.classList.add('admin-mode');
+    console.log('Added admin-mode class to body');
     
     // Show admin buttons on product cards
     adminButtons.forEach(btn => btn.style.display = 'flex');
@@ -87,6 +94,7 @@ function switchToAdminMode() {
     // Show edit buttons on content pages
     editButtons.forEach(btn => btn.style.display = 'block');
     
+    console.log('Admin mode set successfully');
     hideLoginModal();
     hideAdminDropdown();
 }
@@ -138,6 +146,8 @@ function setGuestMode() {
     
     adminButtons.forEach(btn => btn.style.display = 'none');
     editButtons.forEach(btn => btn.style.display = 'none');
+    
+    console.log('Guest mode set successfully');
 }
 
 function hideAdminDropdown() {

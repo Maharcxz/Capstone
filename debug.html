@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Firebase</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .log {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 20px;
+            height: 300px;
+            overflow-y: auto;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Firebase Debug Page</h1>
+    
+    <div>
+        <h2>Firebase Initialization</h2>
+        <button id="initButton">Initialize Firebase</button>
+    </div>
+    
+    <div>
+        <h2>Authentication</h2>
+        <input type="email" id="emailInput" placeholder="Email">
+        <input type="password" id="passwordInput" placeholder="Password">
+        <button id="loginButton">Login</button>
+        <button id="logoutButton">Logout</button>
+    </div>
+    
+    <div>
+        <h2>Console Log</h2>
+        <div id="logOutput" class="log"></div>
+    </div>
+    
+    <script>
+        // Log function to display in the page
+        function log(message) {
+            const logOutput = document.getElementById('logOutput');
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            logOutput.appendChild(logEntry);
+            logOutput.scrollTop = logOutput.scrollHeight;
+            console.log(message);
+        }
+        
+        // Initialize Firebase
+        document.getElementById('initButton').addEventListener('click', function() {
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyCGnk5t973s-dFvZsK1VJW3yUpQDuAIPuc",
+                    authDomain: "capstone-66529.firebaseapp.com",
+                    projectId: "capstone-66529",
+                    storageBucket: "capstone-66529.firebasestorage.app",
+                    messagingSenderId: "202809244213",
+                    appId: "1:202809244213:web:c0ee9b358d4ab83579cf7c",
+                    measurementId: "G-ZGV2HWPZ46",
+                    databaseURL: "https://capstone-66529-default-rtdb.firebaseio.com"
+                };
+                
+                // Initialize Firebase
+                const app = firebase.initializeApp(firebaseConfig);
+                log('Firebase initialized successfully');
+                
+                // Initialize Firebase services
+                const auth = firebase.auth();
+                const db = firebase.database();
+                log('Firebase services initialized');
+                
+                // Monitor auth state
+                auth.onAuthStateChanged(function(user) {
+                    if (user) {
+                        log(`User signed in: ${user.email}`);
+                    } else {
+                        log('User signed out');
+                    }
+                });
+            } catch (error) {
+                log(`Error initializing Firebase: ${error.message}`);
+            }
+        });
+        
+        // Login
+        document.getElementById('loginButton').addEventListener('click', function() {
+            try {
+                const email = document.getElementById('emailInput').value;
+                const password = document.getElementById('passwordInput').value;
+                
+                if (!email || !password) {
+                    log('Please enter email and password');
+                    return;
+                }
+                
+                log(`Attempting to login with email: ${email}`);
+                
+                firebase.auth().signInWithEmailAndPassword(email, password)
+                    .then(function(userCredential) {
+                        const user = userCredential.user;
+                        log(`Login successful: ${user.email}`);
+                    })
+                    .catch(function(error) {
+                        log(`Login error: ${error.code} - ${error.message}`);
+                    });
+            } catch (error) {
+                log(`Error during login: ${error.message}`);
+            }
+        });
+        
+        // Logout
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            try {
+                firebase.auth().signOut()
+                    .then(function() {
+                        log('Logout successful');
+                    })
+                    .catch(function(error) {
+                        log(`Logout error: ${error.message}`);
+                    });
+            } catch (error) {
+                log(`Error during logout: ${error.message}`);
+            }
+        });
+        
+        // Initial log
+        log('Debug page loaded. Click "Initialize Firebase" to start.');
+    </script>
+</body>
+</html>
