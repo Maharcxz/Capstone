@@ -87,34 +87,39 @@
                     // Clear previous error messages
                     errorElement.textContent = '';
                     
-                    // Check for hardcoded admin credentials first
-                    if (email === 'admin@trinity.com' && password === 'marcpogi') {
-                        console.log('Login successful with hardcoded credentials');
-                        // Set a flag in localStorage to indicate admin login
+                    // Try Firebase authentication first
+                console.log('Attempting Firebase authentication...');
+                firebase.auth().signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        // Signed in successfully with Firebase
+                        console.log('Firebase authentication successful');
                         localStorage.setItem('isAdminLoggedIn', 'true');
-                        // Redirect to index page
-                        window.location.href = 'index.html';
-                        return;
-                    }
-                    
-                    // If not hardcoded credentials, attempt login with Firebase
-                    firebase.auth().signInWithEmailAndPassword(email, password)
-                        .then((userCredential) => {
-                            // Signed in successfully
-                            console.log('Login successful');
-                            // Redirect to index page
-                            window.location.href = 'index.html';
-                        })
-                        .catch((error) => {
-                            // Handle errors
-                            console.error('Login error:', error.code, error.message);
-                            // Display error message to user
-                            errorElement.textContent = 'Login failed: ' + error.message;
-                            // If it's an invalid email/password error, suggest the hardcoded credentials
-                            if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-                                errorElement.textContent += '\nTry using admin@trinity.com with password "marcpogi"';
-                            }
-                        });
+                        console.log('Redirecting to admin-dashboard.html');
+                        setTimeout(function() {
+                            window.location.replace('admin-dashboard.html');
+                        }, 500);
+                    })
+                    .catch((error) => {
+                        console.log('Firebase auth error:', error.code, error.message);
+                        
+                        // Fallback to hardcoded admin login check (for demo purposes)
+                        if (email === 'admin@trinity.com' && password === 'marcpogi') {
+                            console.log('Hardcoded authentication successful');
+                            localStorage.setItem('isAdminLoggedIn', 'true');
+                            console.log('Redirecting to admin-dashboard.html');
+                            setTimeout(function() {
+                                window.location.replace('admin-dashboard.html');
+                            }, 500);
+                        } else {
+                            // Show error message
+                            console.log('Authentication failed');
+                            document.getElementById('loginError').textContent = 'Invalid email or password';
+                            document.getElementById('loginError').style.display = 'block';
+                        }
+                    });
+                });
+            }
+        });
                 });
             }
         });
