@@ -15,9 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateNotificationBadge();
     initializeEventListeners();
     
-    // Start in guest mode
-    setGuestMode();
-    
     // Check authentication state
     firebaseServices.onAuthStateChanged(user => {
         if (user) {

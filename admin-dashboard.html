@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Trinity Optimum Vision Center</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/BaseStyles.css">
+    <link rel="stylesheet" href="CSS/HeaderStyles.css">
+    <link rel="stylesheet" href="CSS/AdminPageStyles.css">
+    <link rel="stylesheet" href="CSS/NotificationIconPanelStyles.css">
+    <link rel="stylesheet" href="CSS/Pre-OrderStyles.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    
+    <!-- Firebase Configuration (must be loaded first) -->
+    <script src="JS/FirebaseConfig.js"></script>
+    
+    <!-- Application Scripts (loaded after Firebase is initialized) -->
+    <script src="JS/AuthHandlers.js"></script>
+    <script src="JS/ContentEditingFunc.js"></script>
+    <script src="JS/NotificationFunc.js"></script>
+    <script src="JS/Script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1 class="maintitle">T R I N I T Y</h1>
+                <p class="subtitle">OPTIMUM VISION CENTER</p>
+            </div>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="contact.html" class="nav-link">Contact Us</a>
+                    <a href="about.html" class="nav-link">About Us</a>
+                    <a href="admin-dashboard.html" class="nav-link active admin-only">Admin Dashboard</a>
+                    <a href="preorders.html" class="nav-link admin-only" id="preOrdersNav">Pre-Orders</a>
+                </div>
+                <div class="nav-right">
+                    <div class="nav-icons">
+                        <div class="notification-wrapper">
+                            <span class="notification-icon" onclick="toggleNotifications()">🔔</span>
+                            <span class="notification-badge" id="notificationBadge">0</span>
+                        </div>
+                    </div>
+                    <div class="auth-section">
+                        <a href="login.html" class="login-btn" id="authButton">
+                            <span class="user-icon">👤</span>
+                            <span id="authButtonText">Log In</span>
+                        </a>
+                        <div class="admin-dropdown" id="adminDropdown">
+                            <button class="dropdown-item" onclick="switchToGuestMode()">Logout</button>
+                            <button class="dropdown-item" onclick="switchToGuestMode()">Switch to Guest View</button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Admin Navigation Area -->
+        <div class="admin-nav-area" id="adminNavArea" style="display: block;">
+            <div class="admin-nav-container">
+                <div class="admin-nav-title">
+                    <span class="admin-icon">⚙️</span>
+                    <h3>Admin Panel</h3>
+                </div>
+                <nav class="admin-nav">
+                    <a href="admin-dashboard.html" class="admin-nav-link active">
+                        <span class="nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="preorders.html" class="admin-nav-link">
+                        <span class="nav-icon">📋</span>
+                        <span>Pre-Orders</span>
+                    </a>
+                    <a href="#" class="admin-nav-link" onclick="toggleContentManagement()">
+                        <span class="nav-icon">📝</span>
+                        <span>Content Management</span>
+                    </a>
+                    <a href="#" class="admin-nav-link" onclick="toggleUserManagement()">
+                        <span class="nav-icon">👥</span>
+                        <span>User Management</span>
+                    </a>
+                    <a href="#" class="admin-nav-link" onclick="toggleAdminSettings()">
+                        <span class="nav-icon">⚙️</span>
+                        <span>Settings</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Notification Panel -->
+        <div class="notification-panel" id="notificationPanel">
+            <div class="notification-header">
+                <h3>Notifications</h3>
+                <button class="close-btn" onclick="toggleNotifications()">×</button>
+            </div>
+            <div class="notification-content" id="notificationContent">
+                <!-- Notifications will be dynamically loaded here -->
+            </div>
+        </div>
+
+        <main class="admin-dashboard">
+            <h1 class="dashboard-title">Admin Dashboard</h1>
+            
+            <div class="admin-welcome">
+                <p>Welcome to the Trinity Optimum Vision Center Admin Dashboard. From here, you can manage content, view pre-orders, and access administrative functions.</p>
+            </div>
+            
+            <div class="dashboard-cards">
+                <div class="dashboard-card">
+                    <h3>Content Management</h3>
+                    <div class="card-content">
+                        <p>Edit website content for various pages</p>
+                        <div class="card-actions">
+                            <a href="about.html?edit=true" class="action-btn">Edit About Page</a>
+                            <a href="contact.html?edit=true" class="action-btn">Edit Contact Page</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3>Pre-Order Management</h3>
+                    <div class="card-content">
+                        <p>View and manage customer pre-orders</p>
+                        <div class="card-actions">
+                            <a href="preorders.html" class="action-btn">View All Pre-Orders</a>
+                            <button class="action-btn" id="refreshPreOrdersBtn">Refresh Pre-Orders</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3>System Settings</h3>
+                    <div class="card-content">
+                        <p>Manage system settings and cache</p>
+                        <div class="card-actions">
+                            <button class="action-btn" onclick="clearCache()">Clear Cache</button>
+                            <button class="action-btn" onclick="toggleEditMode()">Toggle Edit Mode</button>
+                            <button class="action-btn" onclick="logout()">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2023 Trinity Optimum Vision Center. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in as admin
+            const isAdmin = localStorage.getItem('isAdminLoggedIn') === 'true';
+            
+            if (!isAdmin) {
+                // Redirect to login page if not logged in as admin
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Setup logout button
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function() {
+                    // Clear admin login status
+                    localStorage.removeItem('isAdminLoggedIn');
+                    // Sign out from Firebase if using Firebase auth
+                    if (window.firebaseServices && window.firebaseServices.signOut) {
+                        window.firebaseServices.signOut();
+                    }
+                    // Redirect to login page
+                    window.location.href = 'login.html';
+                });
+            }
+            
+            // Setup notification panel toggle
+            const notificationIcon = document.getElementById('notificationIcon');
+            const notificationPanel = document.getElementById('notificationPanel');
+            const closeNotifications = document.getElementById('closeNotifications');
+            
+            if (notificationIcon && notificationPanel && closeNotifications) {
+                notificationIcon.addEventListener('click', function() {
+                    notificationPanel.classList.toggle('active');
+                });
+                
+                closeNotifications.addEventListener('click', function() {
+                    notificationPanel.classList.remove('active');
+                });
+            }
+            
+            // Setup clear cache button
+            const clearCacheBtn = document.getElementById('clearCacheBtn');
+            if (clearCacheBtn) {
+                clearCacheBtn.addEventListener('click', function() {
+                    // Clear local storage except for admin login status
+                    const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
+                    localStorage.clear();
+                    localStorage.setItem('isAdminLoggedIn', isAdminLoggedIn);
+                    
+                    alert('Cache cleared successfully!');
+                });
+            }
+            
+            // Load notifications
+            loadNotifications();
+        });
+        
+        // Function to load notifications
+        function loadNotifications() {
+            const notificationList = document.getElementById('notificationList');
+            const notificationCount = document.getElementById('notificationCount');
+            
+            if (notificationList && notificationCount) {
+                // Check if we have the loadNotifications function from NotificationFunc.js
+                if (window.loadNotifications) {
+                    window.loadNotifications(notificationList, notificationCount);
+                } else {
+                    // Fallback if the function is not available
+                    const preOrdersRef = firebase.database().ref('preOrders');
+                    
+                    preOrdersRef.orderByChild('status').equalTo('pending').once('value', function(snapshot) {
+                        const notifications = [];
+                        snapshot.forEach(function(childSnapshot) {
+                            const preOrder = childSnapshot.val();
+                            preOrder.id = childSnapshot.key;
+                            
+                            notifications.push({
+                                id: preOrder.id,
+                                title: 'New Pre-Order',
+                                message: `New pre-order from ${preOrder.firstName} ${preOrder.lastName} for ${preOrder.frameName}`,
+                                timestamp: preOrder.date,
+                                read: false
+                            });
+                        });
+                        
+                        // Update notification count
+                        notificationCount.textContent = notifications.length;
+                        
+                        // Clear existing notifications
+                        notificationList.innerHTML = '';
+                        
+                        if (notifications.length === 0) {
+                            notificationList.innerHTML = '<div class="no-notifications">No new notifications</div>';
+                            return;
+                        }
+                        
+                        // Sort notifications by timestamp (newest first)
+                        notifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                        
+                        // Add notifications to the list
+                        notifications.forEach(function(notification) {
+                            const notificationItem = document.createElement('div');
+                            notificationItem.className = 'notification-item' + (notification.read ? ' read' : '');
+                            
+                            const date = new Date(notification.timestamp);
+                            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                            
+                            notificationItem.innerHTML = `
+                                <div class="notification-title">${notification.title}</div>
+                                <div class="notification-message">${notification.message}</div>
+                                <div class="notification-time">${formattedDate}</div>
+                            `;
+                            
+                            notificationItem.addEventListener('click', function() {
+                                // Mark as read
+                                notificationItem.classList.add('read');
+                                
+                                // Redirect to pre-orders page
+                                window.location.href = 'preorders.html';
+                            });
+                            
+                            notificationList.appendChild(notificationItem);
+                        });
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
