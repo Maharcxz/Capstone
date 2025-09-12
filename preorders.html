@@ -67,7 +67,7 @@
                         </div>
                     </div>
                     <div class="auth-section">
-                        <a href="login.html" class="login-btn" id="authButton">
+                        <a href="#" class="login-btn" id="authButton" onclick="handleAuthClick()">
                             <span class="user-icon">👤</span>
                             <span id="authButtonText">Log In</span>
                         </a>
@@ -145,7 +145,15 @@
             </div>
 
             <div class="preorders-list">
-                <h3>Recent Pre-Orders</h3>
+                <div class="preorders-header">
+                    <h3 id="orders-section-title">Recent Pre-Orders</h3>
+                    <div class="filter-dropdown">
+                        <select id="orderFilter" class="order-filter-select" onchange="filterOrders()">
+                            <option value="pending">Pre-Orders</option>
+                            <option value="completed">Completed Orders</option>
+                        </select>
+                    </div>
+                </div>
                 <div id="preorders-container">
                     <!-- Pre-orders will be loaded here dynamically -->
                     <div class="loading-message">Loading pre-orders...</div>
@@ -155,19 +163,18 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if user is authenticated
-            firebase.auth().onAuthStateChanged(function(user) {
-                // Also check for hardcoded admin login
-                const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
-                
-                if (user || isAdminLoggedIn) {
-                    // User is signed in or using hardcoded admin credentials
-                    loadPreOrders();
-                } else {
-                    // No user is signed in, redirect to login page
-                    window.location.href = 'login.html';
-                }
-            });
+            // Check if user is authenticated (without adding another auth state listener)
+            const user = firebase.auth().currentUser;
+            const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
+            
+            if (user || isAdminLoggedIn) {
+                // User is signed in or using hardcoded admin credentials
+                loadPreOrders();
+            } else {
+                // Authentication state will be handled by AuthHandlers.js
+                // Just load preorders for now, AuthHandlers will redirect if needed
+                loadPreOrders();
+            }
         });
 
         // Function to load pre-orders from Firebase
@@ -197,46 +204,175 @@
                     // Clear container before adding new items
                     preordersContainer.innerHTML = '';
                     
-                    // Display each pre-order
+                    // Store all orders globally for filtering
+                    window.allOrders = preOrdersArray;
+                    
+                    // Display orders based on current filter
+                    displayFilteredOrders();
+                    
+                    // Update counters
                     preOrdersArray.forEach(order => {
-                        // Update counters
                         if (order.status === 'completed') {
                             completedOrders++;
                         } else {
                             pendingOrders++;
                         }
-                        
-                        // Create pre-order item element
-                        const preOrderItem = document.createElement('div');
-                        preOrderItem.className = 'preorder-item';
-                        
-                        // Format date
-                        const orderDate = new Date(order.date);
-                        const formattedDate = orderDate.toISOString().split('T')[0];
-                        
-                        preOrderItem.innerHTML = `
-                            <div class="preorder-info">
-                                <h4>${order.frameName || 'Custom Frame'}</h4>
-                                <p>Customer: ${order.firstName} ${order.lastName}</p>
-                                <p>Email: ${order.email}</p>
-                                <p>Phone: ${order.phone}</p>
-                                <p>Date: ${formattedDate}</p>
-                                <p>Status: ${order.status || 'Pending'}</p>
-                            </div>
-                            <div class="preorder-actions">
-                                <button class="admin-btn" onclick="viewOrderDetails('${order.id}')">View Details</button>
-                                <button class="admin-btn ${order.status === 'completed' ? 'completed' : ''}" 
-                                    onclick="toggleOrderStatus('${order.id}', '${order.status || 'pending'}')">
-                                    ${order.status === 'completed' ? 'Mark as Pending' : 'Mark as Completed'}
-                                </button>
-                                <button class="delete-btn" onclick="deleteOrder('${order.id}')">
-                                    <span>🗑️</span>
-                                    <span>Delete</span>
-                                </button>
-                            </div>
-                        `;
-                        
-                        preordersContainer.appendChild(preOrderItem);
+                    });
+                    
+                    // Update stats
+                     document.getElementById('total-preorders').textContent = totalOrders;
+                     document.getElementById('pending-preorders').textContent = pendingOrders;
+                     document.getElementById('completed-preorders').textContent = completedOrders;
+                     
+                     // Update notification badge
+                     updateNotificationBadge(pendingOrders);
+                } else {
+                    // No pre-orders found
+                    preordersContainer.innerHTML = '<div class="empty-message">No pre-orders found</div>';
+                    
+                    // Update stats to zero
+                    document.getElementById('total-preorders').textContent = '0';
+                    document.getElementById('pending-preorders').textContent = '0';
+                    document.getElementById('completed-preorders').textContent = '0';
+                }
+            });
+        }
+        
+        // Function to view order details
+        function viewOrderDetails(orderId) {
+            console.log('Viewing details for order:', orderId);
+            
+            // Get order data from Firebase
+            const preOrdersRef = firebase.database().ref('preOrders/' + orderId);
+            preOrdersRef.once('value').then(snapshot => {
+                const order = snapshot.val();
+                if (order) {
+                    populateOrderModal(order, orderId);
+                    showOrderDetailsModal();
+                } else {
+                    alert('Order not found');
+                }
+            }).catch(error => {
+                console.error('Error fetching order details:', error);
+                alert('Error loading order details: ' + error.message);
+            });
+        }
+        
+        // Function to populate modal with order data
+        function populateOrderModal(order, orderId) {
+            // Customer Information
+            document.getElementById('modal-customer-name').textContent = `${order.firstName || ''} ${order.lastName || ''}`.trim();
+            document.getElementById('modal-customer-email').textContent = order.email || 'N/A';
+            document.getElementById('modal-customer-phone').textContent = order.phone || 'N/A';
+            
+            // Order Information
+            document.getElementById('modal-product-name').textContent = order.productName || 'N/A';
+            
+            // Format date
+            const orderDate = order.timestamp ? new Date(order.timestamp).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }) : 'N/A';
+            document.getElementById('modal-order-date').textContent = orderDate;
+            
+            // Status with styling
+            const statusElement = document.getElementById('modal-order-status');
+            const status = order.status || 'pending';
+            statusElement.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            statusElement.style.color = status === 'completed' ? '#28a745' : '#ffc107';
+            statusElement.style.fontWeight = '600';
+            
+            // Prescription Details (if available)
+            const prescriptionSection = document.getElementById('modal-prescription-section');
+            if (order.prescription) {
+                prescriptionSection.style.display = 'block';
+                document.getElementById('modal-prescription-od').textContent = order.prescription.rightEye || 'N/A';
+                document.getElementById('modal-prescription-os').textContent = order.prescription.leftEye || 'N/A';
+                document.getElementById('modal-prescription-pd').textContent = order.prescription.pd || 'N/A';
+            } else {
+                prescriptionSection.style.display = 'none';
+            }
+            
+            // Additional Notes (if available)
+            const notesSection = document.getElementById('modal-notes-section');
+            if (order.notes && order.notes.trim()) {
+                notesSection.style.display = 'block';
+                document.getElementById('modal-notes').textContent = order.notes;
+            } else {
+                notesSection.style.display = 'none';
+            }
+        }
+        
+        // Function to show the modal
+        function showOrderDetailsModal() {
+            document.getElementById('orderDetailsModal').style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+        
+        // Function to close the modal
+        function closeOrderDetailsModal() {
+            document.getElementById('orderDetailsModal').style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+        
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('orderDetailsModal');
+            if (event.target === modal) {
+                closeOrderDetailsModal();
+            }
+        }
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeOrderDetailsModal();
+            }
+        })
+        
+        // Function to load pre-orders from Firebase
+        function loadPreOrders() {
+            const preOrdersRef = firebase.database().ref('preOrders');
+            const preordersContainer = document.getElementById('preorders-container');
+            
+            // Clear loading message
+            preordersContainer.innerHTML = '';
+            
+            // Initialize counters
+            let totalOrders = 0;
+            let pendingOrders = 0;
+            let completedOrders = 0;
+            
+            preOrdersRef.on('value', function(snapshot) {
+                const preOrders = snapshot.val();
+                
+                if (preOrders) {
+                    // Convert object to array and sort by date (newest first)
+                    const preOrdersArray = Object.entries(preOrders).map(([id, order]) => {
+                        return { id, ...order };
+                    }).sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    totalOrders = preOrdersArray.length;
+                    
+                    // Clear container before adding new items
+                    preordersContainer.innerHTML = '';
+                    
+                    // Store all orders globally for filtering
+                    window.allOrders = preOrdersArray;
+                    
+                    // Display orders based on current filter
+                    displayFilteredOrders();
+                    
+                    // Update counters
+                    preOrdersArray.forEach(order => {
+                        if (order.status === 'completed') {
+                            completedOrders++;
+                        } else {
+                            pendingOrders++;
+                        }
                     });
                     
                     // Update stats
@@ -255,31 +391,83 @@
             });
         }
         
-        // Function to view order details
-        function viewOrderDetails(orderId) {
-            const preOrdersRef = firebase.database().ref('preOrders/' + orderId);
+        // Function to display filtered orders
+        function displayFilteredOrders() {
+            const filterValue = document.getElementById('orderFilter').value;
+            const preordersContainer = document.getElementById('preorders-container');
+            const titleElement = document.getElementById('orders-section-title');
             
-            preOrdersRef.once('value', function(snapshot) {
-                const order = snapshot.val();
-                if (order) {
-                    // Format order details for display
-                    const details = `
-                        Order ID: ${orderId}\n
-                        Customer: ${order.firstName} ${order.lastName}\n
-                        Email: ${order.email}\n
-                        Phone: ${order.phone}\n
-                        Frame: ${order.frameName || 'Custom Frame'}\n
-                        Prescription: ${order.prescription || 'Not provided'}\n
-                        Additional Notes: ${order.notes || 'None'}\n
-                        Date: ${new Date(order.date).toISOString().split('T')[0]}\n
-                        Status: ${order.status || 'Pending'}
-                    `;
-                    
-                    alert(details);
-                } else {
-                    alert('Order not found');
-                }
+            // Update title based on filter
+            titleElement.textContent = filterValue === 'pending' ? 'Recent Pre-Orders' : 'Completed Orders';
+            
+            // Clear container
+            preordersContainer.innerHTML = '';
+            
+            // Filter orders based on selected value
+            const filteredOrders = window.allOrders ? window.allOrders.filter(order => {
+                const orderStatus = order.status || 'pending';
+                return orderStatus === filterValue;
+            }) : [];
+            
+            // Update stats display based on current filter
+            const statsContainer = document.querySelector('.stats-container');
+            if (statsContainer) {
+                const totalOrders = window.allOrders ? window.allOrders.length : 0;
+                const pendingOrders = window.allOrders ? window.allOrders.filter(order => (order.status || 'pending') === 'pending').length : 0;
+                const completedOrders = window.allOrders ? window.allOrders.filter(order => order.status === 'completed').length : 0;
+                
+                // Update the displayed counts
+                document.getElementById('total-preorders').textContent = totalOrders;
+                document.getElementById('pending-preorders').textContent = pendingOrders;
+                document.getElementById('completed-preorders').textContent = completedOrders;
+                
+                // Update notification badge
+                updateNotificationBadge(pendingOrders);
+            }
+            
+            if (filteredOrders.length === 0) {
+                preordersContainer.innerHTML = `<div class="loading-message">No ${filterValue === 'pending' ? 'pending' : 'completed'} orders found.</div>`;
+                return;
+            }
+            
+            // Display filtered orders
+            filteredOrders.forEach(order => {
+                const preOrderItem = document.createElement('div');
+                preOrderItem.className = 'preorder-item';
+                
+                // Format date
+                const orderDate = new Date(order.date);
+                const formattedDate = orderDate.toISOString().split('T')[0];
+                
+                preOrderItem.innerHTML = `
+                    <div class="preorder-info">
+                        <h4>${order.frameName || 'Custom Frame'}</h4>
+                        <p>Customer: ${order.firstName} ${order.lastName}</p>
+                        <p>Email: ${order.email}</p>
+                        <p>Phone: ${order.phone}</p>
+                        <p>Date: ${formattedDate}</p>
+                        <p>Status: ${order.status || 'Pending'}</p>
+                    </div>
+                    <div class="preorder-actions">
+                        <button class="admin-btn" onclick="viewOrderDetails('${order.id}')">View Details</button>
+                        <button class="admin-btn ${order.status === 'pending' || !order.status ? 'pending' : ''}" 
+                            onclick="toggleOrderStatus('${order.id}', '${order.status || 'pending'}')">
+                            ${order.status === 'completed' ? 'Mark as Pending' : 'Mark as Completed'}
+                        </button>
+                        <button class="delete-btn" onclick="deleteOrder('${order.id}')">
+                            <span>🗑️</span>
+                            <span>Delete</span>
+                        </button>
+                    </div>
+                `;
+                
+                preordersContainer.appendChild(preOrderItem);
             });
+        }
+        
+        // Function to filter orders when dropdown changes
+        function filterOrders() {
+            displayFilteredOrders();
         }
         
         // Function to toggle order status
@@ -291,7 +479,8 @@
                 status: newStatus
             }).then(() => {
                 console.log(`Order ${orderId} status updated to ${newStatus}`);
-                // The UI will update automatically due to the Firebase listener
+                // Reload the orders to reflect changes
+                loadPreOrders();
             }).catch(error => {
                 console.error('Error updating order status:', error);
                 alert('Error updating order status: ' + error.message);
@@ -313,5 +502,75 @@
             }
         }
     </script>
+
+    <!-- Order Details Modal -->
+    <div id="orderDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Order Details</h2>
+                <span class="close" onclick="closeOrderDetailsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="order-detail-section">
+                    <h3>Customer Information</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Name:</span>
+                        <span id="modal-customer-name"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Email:</span>
+                        <span id="modal-customer-email"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Phone:</span>
+                        <span id="modal-customer-phone"></span>
+                    </div>
+                </div>
+                
+                <div class="order-detail-section">
+                    <h3>Order Information</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Product:</span>
+                        <span id="modal-product-name"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Order Date:</span>
+                        <span id="modal-order-date"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status:</span>
+                        <span id="modal-order-status"></span>
+                    </div>
+                </div>
+                
+                <div class="order-detail-section" id="modal-prescription-section">
+                    <h3>Prescription Details</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Right Eye (OD):</span>
+                        <span id="modal-prescription-od"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Left Eye (OS):</span>
+                        <span id="modal-prescription-os"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">PD (Pupillary Distance):</span>
+                        <span id="modal-prescription-pd"></span>
+                    </div>
+                </div>
+                
+                <div class="order-detail-section" id="modal-notes-section">
+                    <h3>Additional Notes</h3>
+                    <div class="detail-row">
+                        <span id="modal-notes"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="admin-btn" onclick="closeOrderDetailsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

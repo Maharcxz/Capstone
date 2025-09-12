@@ -19,6 +19,9 @@ const app = firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
+// Global admin mode state
+let isAdminMode = false;
+
 // Reference to pre-orders collection in the database
 const preOrdersRef = db.ref('preOrders');
 

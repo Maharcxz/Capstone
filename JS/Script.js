@@ -1,6 +1,6 @@
-// Global state
-let isAdminMode = false;
-let currentEditTarget = null;
+// Global variables
+// isAdminMode is declared globally
+// currentEditTarget is declared in ContentEditingFunc.js
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
@@ -15,15 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateNotificationBadge();
     initializeEventListeners();
     
-    // Check authentication state
-    firebaseServices.onAuthStateChanged(user => {
-        if (user) {
-            // User is signed in
-            switchToAdminMode();
-        } else {
-            // User is signed out
-            setGuestMode();
-        }
-    });
+    // Authentication state is handled by AuthHandlers.js
+    // No need for duplicate auth state listener here
 });
 

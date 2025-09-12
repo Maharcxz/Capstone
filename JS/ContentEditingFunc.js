@@ -1,5 +1,5 @@
 // Content editing functionality
-let isAdminMode = false;
+// isAdminMode is declared globally
 let currentEditTarget = null;
 let isEditMode = false;
 

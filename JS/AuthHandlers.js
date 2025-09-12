@@ -2,8 +2,8 @@
 // Using Firebase Auth from the compatibility version
 
 // Initialize Firebase Auth
-const auth = firebase.auth();
-let isAdminMode = false;
+// auth is already declared in FirebaseConfig.js
+// let isAdminMode = false; // Will be declared globally
 
 // Monitor auth state changes
 auth.onAuthStateChanged((user) => {
@@ -21,18 +21,24 @@ auth.onAuthStateChanged((user) => {
         // Check if user is logged in with hardcoded credentials
         const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
         if (isAdminLoggedIn) {
-            // User is logged in with hardcoded credentials
-            switchToAdminMode();
-            // Redirect to admin dashboard if on login page
-            if (window.location.pathname.includes('login.html')) {
+            // Only switch to admin mode on admin-specific pages
+            if (window.location.pathname.includes('admin-dashboard.html') || 
+                window.location.pathname.includes('preorders.html')) {
+                switchToAdminMode();
+            } else if (window.location.pathname.includes('login.html')) {
+                // Redirect to admin dashboard if on login page
                 window.location.href = 'admin-dashboard.html';
+            } else {
+                // For other pages (like index), allow guest mode but keep login status
+                setGuestMode();
             }
         } else {
             // User is signed out
             setGuestMode();
-            // Redirect to login page if on admin dashboard or preorders page
-            if (window.location.pathname.includes('admin-dashboard.html') || 
-                window.location.pathname.includes('preorders.html')) {
+            // Only redirect to login if not already being redirected and not on login page
+            if ((window.location.pathname.includes('admin-dashboard.html') || 
+                window.location.pathname.includes('preorders.html')) && 
+                !window.location.pathname.includes('login.html')) {
                 window.location.href = 'login.html';
             }
         }
@@ -111,8 +117,10 @@ function switchToAdminMode() {
     if (adminDashboardNav) adminDashboardNav.style.display = 'block';
     
     // Add admin-mode class to body to show admin-only elements
-    document.body.classList.add('admin-mode');
-    console.log('Added admin-mode class to body');
+    if (document.body) {
+        document.body.classList.add('admin-mode');
+        console.log('Added admin-mode class to body');
+    }
     
     // Show admin navigation area
     if (adminNavArea) {
@@ -135,41 +143,42 @@ function switchToGuestMode() {
     // Clear hardcoded admin login flag
     localStorage.removeItem('isAdminLoggedIn');
     
-    // Sign out from Firebase
-    auth.signOut()
-        .then(() => {
-            isAdminMode = false;
-            const authButton = document.getElementById('authButtonText');
-            const preOrdersNav = document.getElementById('preOrdersNav');
-            const adminDashboardNav = document.getElementById('adminDashboardNav');
-            const adminButtons = document.querySelectorAll('.admin-buttons');
-            const editButtons = document.querySelectorAll('.edit-content-btn');
-            const adminNavArea = document.querySelector('.admin-nav-area');
-            
-            if (authButton) authButton.textContent = 'Log In';
-            if (preOrdersNav) preOrdersNav.style.display = 'none';
-            if (adminDashboardNav) adminDashboardNav.style.display = 'none';
-            
-            // Remove admin-mode class to show guest-only elements
-            document.body.classList.remove('admin-mode');
-            
-            // Hide admin navigation area
-            if (adminNavArea) adminNavArea.style.display = 'none';
-            
-            // Hide admin buttons
-            adminButtons.forEach(btn => btn.style.display = 'none');
-            editButtons.forEach(btn => btn.style.display = 'none');
-            
-            hideAdminDropdown();
-            
-            // Redirect from preorders page if currently there
-            if (window.location.pathname.includes('preorders.html')) {
-                window.location.href = 'index.html';
-            }
-        })
-        .catch(error => {
-            console.error('Error signing out:', error);
-        });
+    // Update UI immediately
+    isAdminMode = false;
+    const authButton = document.getElementById('authButtonText');
+    const preOrdersNav = document.getElementById('preOrdersNav');
+    const adminDashboardNav = document.getElementById('adminDashboardNav');
+    const adminButtons = document.querySelectorAll('.admin-buttons');
+    const editButtons = document.querySelectorAll('.edit-content-btn');
+    const adminNavArea = document.querySelector('.admin-nav-area');
+    
+    if (authButton) authButton.textContent = 'Log In';
+    if (preOrdersNav) preOrdersNav.style.display = 'none';
+    if (adminDashboardNav) adminDashboardNav.style.display = 'none';
+    
+    // Remove admin-mode class to show guest-only elements
+    document.body.classList.remove('admin-mode');
+    
+    // Hide admin navigation area
+    if (adminNavArea) adminNavArea.style.display = 'none';
+    
+    // Hide admin buttons
+    adminButtons.forEach(btn => btn.style.display = 'none');
+    editButtons.forEach(btn => btn.style.display = 'none');
+    
+    hideAdminDropdown();
+    
+    // Sign out from Firebase (but don't wait for it to avoid auth loops)
+    auth.signOut().catch(error => {
+        console.error('Error signing out:', error);
+    });
+    
+    // Redirect based on current page
+    if (window.location.pathname.includes('preorders.html')) {
+        window.location.href = 'index.html';
+    } else if (window.location.pathname.includes('admin-dashboard.html')) {
+        window.location.href = 'login.html';
+    }
 }
 
 function setGuestMode() {
@@ -186,7 +195,9 @@ function setGuestMode() {
     if (adminDashboardNav) adminDashboardNav.style.display = 'none';
     
     // Ensure admin-mode class is removed
-    document.body.classList.remove('admin-mode');
+    if (document.body) {
+        document.body.classList.remove('admin-mode');
+    }
     
     // Hide admin navigation area
     if (adminNavArea) adminNavArea.style.display = 'none';
