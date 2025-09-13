@@ -10,11 +10,11 @@ auth.onAuthStateChanged((user) => {
     if (user) {
         // User is signed in through Firebase
         switchToAdminMode();
-        // Redirect to admin dashboard if on login page
+        // Redirect to preorders if on login page
         if (window.location.pathname.includes('login.html')) {
-            console.log('AuthHandlers: Redirecting to admin dashboard');
+            console.log('AuthHandlers: Redirecting to preorders');
             setTimeout(function() {
-                window.location.replace('admin-dashboard.html');
+                window.location.replace('preorders.html');
             }, 500);
         }
     } else {
@@ -28,12 +28,11 @@ auth.onAuthStateChanged((user) => {
         const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
         if (isAdminLoggedIn) {
             // Only switch to admin mode on admin-specific pages
-            if (window.location.pathname.includes('admin-dashboard.html') || 
-                window.location.pathname.includes('preorders.html')) {
+            if (window.location.pathname.includes('preorders.html')) {
                 switchToAdminMode();
             } else if (window.location.pathname.includes('login.html')) {
-                // Redirect to admin dashboard if on login page
-                window.location.href = 'admin-dashboard.html';
+                // Redirect to preorders if on login page
+                window.location.href = 'preorders.html';
             } else {
                 // For other pages, use guest mode
                 setGuestMode();
@@ -42,8 +41,7 @@ auth.onAuthStateChanged((user) => {
             // User is signed out
             setGuestMode();
             // Only redirect to login if not already being redirected and not on login page
-            if ((window.location.pathname.includes('admin-dashboard.html') || 
-                window.location.pathname.includes('preorders.html')) && 
+            if (window.location.pathname.includes('preorders.html') && 
                 !window.location.pathname.includes('login.html')) {
                 window.location.href = 'login.html';
             }
@@ -108,7 +106,6 @@ function switchToAdminMode() {
     isAdminMode = true;
     const authButton = document.getElementById('authButtonText');
     const preOrdersNav = document.getElementById('preOrdersNav');
-    const adminDashboardNav = document.getElementById('adminDashboardNav');
     const adminButtons = document.querySelectorAll('.admin-buttons');
     const editButtons = document.querySelectorAll('.edit-content-btn');
     const adminNavArea = document.querySelector('.admin-nav-area');
@@ -120,7 +117,6 @@ function switchToAdminMode() {
     }
     
     if (preOrdersNav) preOrdersNav.style.display = 'block';
-    if (adminDashboardNav) adminDashboardNav.style.display = 'block';
     
     // Add admin-mode class to body to show admin-only elements
     if (document.body) {
@@ -153,14 +149,12 @@ function switchToGuestMode() {
     isAdminMode = false;
     const authButton = document.getElementById('authButtonText');
     const preOrdersNav = document.getElementById('preOrdersNav');
-    const adminDashboardNav = document.getElementById('adminDashboardNav');
     const adminButtons = document.querySelectorAll('.admin-buttons');
     const editButtons = document.querySelectorAll('.edit-content-btn');
     const adminNavArea = document.querySelector('.admin-nav-area');
     
     if (authButton) authButton.textContent = 'Log In';
     if (preOrdersNav) preOrdersNav.style.display = 'none';
-    if (adminDashboardNav) adminDashboardNav.style.display = 'none';
     
     // Remove admin-mode class to show guest-only elements
     document.body.classList.remove('admin-mode');
@@ -182,8 +176,6 @@ function switchToGuestMode() {
     // Redirect based on current page
     if (window.location.pathname.includes('preorders.html')) {
         window.location.href = 'index.html';
-    } else if (window.location.pathname.includes('admin-dashboard.html')) {
-        window.location.href = 'login.html';
     }
 }
 
@@ -191,14 +183,12 @@ function setGuestMode() {
     isAdminMode = false;
     const authButton = document.getElementById('authButtonText');
     const preOrdersNav = document.getElementById('preOrdersNav');
-    const adminDashboardNav = document.getElementById('adminDashboardNav');
     const adminButtons = document.querySelectorAll('.admin-buttons');
     const editButtons = document.querySelectorAll('.edit-content-btn');
     const adminNavArea = document.querySelector('.admin-nav-area');
     
     if (authButton) authButton.textContent = 'Log In';
     if (preOrdersNav) preOrdersNav.style.display = 'none';
-    if (adminDashboardNav) adminDashboardNav.style.display = 'none';
     
     // Ensure admin-mode class is removed
     if (document.body) {

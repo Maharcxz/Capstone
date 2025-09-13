@@ -57,7 +57,7 @@
                     <a href="index.html" class="nav-link">Home</a>
                     <a href="contact.html" class="nav-link">Contact Us</a>
                     <a href="about.html" class="nav-link">About Us</a>
-                    <a href="admin-dashboard.html" class="nav-link admin-only" id="adminDashboardNav" style="display: none;">Admin Dashboard</a>
+
                     <a href="preorders.html" class="nav-link admin-only" id="preOrdersNav" style="display: none;">Pre-Orders</a>
                 </div>
                 <div class="nav-right">
@@ -109,7 +109,7 @@
                         </svg>
                     </div>
                     <h2>ADMIN LOGIN</h2>
-                    <p>Access the administrative dashboard</p>
+                    <p>Access the administrative panel</p>
                 </div>
                 
                 <form class="login-form" id="loginForm">
@@ -170,9 +170,9 @@
                         .then((userCredential) => {
                             console.log('Firebase authentication successful');
                             localStorage.setItem('isAdminLoggedIn', 'true');
-                            console.log('Redirecting to admin-dashboard.html');
+                            console.log('Login successful');
                             setTimeout(function() {
-                                window.location.replace('admin-dashboard.html');
+                                window.location.replace('preorders.html');
                             }, 500);
                         })
                         .catch((error) => {
@@ -182,9 +182,9 @@
                             if (email === 'Adminaccount@gmail.com' && password === 'marcpogi') {
                                 console.log('Hardcoded authentication successful');
                                 localStorage.setItem('isAdminLoggedIn', 'true');
-                                console.log('Redirecting to admin-dashboard.html');
+                                console.log('Login successful');
                                 setTimeout(function() {
-                                    window.location.replace('admin-dashboard.html');
+                                    window.location.replace('preorders.html');
                                 }, 500);
                             } else {
                                 console.log('Authentication failed - invalid credentials');
