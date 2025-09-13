@@ -18,6 +18,12 @@ auth.onAuthStateChanged((user) => {
             }, 500);
         }
     } else {
+        // Force guest mode on index page regardless of admin status
+        if (window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/')) {
+            setGuestMode();
+            return;
+        }
+        
         // Check if user is logged in with hardcoded credentials
         const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
         if (isAdminLoggedIn) {
@@ -29,7 +35,7 @@ auth.onAuthStateChanged((user) => {
                 // Redirect to admin dashboard if on login page
                 window.location.href = 'admin-dashboard.html';
             } else {
-                // For other pages (like index), allow guest mode but keep login status
+                // For other pages, use guest mode
                 setGuestMode();
             }
         } else {
