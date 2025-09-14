@@ -72,42 +72,38 @@
                             <span id="authButtonText">Log In</span>
                         </a>
                         <div class="admin-dropdown" id="adminDropdown">
-                            <button class="dropdown-item" onclick="switchToGuestMode()">Logout</button>
-                            <button class="dropdown-item" onclick="switchToGuestMode()">Switch to Guest View</button>
+                            <button class="dropdown-item" onclick="window.location.href='preorders.html'">
+                                <span class="dropdown-icon">📋</span>
+                                <span>Pre-Orders</span>
+                            </button>
+                            <button class="dropdown-item" onclick="toggleContentManagement()">
+                                <span class="dropdown-icon">📝</span>
+                                <span>Content Management</span>
+                            </button>
+                            <button class="dropdown-item" onclick="toggleUserManagement()">
+                                <span class="dropdown-icon">👥</span>
+                                <span>User Management</span>
+                            </button>
+                            <button class="dropdown-item" onclick="toggleAdminSettings()">
+                                <span class="dropdown-icon">⚙️</span>
+                                <span>Settings</span>
+                            </button>
+                            <hr class="dropdown-divider">
+                            <button class="dropdown-item logout-item" onclick="switchToGuestMode()">
+                                <span class="dropdown-icon">🚪</span>
+                                <span>Logout</span>
+                            </button>
+                            <button class="dropdown-item" onclick="switchToGuestMode()">
+                                <span class="dropdown-icon">👁️</span>
+                                <span>Switch to Guest View</span>
+                            </button>
                         </div>
                     </div>
                 </div>
             </nav>
         </header>
 
-        <!-- Admin Navigation Area -->
-        <div class="admin-nav-area" id="adminNavArea" style="display: block;">
-            <div class="admin-nav-container">
-                <div class="admin-nav-title">
-                    <span class="admin-icon">⚙️</span>
-                    <h3>Admin Panel</h3>
-                </div>
-                <nav class="admin-nav">
 
-                    <a href="preorders.html" class="admin-nav-link active">
-                        <span class="nav-icon">📋</span>
-                        <span>Pre-Orders</span>
-                    </a>
-                    <a href="#" class="admin-nav-link" onclick="toggleContentManagement()">
-                        <span class="nav-icon">📝</span>
-                        <span>Content Management</span>
-                    </a>
-                    <a href="#" class="admin-nav-link" onclick="toggleUserManagement()">
-                        <span class="nav-icon">👥</span>
-                        <span>User Management</span>
-                    </a>
-                    <a href="#" class="admin-nav-link" onclick="toggleAdminSettings()">
-                        <span class="nav-icon">⚙️</span>
-                        <span>Settings</span>
-                    </a>
-                </nav>
-            </div>
-        </div>
 
         <!-- Notifications Panel -->
         <div class="notifications-panel" id="notificationsPanel">

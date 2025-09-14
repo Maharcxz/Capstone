@@ -108,7 +108,6 @@ function switchToAdminMode() {
     const preOrdersNav = document.getElementById('preOrdersNav');
     const adminButtons = document.querySelectorAll('.admin-buttons');
     const editButtons = document.querySelectorAll('.edit-content-btn');
-    const adminNavArea = document.querySelector('.admin-nav-area');
     
     console.log('authButton found:', authButton !== null);
     if (authButton) {
@@ -122,12 +121,6 @@ function switchToAdminMode() {
     if (document.body) {
         document.body.classList.add('admin-mode');
         console.log('Added admin-mode class to body');
-    }
-    
-    // Show admin navigation area
-    if (adminNavArea) {
-        adminNavArea.style.display = 'block';
-        console.log('Admin navigation area shown');
     }
     
     // Show admin buttons on product cards
@@ -151,16 +144,12 @@ function switchToGuestMode() {
     const preOrdersNav = document.getElementById('preOrdersNav');
     const adminButtons = document.querySelectorAll('.admin-buttons');
     const editButtons = document.querySelectorAll('.edit-content-btn');
-    const adminNavArea = document.querySelector('.admin-nav-area');
     
     if (authButton) authButton.textContent = 'Log In';
     if (preOrdersNav) preOrdersNav.style.display = 'none';
     
     // Remove admin-mode class to show guest-only elements
     document.body.classList.remove('admin-mode');
-    
-    // Hide admin navigation area
-    if (adminNavArea) adminNavArea.style.display = 'none';
     
     // Hide admin buttons
     adminButtons.forEach(btn => btn.style.display = 'none');
@@ -185,7 +174,6 @@ function setGuestMode() {
     const preOrdersNav = document.getElementById('preOrdersNav');
     const adminButtons = document.querySelectorAll('.admin-buttons');
     const editButtons = document.querySelectorAll('.edit-content-btn');
-    const adminNavArea = document.querySelector('.admin-nav-area');
     
     if (authButton) authButton.textContent = 'Log In';
     if (preOrdersNav) preOrdersNav.style.display = 'none';
@@ -194,9 +182,6 @@ function setGuestMode() {
     if (document.body) {
         document.body.classList.remove('admin-mode');
     }
-    
-    // Hide admin navigation area
-    if (adminNavArea) adminNavArea.style.display = 'none';
     
     adminButtons.forEach(btn => btn.style.display = 'none');
     editButtons.forEach(btn => btn.style.display = 'none');
