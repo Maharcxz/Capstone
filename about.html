@@ -116,6 +116,45 @@
             </div>
         </div>
 
+        <!-- Login Modal -->
+        <div class="login-modal-overlay" id="loginModalOverlay" onclick="hideLoginModal()">
+            <div class="login-modal" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <div class="glasses-icon">
+                        <svg viewBox="0 0 100 60" class="glasses-svg">
+                            <path d="M15 25 Q50 15 85 25 Q90 30 85 35 Q80 40 70 40 L60 40 Q55 35 50 35 Q45 35 40 40 L30 40 Q20 40 15 35 Q10 30 15 25 Z" 
+                                fill="none" stroke="white" stroke-width="3"/>
+                            <circle cx="25" cy="32" r="12" fill="none" stroke="white" stroke-width="3"/>
+                            <circle cx="75" cy="32" r="12" fill="none" stroke="white" stroke-width="3"/>
+                            <rect x="68" y="25" width="14" height="14" rx="2" fill="none" stroke="white" stroke-width="2"/>
+                            <text x="75" y="34" text-anchor="middle" fill="white" font-size="8" font-weight="bold">AR</text>
+                        </svg>
+                    </div>
+                    <h2 class="modal-title">WELCOME</h2>
+                </div>
+                
+                <form class="login-form">
+                    <div class="input-group">
+                        <span class="input-icon">✉</span>
+                        <input type="email" placeholder="Email Address" class="login-input" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" placeholder="Password" class="login-input" id="passwordInput" required>
+                        <span class="password-toggle" onclick="togglePassword()">👁</span>
+                    </div>
+                    
+                    <button type="submit" class="modal-login-btn">Log In</button>
+                    
+                    <div class="guest-option">
+                        <span class="continue-text">Or continue as</span>
+                        <button type="button" class="guest-btn" onclick="hideLoginModal()">Guest</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- About Us Content -->
         <main class="about-content">
             <h2 class="about-title">ABOUT US</h2>

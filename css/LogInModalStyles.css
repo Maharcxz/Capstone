@@ -5,21 +5,34 @@
     left: 0;
     width: 100%;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(84, 0, 0, 0.3) 100%);
+    backdrop-filter: blur(15px);
     display: none;
     justify-content: center;
     align-items: center;
     z-index: 2000;
-    animation: fadeIn 0.3s ease;
+    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes fadeIn {
     from {
         opacity: 0;
+        transform: scale(0.95);
     }
     to {
         opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -28,41 +41,111 @@
 }
 
 .login-modal {
-    background-color: #540000;
-    border-radius: 20px;
-    padding: 40px;
+    background: linear-gradient(145deg, #540000 0%, #6d0000 50%, #540000 100%);
+    border-radius: 25px;
+    padding: 45px;
     width: 90%;
-    max-width: 400px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    max-width: 420px;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.7),
+        0 15px 35px rgba(84, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    position: relative;
+    overflow: hidden;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.login-modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+}
+
+.login-modal::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+    pointer-events: none;
 }
 
 .modal-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 35px;
+    position: relative;
+    z-index: 1;
 }
 
 .glasses-icon {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    position: relative;
+    display: inline-block;
+}
+
+.glasses-icon::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 80px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: -1;
 }
 
 .glasses-svg {
-    width: 80px;
-    height: 50px;
+    width: 90px;
+    height: 55px;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.glasses-icon:hover .glasses-svg {
+    transform: scale(1.05);
 }
 
 .modal-title {
     color: white;
-    font-size: 24px;
-    font-weight: normal;
-    letter-spacing: 3px;
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: 4px;
     margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+}
+
+.modal-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    border-radius: 1px;
 }
 
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 25px;
+    position: relative;
+    z-index: 1;
 }
 
 .input-group {
@@ -71,83 +154,180 @@
     align-items: center;
 }
 
+.input-group::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border-radius: 30px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.input-group:focus-within::before {
+    opacity: 1;
+}
+
 .input-icon {
     position: absolute;
-    left: 15px;
+    left: 18px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 18px;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.input-group:focus-within .input-icon {
     color: white;
-    font-size: 16px;
-    z-index: 1;
+    transform: scale(1.1);
 }
 
 .login-input {
     width: 100%;
-    padding: 15px 50px;
-    background-color: transparent;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 25px;
+    padding: 18px 55px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 30px;
     color: white;
     font-size: 16px;
+    font-weight: 300;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
 }
 
 .login-input::placeholder {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.6);
+    transition: color 0.3s ease;
 }
 
 .login-input:focus {
     outline: none;
-    border-color: white;
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 
+        0 0 0 4px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.login-input:focus::placeholder {
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .password-toggle {
     position: absolute;
-    right: 15px;
-    color: white;
+    right: 18px;
+    color: rgba(255, 255, 255, 0.7);
     cursor: pointer;
-    font-size: 16px;
-    z-index: 1;
+    font-size: 18px;
+    z-index: 2;
+    transition: all 0.3s ease;
+    padding: 4px;
+    border-radius: 50%;
+}
+
+.password-toggle:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
 }
 
 .modal-login-btn {
-    background-color: transparent;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
     color: white;
-    border: 2px solid white;
-    padding: 15px;
-    border-radius: 25px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    padding: 18px 30px;
+    border-radius: 30px;
     font-size: 16px;
+    font-weight: 500;
     cursor: pointer;
-    margin-top: 10px;
-    transition: all 0.3s ease;
+    margin-top: 15px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.modal-login-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s ease;
+}
+
+.modal-login-btn:hover::before {
+    left: 100%;
 }
 
 .modal-login-btn:hover {
-    background-color: white;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.8) 100%);
     color: #540000;
+    border-color: white;
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 25px rgba(255, 255, 255, 0.2),
+        0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.modal-login-btn:active {
+    transform: translateY(0);
 }
 
 .guest-option {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 25px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
+    position: relative;
+}
+
+.guest-option::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
 }
 
 .continue-text {
-    color: white;
+    color: rgba(255, 255, 255, 0.8);
     font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
 }
 
 .guest-btn {
-    background-color: transparent;
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    padding: 10px 30px;
-    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 12px 35px;
+    border-radius: 25px;
     font-size: 14px;
+    font-weight: 400;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    letter-spacing: 0.5px;
 }
 
 .guest-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
 }
