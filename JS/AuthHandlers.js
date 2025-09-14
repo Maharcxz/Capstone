@@ -3,7 +3,7 @@
 
 // Initialize Firebase Auth
 // auth is already declared in FirebaseConfig.js
-// let isAdminMode = false; // Will be declared globally
+// isAdminMode is declared globally in FirebaseConfig.js
 
 // Monitor auth state changes
 auth.onAuthStateChanged((user) => {

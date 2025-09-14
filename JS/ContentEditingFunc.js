@@ -1,5 +1,5 @@
 // Content editing functionality
-let isAdminMode = false;
+// isAdminMode is declared globally in FirebaseConfig.js
 let currentEditTarget = null;
 let isEditMode = false;
 
@@ -72,7 +72,10 @@ function openEditModal(contentType) {
                     <button class="close-edit-modal" onclick="closeEditModal()">&times;</button>
                 </div>
                 <div class="edit-modal-content">
-                    <textarea id="editTextarea" placeholder="Enter content here...">${getContentForEdit(contentType)}</textarea>
+                    <div class="edit-instructions">
+                        <p><strong>Note:</strong> You can edit HTML directly. Be careful with the structure to maintain proper formatting.</p>
+                    </div>
+                    <textarea id="editTextarea" placeholder="Enter HTML content here..." rows="15">${getContentForEdit(contentType)}</textarea>
                     <div class="edit-modal-actions">
                         <button class="save-edit-btn" onclick="saveEditedContent()">Save Changes</button>
                         <button class="cancel-edit-btn" onclick="closeEditModal()">Cancel</button>
@@ -95,7 +98,8 @@ function openEditModal(contentType) {
 function getContentForEdit(contentType) {
     const contentElement = document.getElementById(contentType + 'Content');
     if (contentElement) {
-        return contentElement.innerText.trim();
+        // Return the HTML content instead of just text to preserve formatting
+        return contentElement.innerHTML.trim();
     }
     return '';
 }
@@ -108,13 +112,8 @@ function saveEditedContent() {
     const contentElement = document.getElementById(currentEditTarget + 'Content');
     
     if (contentElement) {
-        // Convert plain text to HTML with basic formatting
-        const formattedContent = content
-            .split('\n\n')
-            .map(paragraph => `<p class="${currentEditTarget}-description">${paragraph.trim()}</p>`)
-            .join('');
-        
-        contentElement.innerHTML = formattedContent;
+        // Save the HTML content directly to preserve formatting
+        contentElement.innerHTML = content;
         
         // Save to Firebase
         saveContentToFirebase(currentEditTarget, content);
@@ -164,7 +163,18 @@ function loadContentFromFirebase() {
                 if (content) {
                     // Update each content type found in Firebase
                     Object.keys(content).forEach(contentType => {
-                        updateContentElement(contentType, content[contentType].text);
+                        // Only update if the content element exists and doesn't already have structured HTML
+                        const contentElement = document.getElementById(contentType + 'Content');
+                        if (contentElement) {
+                            // Check if the element already has structured content (contains HTML tags)
+                            const currentContent = contentElement.innerHTML.trim();
+                            const hasStructuredContent = currentContent.includes('<') && currentContent.includes('>');
+                            
+                            // Only overwrite if there's no structured content or if we're in admin mode and explicitly loading
+                            if (!hasStructuredContent || (isAdminMode && content[contentType].text.includes('<'))) {
+                                updateContentElement(contentType, content[contentType].text);
+                            }
+                        }
                     });
                 }
             })
@@ -190,7 +200,14 @@ function loadContentFromLocalStorage() {
         const savedContent = localStorage.getItem(`content_${contentType}`);
         
         if (savedContent) {
-            updateContentElement(contentType, savedContent);
+            // Check if the element already has structured content (contains HTML tags)
+            const currentContent = content.innerHTML.trim();
+            const hasStructuredContent = currentContent.includes('<') && currentContent.includes('>');
+            
+            // Only overwrite if there's no structured content or if we're in admin mode and explicitly loading
+            if (!hasStructuredContent || (isAdminMode && savedContent.includes('<'))) {
+                updateContentElement(contentType, savedContent);
+            }
         }
     });
 }
@@ -200,13 +217,8 @@ function updateContentElement(contentType, content) {
     const contentElement = document.getElementById(contentType + 'Content');
     
     if (contentElement) {
-        // Convert plain text to HTML with basic formatting
-        const formattedContent = content
-            .split('\n\n')
-            .map(paragraph => `<p class="${contentType}-description">${paragraph.trim()}</p>`)
-            .join('');
-        
-        contentElement.innerHTML = formattedContent;
+        // Set the HTML content directly to preserve formatting
+        contentElement.innerHTML = content;
     }
 }
 
@@ -229,7 +241,7 @@ function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
-    notification.style.backgroundColor = type === 'success' ? '#4CAF50' : '#F44336';
+    notification.style.backgroundColor = type === 'success' ? '#4CAF50' : type === 'info' ? '#2196F3' : '#F44336';
     notification.style.color = 'white';
     notification.style.padding = '12px 20px';
     notification.style.marginBottom = '10px';
@@ -261,4 +273,67 @@ function closeEditModal() {
         modal.remove();
     }
     currentEditTarget = null;
+}
+
+// Function for content management toggle (used in index.html and preorders.html)
+function toggleContentManagement() {
+    if (!isAdminMode) {
+        console.log('Not in admin mode, cannot access content management');
+        return;
+    }
+    
+    // For pages that don't have specific content to edit, show a notification
+    // or redirect to a page that does have editable content
+    const currentPage = window.location.pathname;
+    
+    if (currentPage.includes('index.html') || currentPage === '/' || currentPage.endsWith('/')) {
+        // Redirect to about page for content editing
+        window.location.href = 'about.html';
+    } else if (currentPage.includes('preorders.html')) {
+        // Redirect to contact page for content editing
+        window.location.href = 'contact.html';
+    } else {
+        // Show notification that content management is not available on this page
+        showNotification('Content management is not available on this page. Please navigate to About or Contact pages.', 'info');
+    }
+}
+
+// Function for user management toggle (placeholder)
+function toggleUserManagement() {
+    if (!isAdminMode) {
+        console.log('Not in admin mode, cannot access user management');
+        return;
+    }
+    
+    showNotification('User management feature is coming soon!', 'info');
+}
+
+// Function for admin settings toggle (placeholder)
+function toggleAdminSettings() {
+    if (!isAdminMode) {
+        console.log('Not in admin mode, cannot access admin settings');
+        return;
+    }
+    
+    showNotification('Admin settings feature is coming soon!', 'info');
+}
+
+// Function for settings (placeholder)
+function openSettings() {
+    if (!isAdminMode) {
+        console.log('Not in admin mode, cannot access settings');
+        return;
+    }
+    
+    showNotification('Settings feature is coming soon!', 'info');
+}
+
+// Function for user management (placeholder)
+function openUserManagement() {
+    if (!isAdminMode) {
+        console.log('Not in admin mode, cannot access user management');
+        return;
+    }
+    
+    showNotification('User management feature is coming soon!', 'info');
 }
