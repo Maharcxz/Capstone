@@ -73,8 +73,31 @@
                             <span id="authButtonText">Log In</span>
                         </a>
                         <div class="admin-dropdown" id="adminDropdown">
-                            <button class="dropdown-item" onclick="switchToGuestMode()">Logout</button>
-                            <button class="dropdown-item" onclick="switchToGuestMode()">Switch to Guest View</button>
+                            <button class="dropdown-item" onclick="window.location.href='preorders.html'">
+                                <span class="dropdown-icon">📋</span>
+                                Pre-Orders
+                            </button>
+                            <button class="dropdown-item" onclick="openEditModal('content')">
+                                <span class="dropdown-icon">📝</span>
+                                Content Management
+                            </button>
+                            <button class="dropdown-item" onclick="openUserManagement()">
+                                <span class="dropdown-icon">👥</span>
+                                User Management
+                            </button>
+                            <button class="dropdown-item" onclick="openSettings()">
+                                <span class="dropdown-icon">⚙️</span>
+                                Settings
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-item logout-item" onclick="switchToGuestMode()">
+                                <span class="dropdown-icon">🚪</span>
+                                Logout
+                            </button>
+                            <button class="dropdown-item" onclick="switchToGuestMode()">
+                                <span class="dropdown-icon">👁️</span>
+                                Switch to Guest View
+                            </button>
                         </div>
                     </div>
                 </div>

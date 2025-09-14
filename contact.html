@@ -72,8 +72,31 @@
                             <span id="authButtonText">Log In</span>
                         </a>
                         <div class="admin-dropdown" id="adminDropdown">
-                            <button class="dropdown-item" onclick="switchToGuestMode()">Logout</button>
-                            <button class="dropdown-item" onclick="switchToGuestMode()">Switch to Guest View</button>
+                            <button class="dropdown-item" onclick="window.location.href='preorders.html'">
+                                <span class="dropdown-icon">📋</span>
+                                Pre-Orders
+                            </button>
+                            <button class="dropdown-item" onclick="openEditModal('content')">
+                                <span class="dropdown-icon">📝</span>
+                                Content Management
+                            </button>
+                            <button class="dropdown-item" onclick="openUserManagement()">
+                                <span class="dropdown-icon">👥</span>
+                                User Management
+                            </button>
+                            <button class="dropdown-item" onclick="openSettings()">
+                                <span class="dropdown-icon">⚙️</span>
+                                Settings
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-item logout-item" onclick="switchToGuestMode()">
+                                <span class="dropdown-icon">🚪</span>
+                                Logout
+                            </button>
+                            <button class="dropdown-item" onclick="switchToGuestMode()">
+                                <span class="dropdown-icon">👁️</span>
+                                Switch to Guest View
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -99,27 +122,27 @@
             
             <div class="editable-content" id="contactContent">
                 <p class="contact-description">
-                    We'd Love To Hear From You! Whether You Have Questions About Our Products, Need Assistance With Your AR Try-On Experience, Or Want To Schedule An Appointment, Our Team Is Ready To Help.
+                    We'd love to hear from you! Whether you have questions about our products, need assistance with your AR try-on experience, or want to schedule an appointment, our team is ready to help.
                 </p>
 
                 <div class="contact-info">
                     <h3>Contact Information:</h3>
                     <ul>
-                        <li>Phone: +1 (123) 456-7890</li>
-                        <li>Email: Support@Trinityvisioncenter.Com</li>
-                        <li>Address: 123 Orchids Street, Taguig City, Philippines</li>
+                        <li>Phone: +63 917 123 4567</li>
+                        <li>Email: info@trinityoptimumvision.com</li>
+                        <li>Address: 123 Vision Street, Makati City, Metro Manila, Philippines</li>
                     </ul>
                 </div>
 
                 <div class="business-hours">
                     <h3>Business Hours:</h3>
-                    <p class="hours-line">Monday To Friday — 9:00 AM To 6:00 PM</p>
-                    <p class="hours-line">Saturday — 10:00 AM To 4:00 PM</p>
-                    <p class="hours-line">Sunday — Closed</p>
+                    <p class="hours-line">Monday to Friday — 9:00 AM to 7:00 PM</p>
+                    <p class="hours-line">Saturday — 9:00 AM to 5:00 PM</p>
+                    <p class="hours-line">Sunday — 10:00 AM to 3:00 PM</p>
                 </div>
 
                 <p class="contact-footer">
-                    Feel Free To Reach Out Through Any Of The Above Channels.
+                    Feel free to reach out through any of the above channels. We look forward to serving you!
                 </p>
             </div>
             

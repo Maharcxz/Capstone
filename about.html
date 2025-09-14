@@ -72,8 +72,31 @@
                             <span id="authButtonText">Log In</span>
                         </a>
                         <div class="admin-dropdown" id="adminDropdown">
-                            <button class="dropdown-item" onclick="switchToGuestMode()">Logout</button>
-                            <button class="dropdown-item" onclick="switchToGuestMode()">Switch to Guest View</button>
+                            <button class="dropdown-item" onclick="window.location.href='preorders.html'">
+                                <span class="dropdown-icon">📋</span>
+                                Pre-Orders
+                            </button>
+                            <button class="dropdown-item" onclick="openEditModal('content')">
+                                <span class="dropdown-icon">📝</span>
+                                Content Management
+                            </button>
+                            <button class="dropdown-item" onclick="openUserManagement()">
+                                <span class="dropdown-icon">👥</span>
+                                User Management
+                            </button>
+                            <button class="dropdown-item" onclick="openSettings()">
+                                <span class="dropdown-icon">⚙️</span>
+                                Settings
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-item logout-item" onclick="switchToGuestMode()">
+                                <span class="dropdown-icon">🚪</span>
+                                Logout
+                            </button>
+                            <button class="dropdown-item" onclick="switchToGuestMode()">
+                                <span class="dropdown-icon">👁️</span>
+                                Switch to Guest View
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -99,15 +122,15 @@
             
             <div class="editable-content" id="aboutContent">
                 <p class="about-paragraph">
-                    Welcome To Trinity Optimum Vision Center — Your Trusted Partner In Eye Care And Eyewear Innovation. We Specialize In Providing High-Quality Eyeglasses, Frames, And Lenses Tailored To Your Style And Vision Needs.
+                    Welcome to Trinity Optimum Vision Center — your trusted partner in eye care and eyewear innovation. We specialize in providing high-quality eyeglasses, frames, and lenses tailored to your style and vision needs.
                 </p>
 
                 <p class="about-paragraph">
-                    Our Mission Is To Blend Advanced Technology With Personalized Service, Offering You A Seamless Virtual Eyeglass Try-On Experience Using Cutting-Edge Augmented Reality (AR). Whether You're Shopping For New Frames Or Need Expert Advice, Trinity Is Here To Help You See Better And Look Great.
+                    Our mission is to blend advanced technology with personalized service, offering you a seamless virtual eyeglass try-on experience using cutting-edge augmented reality (AR). Whether you're shopping for new frames or need expert advice, Trinity is here to help you see better and look great.
                 </p>
 
                 <p class="about-paragraph">
-                    We Are Committed To Excellence In Eyewear, Customer Satisfaction, And Continuous Innovation.
+                    We are committed to excellence in eyewear, customer satisfaction, and continuous innovation. At Trinity Optimum Vision Center, we believe that everyone deserves access to quality vision care and stylish eyewear that enhances both sight and confidence.
                 </p>
             </div>
             

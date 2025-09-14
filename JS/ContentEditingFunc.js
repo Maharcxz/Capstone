@@ -29,11 +29,11 @@ document.addEventListener('DOMContentLoaded', function() {
             addEditButtons();
         }
         
-        // Load content from Firebase
-        loadContentFromFirebase();
+        // Don't automatically load content from Firebase - preserve static HTML content
+        // loadContentFromFirebase();
     } else {
-        // Ensure guest mode - load content but don't add edit functionality
-        loadContentFromFirebase();
+        // Ensure guest mode - don't load content, preserve static HTML
+        // loadContentFromFirebase();
     }
 });
 
