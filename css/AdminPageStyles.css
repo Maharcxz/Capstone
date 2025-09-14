@@ -698,6 +698,334 @@
         0 0 0 1px rgba(255, 255, 255, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
     transform: scale(0.8) translateY(50px);
+}
+
+/* Contact Edit Modal Styles */
+.contact-edit-modal {
+    background: linear-gradient(135deg, #540000 0%, #3d0000 100%);
+    border-radius: 20px;
+    padding: 0;
+    width: 95%;
+    max-width: 900px;
+    max-height: 90vh;
+    box-shadow: 
+        0 25px 80px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(255, 255, 255, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: scale(0.8) translateY(50px);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    overflow: hidden;
+}
+
+.edit-modal-overlay.active .contact-edit-modal {
+    transform: scale(1) translateY(0);
+}
+
+.contact-edit-content {
+    padding: 30px;
+    overflow-y: auto;
+    max-height: calc(90vh - 120px);
+    display: flex;
+    flex-direction: column;
+}
+
+.contact-edit-content .contact-form-grid {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.contact-edit-content .edit-modal-actions {
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+.contact-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 25px;
+}
+
+.form-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.form-section.full-width {
+    grid-column: 1 / -1;
+    margin-top: 10px;
+}
+
+.form-section h4 {
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.form-section h4 i {
+    color: #ff6b6b;
+    font-size: 16px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #ff6b6b;
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.edit-modal-header {
+    background: linear-gradient(135deg, #6d0000 0%, #540000 100%);
+    padding: 25px 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.edit-modal-header h3 {
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.edit-modal-header h3 i {
+    color: #ff6b6b;
+    font-size: 20px;
+}
+
+.close-edit-modal {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 28px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.close-edit-modal:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: rotate(90deg);
+}
+
+.edit-modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.save-edit-btn i,
+.cancel-edit-btn i {
+    margin-right: 8px;
+    font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .contact-form-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .contact-edit-modal {
+        width: 98%;
+        margin: 10px;
+    }
+    
+    .contact-edit-content {
+        padding: 20px;
+    }
+    
+    .edit-modal-header {
+        padding: 20px;
+    }
+    
+    .edit-modal-header h3 {
+        font-size: 18px;
+    }
+ }
+
+/* About Edit Modal Styles */
+.about-edit-modal {
+    background: linear-gradient(135deg, #540000 0%, #3d0000 100%);
+    border-radius: 20px;
+    padding: 0;
+    width: 95%;
+    max-width: 800px;
+    max-height: 90vh;
+    box-shadow: 
+        0 25px 80px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(255, 255, 255, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: scale(0.8) translateY(50px);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    overflow: hidden;
+}
+
+.edit-modal-overlay.active .about-edit-modal {
+    transform: scale(1) translateY(0);
+}
+
+.about-edit-content {
+    padding: 30px;
+    overflow-y: auto;
+    max-height: calc(90vh - 80px);
+}
+
+.about-form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+.about-form-grid .form-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.about-form-grid .form-section h4 {
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.about-form-grid .form-section h4 i {
+    color: #ff6b6b;
+    font-size: 16px;
+}
+
+.about-form-grid .form-group {
+    margin-bottom: 0;
+}
+
+.about-form-grid .form-group label {
+    display: block;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.about-form-grid .form-group textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 300px;
+}
+
+.about-form-grid .form-group textarea:focus {
+    outline: none;
+    border-color: #ff6b6b;
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+}
+
+.about-form-grid .form-group textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive Design for About Modal */
+@media (max-width: 768px) {
+    .about-edit-modal {
+        width: 98%;
+        margin: 10px;
+    }
+    
+    .about-edit-content {
+        padding: 20px;
+    }
+}
+
+.edit-modal {
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     overflow: hidden;
 }
