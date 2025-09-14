@@ -1,5 +1,5 @@
 // Content editing functionality
-// isAdminMode is declared globally
+let isAdminMode = false;
 let currentEditTarget = null;
 let isEditMode = false;
 
@@ -29,11 +29,11 @@ document.addEventListener('DOMContentLoaded', function() {
             addEditButtons();
         }
         
-        // Don't automatically load content from Firebase - preserve static HTML content
-        // loadContentFromFirebase();
+        // Load saved content from Firebase
+        loadContentFromFirebase();
     } else {
-        // Ensure guest mode - don't load content, preserve static HTML
-        // loadContentFromFirebase();
+        // Load content for guest users too
+        loadContentFromFirebase();
     }
 });
 
