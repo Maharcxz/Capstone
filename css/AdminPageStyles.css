@@ -705,7 +705,7 @@
     background: linear-gradient(135deg, #540000 0%, #3d0000 100%);
     border-radius: 20px;
     padding: 0;
-    width: 95%;
+    width: 90%;
     max-width: 900px;
     max-height: 90vh;
     box-shadow: 
@@ -722,11 +722,12 @@
 }
 
 .contact-edit-content {
-    padding: 30px;
+    padding: 15px;
     overflow-y: auto;
-    max-height: calc(90vh - 120px);
+    max-height: calc(85vh - 60px);
     display: flex;
     flex-direction: column;
+    gap: 12px;
 }
 
 .contact-edit-content .contact-form-grid {
@@ -742,20 +743,37 @@
 .contact-form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 30px;
-    margin-bottom: 25px;
+    gap: 12px;
+    margin-bottom: 10px;
 }
 
 .form-section {
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 15px;
-    padding: 25px;
+    border-radius: 8px;
+    padding: 10px;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .form-section.full-width {
     grid-column: 1 / -1;
-    margin-top: 10px;
+    padding: 5px 8px;
+    margin-top: 3px;
+    margin-bottom: 0px;
+}
+
+.form-section.full-width textarea {
+    min-height: 28px;
+    max-height: 50px;
+    resize: vertical;
+}
+
+.form-section.full-width .form-group {
+    margin-bottom: 5px;
+}
+
+.form-section.full-width h4 {
+    margin-bottom: 8px;
+    font-size: 16px;
 }
 
 .form-section h4 {
@@ -825,22 +843,23 @@
 
 .edit-modal-header {
     background: linear-gradient(135deg, #6d0000 0%, #540000 100%);
-    padding: 25px 30px;
+    padding: 6px 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-radius: 15px 15px 0 0;
 }
 
 .edit-modal-header h3 {
     color: white;
     font-family: 'Poppins', sans-serif;
-    font-size: 22px;
+    font-size: 16px;
     font-weight: 600;
     margin: 0;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 6px;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -854,12 +873,12 @@
     background: none;
     border: none;
     color: rgba(255, 255, 255, 0.7);
-    font-size: 28px;
+    font-size: 20px;
     cursor: pointer;
-    padding: 5px;
+    padding: 4px;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -874,10 +893,10 @@
 
 .edit-modal-actions {
     display: flex;
-    gap: 15px;
     justify-content: center;
-    margin-top: 30px;
-    padding-top: 25px;
+    gap: 12px;
+    margin-top: 5px;
+    padding-top: 8px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -886,6 +905,8 @@
     margin-right: 8px;
     font-size: 14px;
 }
+
+
 
 /* Responsive Design */
 @media (max-width: 768px) {
@@ -910,6 +931,8 @@
     .edit-modal-header h3 {
         font-size: 18px;
     }
+    
+
  }
 
 /* About Edit Modal Styles */

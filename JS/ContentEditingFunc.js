@@ -206,7 +206,13 @@ function saveEditedContent() {
 }
 
 function saveContactEditedContent() {
-    if (!currentEditTarget) return;
+    console.log('saveContactEditedContent called');
+    if (!currentEditTarget) {
+        console.log('No currentEditTarget, returning');
+        return;
+    }
+    
+    console.log('currentEditTarget:', currentEditTarget);
     
     // Get form values
     const phone = document.getElementById('contactPhone').value;
@@ -217,43 +223,54 @@ function saveContactEditedContent() {
     const sunday = document.getElementById('sunday').value;
     const footer = document.getElementById('contactFooter').value;
     
-    // Build structured HTML content
+    console.log('Form values:', { phone, email, address, mondayFriday, saturday, sunday, footer });
+    
+    // Build structured HTML content to match original format exactly
     const structuredContent = `
-        <p class="contact-description">
-            We'd love to hear from you! Whether you have questions about our products, need assistance with your AR try-on experience, or want to schedule an appointment, our team is ready to help. Contact information:
-        </p>
+                <p class="contact-description">
+                    We'd love to hear from you! Whether you have questions about our products, need assistance with your AR try-on experience, or want to schedule an appointment, our team is ready to help.
+                </p>
 
-        <div class="contact-info">
-            <ul>
-                <li>Phone: ${phone}</li>
-                <li>Email: ${email}</li>
-                <li>Address: ${address}</li>
-            </ul>
-        </div>
+                <div class="contact-info">
+                    <h3>Contact Information:</h3>
+                    <ul>
+                        <li>Phone: ${phone}</li>
+                        <li>Email: ${email}</li>
+                        <li>Address: ${address}</li>
+                    </ul>
+                </div>
 
-        <div class="business-hours">
-            <h3>Business Hours:</h3>
-            <p class="hours-line">Monday to Friday — ${mondayFriday}</p>
-            <p class="hours-line">Saturday — ${saturday}</p>
-            <p class="hours-line">Sunday — ${sunday}</p>
-        </div>
+                <div class="business-hours">
+                    <h3>Business Hours:</h3>
+                    <p class="hours-line">Monday to Friday — ${mondayFriday}</p>
+                    <p class="hours-line">Saturday — ${saturday}</p>
+                    <p class="hours-line">Sunday — ${sunday}</p>
+                </div>
 
-        <p class="contact-footer">
-            ${footer}
-        </p>
-    `;
+                <p class="contact-footer">
+                    ${footer}
+                </p>`;
     
     const contentElement = document.getElementById(currentEditTarget + 'Content');
     
+    console.log('Content element:', contentElement);
+    console.log('Structured content to save:', structuredContent);
+    
     if (contentElement) {
         // Save the structured HTML content
+        console.log('Setting innerHTML to content element');
         contentElement.innerHTML = structuredContent;
         
+        console.log('Content element innerHTML after update:', contentElement.innerHTML);
+        
         // Save to Firebase
+        console.log('Calling saveContentToFirebase');
         saveContentToFirebase(currentEditTarget, structuredContent);
         
         // Show success notification
         showNotification('Contact information updated successfully!', 'success');
+    } else {
+        console.log('Content element not found!');
     }
     
     closeEditModal();
@@ -342,8 +359,11 @@ function saveAboutEditedContent() {
 
 // Function to save content to Firebase
 function saveContentToFirebase(contentType, content) {
+    console.log('saveContentToFirebase called with:', { contentType, content });
+    
     // Check if Firebase is initialized
     if (window.firebase && window.firebase.database) {
+        console.log('Firebase is available, saving to Firebase');
         const db = window.firebase.database();
         const contentRef = db.ref('content/' + contentType);
         
@@ -352,7 +372,7 @@ function saveContentToFirebase(contentType, content) {
             lastUpdated: new Date().toISOString()
         })
         .then(() => {
-            console.log(`${contentType} content saved to Firebase`);
+            console.log(`${contentType} content saved to Firebase successfully`);
             showNotification(`${contentType.charAt(0).toUpperCase() + contentType.slice(1)} content updated successfully!`);
         })
         .catch(error => {
@@ -360,40 +380,69 @@ function saveContentToFirebase(contentType, content) {
             showNotification('Error saving content. Please try again.', 'error');
         });
     } else {
-        console.error('Firebase database not available');
+        console.error('Firebase database not available, using localStorage fallback');
         // Fallback to localStorage
         localStorage.setItem(`content_${contentType}`, content);
+        console.log('Content saved to localStorage:', localStorage.getItem(`content_${contentType}`));
         showNotification(`${contentType.charAt(0).toUpperCase() + contentType.slice(1)} content saved locally.`);
     }
 }
 
 // Function to load content from Firebase
 function loadContentFromFirebase() {
+    console.log('loadContentFromFirebase called');
+    
     // Check if Firebase is initialized
     if (window.firebase && window.firebase.database) {
+        console.log('Firebase is available, loading content from Firebase');
         const db = window.firebase.database();
         const contentRef = db.ref('content');
         
         contentRef.once('value')
             .then(snapshot => {
                 const content = snapshot.val();
+                console.log('Firebase content loaded:', content);
                 
                 if (content) {
                     // Update each content type found in Firebase
                     Object.keys(content).forEach(contentType => {
-                        // Only update if the content element exists and doesn't already have structured HTML
+                        console.log(`Processing ${contentType} content from Firebase`);
+                        // Only update if the content element exists
                         const contentElement = document.getElementById(contentType + 'Content');
                         if (contentElement) {
                             // Check if the element already has structured content (contains HTML tags)
                             const currentContent = contentElement.innerHTML.trim();
                             const hasStructuredContent = currentContent.includes('<') && currentContent.includes('>');
                             
-                            // Only overwrite if there's no structured content or if we're in admin mode and explicitly loading
-                            if (!hasStructuredContent || (isAdminMode && content[contentType].text.includes('<'))) {
-                                updateContentElement(contentType, content[contentType].text);
+                            console.log(`${contentType} - hasStructuredContent:`, hasStructuredContent);
+                            console.log(`${contentType} - current content length:`, currentContent.length);
+                            
+                            // For contact content, only load from Firebase if:
+                            // 1. There's no existing structured content, OR
+                            // 2. The saved content is significantly different from current content
+                            if (contentType === 'contact') {
+                                // Only load if there's no structured content or if explicitly requested
+                                if (!hasStructuredContent) {
+                                    console.log(`Loading ${contentType} content from Firebase (no structured content)`);
+                                    updateContentElement(contentType, content[contentType].text);
+                                } else {
+                                    console.log(`Skipping ${contentType} content load - structured content exists`);
+                                }
+                            } else {
+                                // For other content types, use the original logic
+                                if (!hasStructuredContent || (isAdminMode && content[contentType].text.includes('<'))) {
+                                    console.log(`Loading ${contentType} content from Firebase`);
+                                    updateContentElement(contentType, content[contentType].text);
+                                } else {
+                                    console.log(`Skipping ${contentType} content load`);
+                                }
                             }
+                        } else {
+                            console.log(`Content element not found for ${contentType}`);
                         }
                     });
+                } else {
+                    console.log('No content found in Firebase');
                 }
             })
             .catch(error => {
@@ -432,11 +481,21 @@ function loadContentFromLocalStorage() {
 
 // Function to update content element with loaded content
 function updateContentElement(contentType, content) {
+    console.log(`updateContentElement called for ${contentType}`);
+    console.log('Content to update:', content);
+    
     const contentElement = document.getElementById(contentType + 'Content');
     
     if (contentElement) {
+        console.log(`Updating ${contentType} content element`);
+        console.log('Previous content:', contentElement.innerHTML);
+        
         // Set the HTML content directly to preserve formatting
         contentElement.innerHTML = content;
+        
+        console.log('New content set:', contentElement.innerHTML);
+    } else {
+        console.log(`Content element not found for ${contentType}`);
     }
 }
 
@@ -492,6 +551,8 @@ function closeEditModal() {
     }
     currentEditTarget = null;
 }
+
+
 
 // Function for content management toggle (used in index.html and preorders.html)
 function toggleContentManagement() {

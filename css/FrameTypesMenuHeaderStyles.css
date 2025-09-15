@@ -7,11 +7,12 @@
     padding-left: 0;
     margin-left: 0;
     cursor: pointer;
-    transition: opacity 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .frame-types-menu:hover {
-    opacity: 0.8;
+    opacity: 0.9;
+    transform: translateX(5px);
 }
 
 .menu-icon {
