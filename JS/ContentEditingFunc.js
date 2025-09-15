@@ -2,9 +2,14 @@
 // isAdminMode is declared globally in FirebaseConfig.js
 let currentEditTarget = null;
 let isEditMode = false;
+let contentCache = new Map(); // Cache for loaded content
+let isContentLoaded = false; // Flag to prevent duplicate loading
 
 // Initialize admin mode based on login status
 document.addEventListener('DOMContentLoaded', function() {
+    // Show content immediately from cache or localStorage
+    showCachedContentImmediately();
+    
     // Check if user is logged in as admin
     const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
     const currentUser = firebase.auth().currentUser;
@@ -28,14 +33,30 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!document.querySelector('.edit-content-btn')) {
             addEditButtons();
         }
-        
-        // Load saved content from Firebase
-        loadContentFromFirebase();
-    } else {
-        // Load content for guest users too
-        loadContentFromFirebase();
     }
+    
+    // Load content from Firebase asynchronously (non-blocking)
+    setTimeout(() => {
+        loadContentFromFirebaseAsync();
+    }, 0);
 });
+
+// Show cached content immediately to reduce perceived loading time
+function showCachedContentImmediately() {
+    const contentTypes = ['about', 'contact', 'home', 'services'];
+    
+    contentTypes.forEach(contentType => {
+        const contentElement = document.getElementById(contentType + 'Content');
+        if (contentElement) {
+            // Check localStorage first
+            const savedContent = localStorage.getItem(`content_${contentType}`);
+            if (savedContent) {
+                contentElement.innerHTML = savedContent;
+                contentCache.set(contentType, savedContent);
+            }
+        }
+    });
+}
 
 function addEditButtons() {
     // Find all editable content sections
@@ -381,80 +402,126 @@ function saveContentToFirebase(contentType, content) {
 }
 
 // Function to load content from Firebase
-function loadContentFromFirebase() {
-    console.log('loadContentFromFirebase called');
+// Optimized async version of loadContentFromFirebase
+async function loadContentFromFirebaseAsync() {
+    if (isContentLoaded) return; // Prevent duplicate loading
+    
+    console.log('loadContentFromFirebaseAsync called');
     
     // Check if Firebase is initialized
-    if (window.firebase && window.firebase.database) {
+    if (!window.firebase || !window.firebase.database) {
+        console.error('Firebase database not available');
+        loadContentFromLocalStorage();
+        return;
+    }
+
+    try {
         console.log('Firebase is available, loading content from Firebase');
         const db = window.firebase.database();
         const contentRef = db.ref('content');
         
-        contentRef.once('value')
-            .then(snapshot => {
-                const content = snapshot.val();
-                console.log('Firebase content loaded:', content);
-                
-                if (content) {
-                    // Update each content type found in Firebase
-                    Object.keys(content).forEach(contentType => {
-                        console.log(`Processing ${contentType} content from Firebase`);
-                        
-                        // Check if there's saved content in localStorage first
-                        const savedContent = localStorage.getItem(`content_${contentType}`);
-                        console.log(`localStorage content for ${contentType}:`, savedContent ? 'exists' : 'not found');
-                        
-                        // Only update if the content element exists
-                        const contentElement = document.getElementById(contentType + 'Content');
-                        if (contentElement) {
-                            // If there's saved content in localStorage, use that instead of Firebase
-                            if (savedContent) {
-                                console.log(`Using localStorage content for ${contentType} instead of Firebase`);
-                                updateContentElement(contentType, savedContent);
-                            } else {
-                                // No localStorage content, proceed with Firebase content
-                                const currentContent = contentElement.innerHTML.trim();
-                                const hasStructuredContent = currentContent.includes('<') && currentContent.includes('>');
-                                
-                                console.log(`${contentType} - hasStructuredContent:`, hasStructuredContent);
-                                console.log(`${contentType} - current content length:`, currentContent.length);
-                                
-                                // For contact content, only load from Firebase if there's no structured content
-                                if (contentType === 'contact') {
-                                    if (!hasStructuredContent) {
-                                        console.log(`Loading ${contentType} content from Firebase (no structured content)`);
-                                        updateContentElement(contentType, content[contentType].text);
-                                    } else {
-                                        console.log(`Skipping ${contentType} content load - structured content exists`);
-                                    }
-                                } else {
-                                    // For other content types, use the original logic
-                                    if (!hasStructuredContent || (isAdminMode && content[contentType].text.includes('<'))) {
-                                        console.log(`Loading ${contentType} content from Firebase`);
-                                        updateContentElement(contentType, content[contentType].text);
-                                    } else {
-                                        console.log(`Skipping ${contentType} content load`);
-                                    }
-                                }
-                            }
-                        } else {
-                            console.log(`Content element not found for ${contentType}`);
-                        }
-                    });
-                } else {
-                    console.log('No content found in Firebase');
-                }
-            })
-            .catch(error => {
-                console.error('Error loading content from Firebase:', error);
-                // Fallback to localStorage
-                loadContentFromLocalStorage();
-            });
-    } else {
-        console.error('Firebase database not available');
+        const snapshot = await contentRef.once('value');
+        const content = snapshot.val();
+        console.log('Firebase content loaded:', content);
+        
+        if (content) {
+            // Process content updates in batches to avoid blocking UI
+            const contentUpdates = Object.keys(content).map(contentType => ({
+                type: contentType,
+                data: content[contentType]
+            }));
+            
+            // Process updates in small batches
+            await processBatchedContentUpdates(contentUpdates);
+        } else {
+            console.log('No content found in Firebase');
+        }
+        
+        isContentLoaded = true;
+    } catch (error) {
+        console.error('Error loading content from Firebase:', error);
         // Fallback to localStorage
         loadContentFromLocalStorage();
     }
+}
+
+// Process content updates in batches to prevent UI blocking
+async function processBatchedContentUpdates(contentUpdates) {
+    const batchSize = 2; // Process 2 items at a time
+    
+    for (let i = 0; i < contentUpdates.length; i += batchSize) {
+        const batch = contentUpdates.slice(i, i + batchSize);
+        
+        // Process batch
+        batch.forEach(({ type: contentType, data }) => {
+            console.log(`Processing ${contentType} content from Firebase`);
+            
+            // Check if there's saved content in localStorage first
+            const savedContent = localStorage.getItem(`content_${contentType}`);
+            console.log(`localStorage content for ${contentType}:`, savedContent ? 'exists' : 'not found');
+            
+            // Only update if the content element exists
+            const contentElement = document.getElementById(contentType + 'Content');
+            if (contentElement) {
+                // If there's saved content in localStorage, use that instead of Firebase
+                if (savedContent && !contentCache.has(contentType)) {
+                    console.log(`Using localStorage content for ${contentType} instead of Firebase`);
+                    updateContentElementOptimized(contentType, savedContent);
+                } else if (!contentCache.has(contentType)) {
+                    // No localStorage content, proceed with Firebase content
+                    const currentContent = contentElement.innerHTML.trim();
+                    const hasStructuredContent = currentContent.includes('<') && currentContent.includes('>');
+                    
+                    console.log(`${contentType} - hasStructuredContent:`, hasStructuredContent);
+                    console.log(`${contentType} - current content length:`, currentContent.length);
+                    
+                    // For contact content, only load from Firebase if there's no structured content
+                    if (contentType === 'contact') {
+                        if (!hasStructuredContent) {
+                            console.log(`Loading ${contentType} content from Firebase (no structured content)`);
+                            updateContentElementOptimized(contentType, data.text);
+                        } else {
+                            console.log(`Skipping ${contentType} content load - structured content exists`);
+                        }
+                    } else {
+                        // For other content types, use the original logic
+                        if (!hasStructuredContent || (isAdminMode && data.text.includes('<'))) {
+                            console.log(`Loading ${contentType} content from Firebase`);
+                            updateContentElementOptimized(contentType, data.text);
+                        } else {
+                            console.log(`Skipping ${contentType} content load`);
+                        }
+                    }
+                }
+            } else {
+                console.log(`Content element not found for ${contentType}`);
+            }
+        });
+        
+        // Yield control to browser between batches
+        if (i + batchSize < contentUpdates.length) {
+            await new Promise(resolve => setTimeout(resolve, 0));
+        }
+    }
+}
+
+// Optimized version of updateContentElement
+function updateContentElementOptimized(contentType, content) {
+    const contentElement = document.getElementById(contentType + 'Content');
+    if (contentElement && content) {
+        // Only update if content is different to avoid unnecessary DOM manipulation
+        if (contentElement.innerHTML !== content) {
+            contentElement.innerHTML = content;
+            contentCache.set(contentType, content);
+            console.log(`Updated ${contentType} content in DOM`);
+        }
+    }
+}
+
+// Keep the original function for backward compatibility
+function loadContentFromFirebase() {
+    // Redirect to async version
+    loadContentFromFirebaseAsync();
 }
 
 // Function to load content from localStorage (fallback)
@@ -479,7 +546,7 @@ function loadContentFromLocalStorage() {
     });
 }
 
-// Function to update content element with loaded content
+// Function to update content element with loaded content (original version for compatibility)
 function updateContentElement(contentType, content) {
     console.log(`updateContentElement called for ${contentType}`);
     console.log('Content to update:', content);
@@ -499,6 +566,7 @@ function updateContentElement(contentType, content) {
         
         // Set the cleaned HTML content
         contentElement.innerHTML = cleanedContent;
+        contentCache.set(contentType, content);
         
         console.log('New content set:', contentElement.innerHTML);
     } else {

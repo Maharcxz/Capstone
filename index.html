@@ -30,17 +30,19 @@
     <!-- Firebase Configuration (must be loaded first) -->
     <script src="JS/FirebaseConfig.js"></script>
     
-    <!-- Application Scripts (loaded after Firebase is initialized) -->
-    <script src="JS/AuthHandlers.js"></script>
+    <!-- Critical Application Scripts (loaded immediately) -->
     <script src="JS/ContentEditingFunc.js"></script>
-    <script src="JS/EventListenerFunc.js"></script>
-    <script src="JS/FrameCategoryFunc.js"></script>
-    <script src="JS/FrameEditingModal.js"></script>
-    <script src="JS/NotificationFunc.js"></script>
-    <script src="JS/PassToggleFunc.js"></script>
+    <script src="JS/AuthHandlers.js"></script>
     <script src="JS/Script.js"></script>
-    <script src="JS/SeachFunc.js"></script>
-    <script src="JS/SidebarFunc.js"></script>
+    
+    <!-- Non-critical Application Scripts (deferred for better performance) -->
+    <script defer src="JS/EventListenerFunc.js"></script>
+    <script defer src="JS/FrameCategoryFunc.js"></script>
+    <script defer src="JS/FrameEditingModal.js"></script>
+    <script defer src="JS/NotificationFunc.js"></script>
+    <script defer src="JS/PassToggleFunc.js"></script>
+    <script defer src="JS/SeachFunc.js"></script>
+    <script defer src="JS/SidebarFunc.js"></script>
 </head>
 <body>
     <div class="container">
