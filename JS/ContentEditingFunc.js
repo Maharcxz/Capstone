@@ -117,6 +117,7 @@ function createContactEditModal() {
     const saturdayMatch = currentContent.match(/Saturday[^\d]*([\d:]+\s*[AP]M\s*to\s*[\d:]+\s*[AP]M)/i);
     const sundayMatch = currentContent.match(/Sunday[^\d]*([\d:]+\s*[AP]M\s*to\s*[\d:]+\s*[AP]M)/i);
     const footerMatch = currentContent.match(/<p class="contact-footer">([^<]+)<\/p>/i);
+    const descriptionMatch = currentContent.match(/<p class="contact-description">([^<]+)<\/p>/i);
     
     return `
         <div class="edit-modal-overlay active" id="editModalOverlay">
@@ -125,46 +126,52 @@ function createContactEditModal() {
                     <h3><i class="fas fa-edit"></i> Edit Contact Information</h3>
                     <button class="close-edit-modal" onclick="closeEditModal()">&times;</button>
                 </div>
-                <div class="contact-edit-content">
-                    <div class="contact-form-grid">
-                        <div class="form-section">
-                            <h4><i class="fas fa-info-circle"></i> Contact Details</h4>
-                            <div class="form-group">
-                                <label for="contactPhone">Phone Number</label>
-                                <input type="tel" id="contactPhone" value="${phoneMatch ? phoneMatch[1].trim() : '+63 917 123 4567'}" placeholder="+63 917 123 4567">
-                            </div>
-                            <div class="form-group">
-                                <label for="contactEmail">Email Address</label>
-                                <input type="email" id="contactEmail" value="${emailMatch ? emailMatch[1].trim() : 'info@trinityoptimumvision.com'}" placeholder="info@trinityoptimumvision.com">
-                            </div>
-                            <div class="form-group">
-                                <label for="contactAddress">Physical Address</label>
-                                <textarea id="contactAddress" rows="2" placeholder="123 Vision Street, Makati City, Metro Manila, Philippines">${addressMatch ? addressMatch[1].trim() : '123 Vision Street, Makati City, Metro Manila, Philippines'}</textarea>
-                            </div>
-                        </div>
-                        
-                        <div class="form-section">
-                            <h4><i class="fas fa-clock"></i> Business Hours</h4>
-                            <div class="form-group">
-                                <label for="mondayFriday">Monday - Friday</label>
-                                <input type="text" id="mondayFriday" value="${mondayFridayMatch ? mondayFridayMatch[1].trim() : '9:00 AM to 7:00 PM'}" placeholder="9:00 AM to 7:00 PM">
-                            </div>
-                            <div class="form-group">
-                                <label for="saturday">Saturday</label>
-                                <input type="text" id="saturday" value="${saturdayMatch ? saturdayMatch[1].trim() : '9:00 AM to 5:00 PM'}" placeholder="9:00 AM to 5:00 PM">
-                            </div>
-                            <div class="form-group">
-                                <label for="sunday">Sunday</label>
-                                <input type="text" id="sunday" value="${sundayMatch ? sundayMatch[1].trim() : '10:00 AM to 3:00 PM'}" placeholder="10:00 AM to 3:00 PM">
-                            </div>
+                <div class="contact-edit-content" style="max-height: 70vh; overflow-y: auto; padding-right: 10px;">
+                    <div class="form-section">
+                        <h4><i class="fas fa-file-text"></i> Contact Description</h4>
+                        <div class="form-group">
+                            <label for="contactDescription">Description Text</label>
+                            <textarea id="contactDescription" rows="3" placeholder="We'd love to hear from you! Whether you have questions about our products, need assistance with your AR try-on experience, or want to schedule an appointment, our team is ready to help.">${descriptionMatch ? descriptionMatch[1].trim() : ''}</textarea>
                         </div>
                     </div>
                     
-                    <div class="form-section full-width">
+                    <div class="form-section">
+                        <h4><i class="fas fa-info-circle"></i> Contact Details</h4>
+                        <div class="form-group">
+                            <label for="contactPhone">Phone Number</label>
+                            <input type="tel" id="contactPhone" value="${phoneMatch ? phoneMatch[1].trim() : ''}" placeholder="+63 917 123 4567">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactEmail">Email Address</label>
+                            <input type="email" id="contactEmail" value="${emailMatch ? emailMatch[1].trim() : ''}" placeholder="info@trinityoptimumvision.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactAddress">Physical Address</label>
+                            <textarea id="contactAddress" rows="2" placeholder="123 Vision Street, Makati City, Metro Manila, Philippines">${addressMatch ? addressMatch[1].trim() : ''}</textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h4><i class="fas fa-clock"></i> Business Hours</h4>
+                        <div class="form-group">
+                            <label for="mondayFriday">Monday - Friday</label>
+                            <input type="text" id="mondayFriday" value="${mondayFridayMatch ? mondayFridayMatch[1].trim() : ''}" placeholder="9:00 AM to 7:00 PM">
+                        </div>
+                        <div class="form-group">
+                            <label for="saturday">Saturday</label>
+                            <input type="text" id="saturday" value="${saturdayMatch ? saturdayMatch[1].trim() : ''}" placeholder="9:00 AM to 5:00 PM">
+                        </div>
+                        <div class="form-group">
+                            <label for="sunday">Sunday</label>
+                            <input type="text" id="sunday" value="${sundayMatch ? sundayMatch[1].trim() : ''}" placeholder="10:00 AM to 3:00 PM">
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
                         <h4><i class="fas fa-comment"></i> Footer Message</h4>
                         <div class="form-group">
                             <label for="contactFooter">Contact Footer Text</label>
-                            <textarea id="contactFooter" rows="2" placeholder="Feel free to reach out through any of the above channels. We look forward to serving you!">${footerMatch ? footerMatch[1].trim() : 'Feel free to reach out through any of the above channels. We look forward to serving you!'}</textarea>
+                            <textarea id="contactFooter" rows="2" placeholder="Feel free to reach out through any of the above channels. We look forward to serving you!">${footerMatch ? footerMatch[1].trim() : ''}</textarea>
                         </div>
                     </div>
                     
@@ -215,6 +222,7 @@ function saveContactEditedContent() {
     console.log('currentEditTarget:', currentEditTarget);
     
     // Get form values
+    const description = document.getElementById('contactDescription').value;
     const phone = document.getElementById('contactPhone').value;
     const email = document.getElementById('contactEmail').value;
     const address = document.getElementById('contactAddress').value;
@@ -223,12 +231,12 @@ function saveContactEditedContent() {
     const sunday = document.getElementById('sunday').value;
     const footer = document.getElementById('contactFooter').value;
     
-    console.log('Form values:', { phone, email, address, mondayFriday, saturday, sunday, footer });
+    console.log('Form values:', { description, phone, email, address, mondayFriday, saturday, sunday, footer });
     
     // Build structured HTML content to match original format exactly
     const structuredContent = `
                 <p class="contact-description">
-                    We'd love to hear from you! Whether you have questions about our products, need assistance with your AR try-on experience, or want to schedule an appointment, our team is ready to help.
+                    ${description}
                 </p>
 
                 <div class="contact-info">
@@ -303,8 +311,8 @@ function createAboutEditModal() {
                         <div class="form-section full-width">
                             <h4><i class="fas fa-edit"></i> About Us Content</h4>
                             <div class="form-group">
-                                <label for="aboutContent">Content</label>
-                                <textarea id="aboutContent" placeholder="Enter your about us content here. Use double line breaks to separate paragraphs..." rows="12">${combinedText}</textarea>
+                                <label for="aboutTextarea">Content</label>
+                                <textarea id="aboutTextarea" placeholder="Enter your about us content here. Use double line breaks to separate paragraphs..." rows="12">${combinedText}</textarea>
                             </div>
                         </div>
                     </div>
@@ -326,7 +334,7 @@ function createAboutEditModal() {
 function saveAboutEditedContent() {
     if (!currentEditTarget) return;
     
-    const content = document.getElementById('aboutContent').value;
+    const content = document.getElementById('aboutTextarea').value;
     
     // Split content by double line breaks and create paragraphs
     const paragraphs = content.split('\n\n').filter(p => p.trim());
@@ -361,6 +369,10 @@ function saveAboutEditedContent() {
 function saveContentToFirebase(contentType, content) {
     console.log('saveContentToFirebase called with:', { contentType, content });
     
+    // Always save to localStorage first for immediate persistence
+    localStorage.setItem(`content_${contentType}`, content);
+    console.log('Content saved to localStorage:', localStorage.getItem(`content_${contentType}`));
+    
     // Check if Firebase is initialized
     if (window.firebase && window.firebase.database) {
         console.log('Firebase is available, saving to Firebase');
@@ -380,10 +392,7 @@ function saveContentToFirebase(contentType, content) {
             showNotification('Error saving content. Please try again.', 'error');
         });
     } else {
-        console.error('Firebase database not available, using localStorage fallback');
-        // Fallback to localStorage
-        localStorage.setItem(`content_${contentType}`, content);
-        console.log('Content saved to localStorage:', localStorage.getItem(`content_${contentType}`));
+        console.error('Firebase database not available, content saved to localStorage only');
         showNotification(`${contentType.charAt(0).toUpperCase() + contentType.slice(1)} content saved locally.`);
     }
 }
@@ -407,34 +416,42 @@ function loadContentFromFirebase() {
                     // Update each content type found in Firebase
                     Object.keys(content).forEach(contentType => {
                         console.log(`Processing ${contentType} content from Firebase`);
+                        
+                        // Check if there's saved content in localStorage first
+                        const savedContent = localStorage.getItem(`content_${contentType}`);
+                        console.log(`localStorage content for ${contentType}:`, savedContent ? 'exists' : 'not found');
+                        
                         // Only update if the content element exists
                         const contentElement = document.getElementById(contentType + 'Content');
                         if (contentElement) {
-                            // Check if the element already has structured content (contains HTML tags)
-                            const currentContent = contentElement.innerHTML.trim();
-                            const hasStructuredContent = currentContent.includes('<') && currentContent.includes('>');
-                            
-                            console.log(`${contentType} - hasStructuredContent:`, hasStructuredContent);
-                            console.log(`${contentType} - current content length:`, currentContent.length);
-                            
-                            // For contact content, only load from Firebase if:
-                            // 1. There's no existing structured content, OR
-                            // 2. The saved content is significantly different from current content
-                            if (contentType === 'contact') {
-                                // Only load if there's no structured content or if explicitly requested
-                                if (!hasStructuredContent) {
-                                    console.log(`Loading ${contentType} content from Firebase (no structured content)`);
-                                    updateContentElement(contentType, content[contentType].text);
-                                } else {
-                                    console.log(`Skipping ${contentType} content load - structured content exists`);
-                                }
+                            // If there's saved content in localStorage, use that instead of Firebase
+                            if (savedContent) {
+                                console.log(`Using localStorage content for ${contentType} instead of Firebase`);
+                                updateContentElement(contentType, savedContent);
                             } else {
-                                // For other content types, use the original logic
-                                if (!hasStructuredContent || (isAdminMode && content[contentType].text.includes('<'))) {
-                                    console.log(`Loading ${contentType} content from Firebase`);
-                                    updateContentElement(contentType, content[contentType].text);
+                                // No localStorage content, proceed with Firebase content
+                                const currentContent = contentElement.innerHTML.trim();
+                                const hasStructuredContent = currentContent.includes('<') && currentContent.includes('>');
+                                
+                                console.log(`${contentType} - hasStructuredContent:`, hasStructuredContent);
+                                console.log(`${contentType} - current content length:`, currentContent.length);
+                                
+                                // For contact content, only load from Firebase if there's no structured content
+                                if (contentType === 'contact') {
+                                    if (!hasStructuredContent) {
+                                        console.log(`Loading ${contentType} content from Firebase (no structured content)`);
+                                        updateContentElement(contentType, content[contentType].text);
+                                    } else {
+                                        console.log(`Skipping ${contentType} content load - structured content exists`);
+                                    }
                                 } else {
-                                    console.log(`Skipping ${contentType} content load`);
+                                    // For other content types, use the original logic
+                                    if (!hasStructuredContent || (isAdminMode && content[contentType].text.includes('<'))) {
+                                        console.log(`Loading ${contentType} content from Firebase`);
+                                        updateContentElement(contentType, content[contentType].text);
+                                    } else {
+                                        console.log(`Skipping ${contentType} content load`);
+                                    }
                                 }
                             }
                         } else {
@@ -459,6 +476,8 @@ function loadContentFromFirebase() {
 
 // Function to load content from localStorage (fallback)
 function loadContentFromLocalStorage() {
+    console.log('loadContentFromLocalStorage called');
+    
     // Find all editable content sections
     const editableContents = document.querySelectorAll('[id$="Content"]');
     
@@ -466,15 +485,13 @@ function loadContentFromLocalStorage() {
         const contentType = content.id.replace('Content', '');
         const savedContent = localStorage.getItem(`content_${contentType}`);
         
+        console.log(`Checking localStorage for ${contentType}:`, savedContent ? 'found' : 'not found');
+        
         if (savedContent) {
-            // Check if the element already has structured content (contains HTML tags)
-            const currentContent = content.innerHTML.trim();
-            const hasStructuredContent = currentContent.includes('<') && currentContent.includes('>');
-            
-            // Only overwrite if there's no structured content or if we're in admin mode and explicitly loading
-            if (!hasStructuredContent || (isAdminMode && savedContent.includes('<'))) {
-                updateContentElement(contentType, savedContent);
-            }
+            console.log(`Loading ${contentType} content from localStorage`);
+            updateContentElement(contentType, savedContent);
+        } else {
+            console.log(`No saved content found in localStorage for ${contentType}`);
         }
     });
 }

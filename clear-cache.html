@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Cache</title>
+</head>
+<body>
+    <h1>Clear Content Cache</h1>
+    <button onclick="clearCache()">Clear All Saved Content</button>
+    <div id="result"></div>
+
+    <script>
+        function clearCache() {
+            // Clear localStorage content
+            localStorage.removeItem('content_contact');
+            localStorage.removeItem('content_about');
+            
+            // Clear any other content-related localStorage items
+            const keys = Object.keys(localStorage);
+            keys.forEach(key => {
+                if (key.startsWith('content_')) {
+                    localStorage.removeItem(key);
+                }
+            });
+            
+            document.getElementById('result').innerHTML = '<p style="color: green;">Cache cleared! You can now close this page and refresh your contact/about pages.</p>';
+        }
+    </script>
+</body>
+</html>
