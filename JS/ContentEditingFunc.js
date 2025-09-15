@@ -119,6 +119,12 @@ function createContactEditModal() {
     const footerMatch = currentContent.match(/<p class="contact-footer">([^<]+)<\/p>/i);
     const descriptionMatch = currentContent.match(/<p class="contact-description">([^<]+)<\/p>/i);
     
+    // Helper function to clean extracted text
+    function cleanText(text) {
+        if (!text) return '';
+        return text.replace(/\s+/g, ' ').trim();
+    }
+    
     return `
         <div class="edit-modal-overlay active" id="editModalOverlay">
             <div class="contact-edit-modal">
@@ -131,7 +137,7 @@ function createContactEditModal() {
                         <h4><i class="fas fa-file-text"></i> Contact Description</h4>
                         <div class="form-group">
                             <label for="contactDescription">Description Text</label>
-                            <textarea id="contactDescription" rows="3" placeholder="We'd love to hear from you! Whether you have questions about our products, need assistance with your AR try-on experience, or want to schedule an appointment, our team is ready to help.">${descriptionMatch ? descriptionMatch[1].trim() : ''}</textarea>
+                            <textarea id="contactDescription" rows="3" placeholder="We'd love to hear from you! Whether you have questions about our products, need assistance with your AR try-on experience, or want to schedule an appointment, our team is ready to help.">${descriptionMatch ? cleanText(descriptionMatch[1]) : ''}</textarea>
                         </div>
                     </div>
                     
@@ -139,15 +145,15 @@ function createContactEditModal() {
                         <h4><i class="fas fa-info-circle"></i> Contact Details</h4>
                         <div class="form-group">
                             <label for="contactPhone">Phone Number</label>
-                            <input type="tel" id="contactPhone" value="${phoneMatch ? phoneMatch[1].trim() : ''}" placeholder="+63 917 123 4567">
+                            <input type="tel" id="contactPhone" value="${phoneMatch ? cleanText(phoneMatch[1]) : ''}" placeholder="+63 917 123 4567">
                         </div>
                         <div class="form-group">
                             <label for="contactEmail">Email Address</label>
-                            <input type="email" id="contactEmail" value="${emailMatch ? emailMatch[1].trim() : ''}" placeholder="info@trinityoptimumvision.com">
+                            <input type="email" id="contactEmail" value="${emailMatch ? cleanText(emailMatch[1]) : ''}" placeholder="info@trinityoptimumvision.com">
                         </div>
                         <div class="form-group">
                             <label for="contactAddress">Physical Address</label>
-                            <textarea id="contactAddress" rows="2" placeholder="123 Vision Street, Makati City, Metro Manila, Philippines">${addressMatch ? addressMatch[1].trim() : ''}</textarea>
+                            <textarea id="contactAddress" rows="2" placeholder="123 Vision Street, Makati City, Metro Manila, Philippines">${addressMatch ? cleanText(addressMatch[1]) : ''}</textarea>
                         </div>
                     </div>
                     
@@ -155,15 +161,15 @@ function createContactEditModal() {
                         <h4><i class="fas fa-clock"></i> Business Hours</h4>
                         <div class="form-group">
                             <label for="mondayFriday">Monday - Friday</label>
-                            <input type="text" id="mondayFriday" value="${mondayFridayMatch ? mondayFridayMatch[1].trim() : ''}" placeholder="9:00 AM to 7:00 PM">
+                            <input type="text" id="mondayFriday" value="${mondayFridayMatch ? cleanText(mondayFridayMatch[1]) : ''}" placeholder="9:00 AM to 7:00 PM">
                         </div>
                         <div class="form-group">
                             <label for="saturday">Saturday</label>
-                            <input type="text" id="saturday" value="${saturdayMatch ? saturdayMatch[1].trim() : ''}" placeholder="9:00 AM to 5:00 PM">
+                            <input type="text" id="saturday" value="${saturdayMatch ? cleanText(saturdayMatch[1]) : ''}" placeholder="9:00 AM to 5:00 PM">
                         </div>
                         <div class="form-group">
                             <label for="sunday">Sunday</label>
-                            <input type="text" id="sunday" value="${sundayMatch ? sundayMatch[1].trim() : ''}" placeholder="10:00 AM to 3:00 PM">
+                            <input type="text" id="sunday" value="${sundayMatch ? cleanText(sundayMatch[1]) : ''}" placeholder="10:00 AM to 3:00 PM">
                         </div>
                     </div>
                     
@@ -171,7 +177,7 @@ function createContactEditModal() {
                         <h4><i class="fas fa-comment"></i> Footer Message</h4>
                         <div class="form-group">
                             <label for="contactFooter">Contact Footer Text</label>
-                            <textarea id="contactFooter" rows="2" placeholder="Feel free to reach out through any of the above channels. We look forward to serving you!">${footerMatch ? footerMatch[1].trim() : ''}</textarea>
+                            <textarea id="contactFooter" rows="2" placeholder="Feel free to reach out through any of the above channels. We look forward to serving you!">${footerMatch ? cleanText(footerMatch[1]) : ''}</textarea>
                         </div>
                     </div>
                     
@@ -233,31 +239,8 @@ function saveContactEditedContent() {
     
     console.log('Form values:', { description, phone, email, address, mondayFriday, saturday, sunday, footer });
     
-    // Build structured HTML content to match original format exactly
-    const structuredContent = `
-                <p class="contact-description">
-                    ${description}
-                </p>
-
-                <div class="contact-info">
-                    <h3>Contact Information:</h3>
-                    <ul>
-                        <li>Phone: ${phone}</li>
-                        <li>Email: ${email}</li>
-                        <li>Address: ${address}</li>
-                    </ul>
-                </div>
-
-                <div class="business-hours">
-                    <h3>Business Hours:</h3>
-                    <p class="hours-line">Monday to Friday — ${mondayFriday}</p>
-                    <p class="hours-line">Saturday — ${saturday}</p>
-                    <p class="hours-line">Sunday — ${sunday}</p>
-                </div>
-
-                <p class="contact-footer">
-                    ${footer}
-                </p>`;
+    // Build structured HTML content without indentation
+    const structuredContent = `<p class="contact-description">${description}</p><div class="contact-info"><h3>Contact Information:</h3><ul><li>Phone: ${phone}</li><li>Email: ${email}</li><li>Address: ${address}</li></ul></div><div class="business-hours"><h3>Business Hours:</h3><p class="hours-line">Monday to Friday — ${mondayFriday}</p><p class="hours-line">Saturday — ${saturday}</p><p class="hours-line">Sunday — ${sunday}</p></div><p class="contact-footer">${footer}</p>`;
     
     const contentElement = document.getElementById(currentEditTarget + 'Content');
     
@@ -507,8 +490,15 @@ function updateContentElement(contentType, content) {
         console.log(`Updating ${contentType} content element`);
         console.log('Previous content:', contentElement.innerHTML);
         
-        // Set the HTML content directly to preserve formatting
-        contentElement.innerHTML = content;
+        // Clean up content to remove unwanted indentation and whitespace
+        let cleanedContent = content;
+        if (typeof content === 'string') {
+            // Remove excessive whitespace between HTML tags while preserving content
+            cleanedContent = content.replace(/>\s+</g, '><').trim();
+        }
+        
+        // Set the cleaned HTML content
+        contentElement.innerHTML = cleanedContent;
         
         console.log('New content set:', contentElement.innerHTML);
     } else {
@@ -614,14 +604,95 @@ function toggleAdminSettings() {
     showNotification('Admin settings feature is coming soon!', 'info');
 }
 
-// Function for settings (placeholder)
+// Function for settings
 function openSettings() {
     if (!isAdminMode) {
         console.log('Not in admin mode, cannot access settings');
         return;
     }
     
-    showNotification('Settings feature is coming soon!', 'info');
+    // Create and show settings modal
+    const settingsModal = createSettingsModal();
+    document.body.insertAdjacentHTML('beforeend', settingsModal);
+}
+
+function createSettingsModal() {
+    return `
+        <div class="edit-modal-overlay active" id="editModalOverlay">
+            <div class="contact-edit-modal">
+                <div class="edit-modal-header">
+                    <h3><i class="fas fa-cog"></i> Admin Settings</h3>
+                    <button class="close-edit-modal" onclick="closeEditModal()">&times;</button>
+                </div>
+                <div class="contact-edit-content" style="max-height: 70vh; overflow-y: auto; padding-right: 10px;">
+                    <div class="form-section">
+                        <h4><i class="fas fa-database"></i> Cache Management</h4>
+                        <div class="form-group">
+                            <label>Clear Application Cache</label>
+                            <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px; margin: 8px 0;">This will clear all cached content and force reload from Firebase.</p>
+                            <button class="admin-btn" onclick="clearApplicationCache()" style="width: 100%; margin-top: 10px;">
+                                <i class="fas fa-trash-alt"></i> Clear Cache
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h4><i class="fas fa-tools"></i> System Tools</h4>
+                        <div class="form-group">
+                            <label>Debug Information</label>
+                            <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px; margin: 8px 0;">View system debug information and logs.</p>
+                            <button class="admin-btn" onclick="showDebugInfo()" style="width: 100%; margin-top: 10px;">
+                                <i class="fas fa-bug"></i> Show Debug Info
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="edit-modal-actions">
+                        <button class="cancel-edit-btn" onclick="closeEditModal()"><i class="fas fa-times"></i> Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function clearApplicationCache() {
+    // Clear localStorage
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('Content') || key.includes('cache') || key.includes('content_'))) {
+            keysToRemove.push(key);
+        }
+    }
+    
+    keysToRemove.forEach(key => {
+        localStorage.removeItem(key);
+        console.log('Removed from localStorage:', key);
+    });
+    
+    // Show success notification
+    showNotification('Application cache cleared successfully! Page will reload.', 'success');
+    
+    // Close modal and reload page after a short delay
+    setTimeout(() => {
+        closeEditModal();
+        window.location.reload();
+    }, 1500);
+}
+
+function showDebugInfo() {
+    const debugInfo = {
+        'Admin Mode': isAdminMode,
+        'Edit Mode': isEditMode,
+        'Current User': firebase.auth().currentUser ? firebase.auth().currentUser.email : 'Not logged in',
+        'LocalStorage Keys': Object.keys(localStorage).filter(key => key.includes('Content') || key.includes('cache')),
+        'Current Page': window.location.pathname,
+        'Firebase Connected': firebase.apps.length > 0
+    };
+    
+    console.log('Debug Information:', debugInfo);
+    showNotification('Debug information logged to console. Press F12 to view.', 'info');
 }
 
 // Function for user management (placeholder)
