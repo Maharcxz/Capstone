@@ -24,6 +24,11 @@ function initializeEventListeners() {
             const email = loginForm.querySelector('input[type="email"]').value;
             const password = loginForm.querySelector('input[type="password"]').value;
             
+            // Save credentials if remember me is checked
+            if (typeof saveCredentials === 'function') {
+                saveCredentials(email, password);
+            }
+            
             // Use Firebase Authentication
             firebaseServices.signInWithEmailAndPassword(email, password)
                 .then(user => {

@@ -1,6 +1,7 @@
 // Password toggle function
 function togglePassword() {
-    const passwordInput = document.getElementById('passwordInput');
+    // Try to find password input with different IDs
+    const passwordInput = document.getElementById('modalPasswordInput') || document.getElementById('passwordInput') || document.getElementById('password');
     const passwordToggle = document.querySelector('.password-toggle');
     
     if (passwordInput && passwordToggle) {

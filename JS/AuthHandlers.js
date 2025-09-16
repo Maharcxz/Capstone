@@ -61,6 +61,10 @@ function showLoginModal() {
     const loginModal = document.getElementById('loginModalOverlay');
     if (loginModal) {
         loginModal.classList.add('active');
+        // Load saved credentials when modal is opened
+        if (typeof loadSavedCredentials === 'function') {
+            loadSavedCredentials();
+        }
     }
 }
 
