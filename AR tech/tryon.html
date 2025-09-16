@@ -2,22 +2,299 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#000000" />
   <title>Virtual Try-On (Face Tracking)</title>
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <link rel="stylesheet" href="/css/BaseStyles.css" />
+  <link rel="manifest" href="/manifest.json" />
   <style>
-    body, html { margin: 0; padding: 0; overflow: hidden; background: #000; }
-    .back-btn { position: absolute; top: 20px; left: 20px; background: white; color: #540000; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 16px; z-index: 9999; }
-    .back-btn:hover { background: #ddd; }
-    #videoElement { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: 1; }
-    #three-canvas { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; pointer-events: none; }
-    .info { position: absolute; top: 70px; left: 20px; color: white; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 10px; z-index: 9999; font-size: 16px; }
-    .glasses-select { position: absolute; top: 120px; left: 20px; z-index: 9999; background: white; color: #540000; border-radius: 10px; padding: 10px; font-size: 16px; border: none; }
+    body, html { margin: 0; padding: 0; overflow: hidden; background: #000; height: 100%; width: 100%; position: fixed; }
+    
+    /* Back button - larger touch target for mobile */
+    .back-btn { 
+      position: absolute; 
+      top: 20px; 
+      left: 20px; 
+      background: white; 
+      color: #540000; 
+      border: none; 
+      padding: 12px 24px; 
+      border-radius: 24px; 
+      cursor: pointer; 
+      font-size: 18px; 
+      z-index: 9999; 
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .back-btn:hover, .back-btn:active { background: #ddd; }
+    
+    /* Video and canvas elements */
+    #videoElement { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100vw; 
+      height: 100vh; 
+      object-fit: cover; 
+      z-index: 1; 
+    }
+    #three-canvas { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100vw; 
+      height: 100vh; 
+      z-index: 2; 
+      pointer-events: none; 
+    }
+    
+    /* Info box */
+    .info { 
+      position: absolute; 
+      top: 80px; 
+      left: 20px; 
+      right: 20px; 
+      color: white; 
+      background: rgba(0,0,0,0.7); 
+      padding: 12px 20px; 
+      border-radius: 12px; 
+      z-index: 9999; 
+      font-size: 16px; 
+      text-align: center;
+      max-width: 90%;
+      margin: 0 auto;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    
+    /* Glasses selector - improved for touch */
+    .glasses-select { 
+      position: absolute; 
+      bottom: 30px; 
+      left: 50%; 
+      transform: translateX(-50%);
+      z-index: 9999; 
+      background: white; 
+      color: #540000; 
+      border-radius: 12px; 
+      padding: 12px; 
+      font-size: 18px; 
+      border: none; 
+      width: 80%; 
+      max-width: 300px;
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23540000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px top 50%;
+      background-size: 12px auto;
+      padding-right: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    
+    /* Mobile instructions overlay */
+    .mobile-instructions {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.9);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .mobile-instructions h3 {
+      margin-top: 0;
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    .mobile-instructions p {
+      margin-bottom: 15px;
+      font-size: 18px;
+      line-height: 1.5;
+      max-width: 80%;
+    }
+    
+    .mobile-instructions button {
+      background: white;
+      color: #540000;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 30px;
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 20px;
+      margin-left: 10px;
+      margin-right: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      transition: all 0.2s ease;
+    }
+    
+    .mobile-instructions button:hover,
+    .mobile-instructions button:active {
+      background: #f0f0f0;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    }
+    
+    #gotItButton {
+      background: #540000;
+      color: white;
+    }
+    
+    #gotItButton:hover,
+    #gotItButton:active {
+      background: #6a0000;
+    }
+    
+    .camera-message-container {
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 90%;
+      width: 400px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+    
+    .camera-message-container h4 {
+      font-size: 20px;
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #ff9900;
+    }
+    
+    .button-container {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 25px;
+    }
+    
+    @media (max-width: 480px) {
+      .camera-message-container {
+        padding: 20px;
+        width: 85%;
+      }
+      
+      .button-container {
+        flex-direction: column;
+      }
+      
+      .button-container button {
+        margin: 10px 0;
+      }
+    }
+    
+    /* Mobile access link */
+    .mobile-link {
+      position: absolute;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      text-align: center;
+    }
+    
+    .mobile-link a {
+      color: white;
+      background: #540000;
+      padding: 10px 20px;
+      border-radius: 24px;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    
+    /* Mobile-specific adjustments */
+    @media (max-width: 768px) {
+      .back-btn {
+        padding: 10px 20px;
+        font-size: 16px;
+      }
+      
+      .info {
+        font-size: 14px;
+        padding: 10px 15px;
+      }
+      
+      .glasses-select {
+        font-size: 16px;
+        padding: 10px;
+      }
+      
+      .mobile-link {
+        bottom: 100px;
+      }
+      
+      .mobile-link a {
+        font-size: 18px;
+        padding: 12px 24px;
+      }
+      
+      .mobile-instructions h3 {
+        font-size: 18px;
+      }
+      
+      .mobile-instructions p {
+        font-size: 14px;
+      }
+    }
+    
+    /* Prevent text selection */
+    * {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
   </style>
 </head>
 <body>
   <button class="back-btn" onclick="window.location.href='index.html'">⬅ Back</button>
   <div class="info" id="info">Allow camera access and point your face at the camera.<br>Glasses will appear over your face.</div>
+  
+  <!-- Camera Access Required Overlay -->
+  <div class="mobile-instructions" id="cameraAccessOverlay" style="display:none;">
+    <h3>Camera Access Required</h3>
+    <p>This AR application needs camera access to work.</p>
+    <p>Please enable camera access in your browser settings and reload the page.</p>
+    <p>On mobile devices, make sure to use a modern browser like Chrome or Safari.</p>
+    <button id="reloadButton">Reload Page</button>
+  </div>
+  
+  <!-- Initial Camera Access Message -->
+  <div class="mobile-instructions" id="initialCameraMessage">
+    <div class="camera-message-container">
+      <h3>Mobile AR Glasses</h3>
+      <h4>Camera Access Required</h4>
+      <p>This AR application needs camera access to work.</p>
+      <p>Position your face in the center of the screen after allowing camera access.</p>
+      <p>For best results, use in good lighting and hold your device steady.</p>
+      <div class="button-container">
+        <button id="gotItButton">Allow Camera</button>
+        <button id="reloadPageButton">Reload Page</button>
+      </div>
+    </div>
+  </div>
+  
   <select class="glasses-select" id="glassesSelect">
     <option value="glasses.glb">Glasses 1</option>
     <option value="glasses-5b.glb">Glasses 2</option>
@@ -29,10 +306,20 @@
     <option value="glasses-9b.glb">Glasses 8</option>
     <!-- Add more options as needed -->
   </select>
+  <div class="mobile-link">
+     <a href="qr-generator.html" target="_blank">Mobile Access</a>
+   </div>
   <video id="videoElement" autoplay muted playsinline></video>
   <canvas id="three-canvas"></canvas>
+  <!-- MediaPipe libraries are still loaded from CDN as they're not easily importable with Vite -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-  <script type="module" src="/src/main.js"></script>
+  <!-- Use Vite's module system for our main script -->
+  <script type="module">
+    // Prevent conflicts with other scripts
+    window.isARTryOnPage = true;
+    // Import the tryon script
+    import("/src/tryon.js");
+  </script>
 </body>
 </html>

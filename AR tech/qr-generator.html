@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Glasses Try-On QR Code Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #540000;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        #qrcode {
+            margin: 20px auto;
+            width: 256px;
+            height: 256px;
+        }
+        .instructions {
+            text-align: left;
+            margin: 20px auto;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+        .instructions ol {
+            padding-left: 20px;
+        }
+        .url-input {
+            width: 100%;
+            max-width: 500px;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .generate-btn {
+            background-color: #540000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .generate-btn:hover {
+            background-color: #7a0000;
+        }
+        .note {
+            font-style: italic;
+            color: #666;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>AR Glasses Try-On QR Code Generator</h1>
+    
+    <div class="container">
+        <p>Generate a QR code to easily access the AR Glasses Try-On application on mobile devices.</p>
+        
+        <div>
+            <input type="text" id="urlInput" class="url-input" placeholder="Enter the URL of your AR application" />
+            <button onclick="generateQR()" class="generate-btn">Generate QR Code</button>
+        </div>
+        
+        <div id="qrcode"></div>
+        
+        <div class="instructions">
+            <h3>How to use:</h3>
+            <ol>
+                <li>Enter the URL where your AR Glasses Try-On application is hosted</li>
+                <li>Click "Generate QR Code"</li>
+                <li>Scan the QR code with your mobile device</li>
+                <li>Allow camera permissions when prompted</li>
+                <li>Position your face in the center of the screen</li>
+                <li>Use the dropdown to try different glasses styles</li>
+            </ol>
+        </div>
+        
+        <p class="note">Note: For the best experience, use a modern mobile browser like Chrome or Safari on a device with a front-facing camera.</p>
+    </div>
+
+    <script>
+        // Auto-fill with the current URL (minus the qr-generator.html part)
+        window.onload = function() {
+            let currentUrl = window.location.href;
+            // Replace qr-generator.html with tryon.html
+            currentUrl = currentUrl.replace('qr-generator.html', 'tryon.html');
+            document.getElementById('urlInput').value = currentUrl;
+        }
+
+        function generateQR() {
+            const url = document.getElementById('urlInput').value.trim();
+            if (!url) {
+                alert('Please enter a valid URL');
+                return;
+            }
+            
+            // Clear previous QR code
+            document.getElementById('qrcode').innerHTML = '';
+            
+            // Create a canvas element
+            const canvas = document.createElement('canvas');
+            document.getElementById('qrcode').appendChild(canvas);
+            
+            // Generate new QR code
+            QRCode.toCanvas(canvas, url, {
+                width: 256,
+                margin: 1,
+                color: {
+                    dark: '#540000',
+                    light: '#ffffff'
+                }
+            }, function(error) {
+                if (error) console.error(error);
+                console.log('QR code generated!');
+            });
+        }
+        
+        // Generate QR code on page load
+        window.onload = function() {
+            let currentUrl = window.location.href;
+            // Replace qr-generator.html with tryon.html
+            currentUrl = currentUrl.replace('qr-generator.html', 'tryon.html');
+            document.getElementById('urlInput').value = currentUrl;
+            
+            // Generate initial QR code
+            generateQR();
+        }
+    </script>
+</body>
+</html>

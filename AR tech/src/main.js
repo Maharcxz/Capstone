@@ -7,27 +7,36 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // MediaPipe scripts still use CDN
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
+// Only initialize the app if the #app element exists
+const appElement = document.querySelector('#app');
+if (appElement) {
+  appElement.innerHTML = `
+    <div>
+      <a href="https://vite.dev" target="_blank">
+        <img src="${viteLogo}" class="logo" alt="Vite logo" />
+      </a>
+      <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
+        <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
+      </a>
+      <h1>Hello Vite!</h1>
+      <div class="card">
+        <button id="counter" type="button"></button>
+      </div>
+      <p class="read-the-docs">
+        Click on the Vite logo to learn more
+      </p>
     </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
-
-setupCounter(document.querySelector('#counter'))
+  `;
+  
+  const counterElement = document.querySelector('#counter');
+  if (counterElement) {
+    setupCounter(counterElement);
+  }
+}
 
 // DOM elements
+// Check if we're on the AR try-on page to avoid conflicts
+if (!window.isARTryOnPage) {
 const video = document.getElementById('videoElement');
 const canvas = document.getElementById('three-canvas');
 const glassesSelect = document.getElementById('glassesSelect');
@@ -150,3 +159,4 @@ startCamera();
 animate();
 
 document.querySelector('.info').innerHTML = '...';
+} // End of isARTryOnPage check
