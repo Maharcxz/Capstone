@@ -93,13 +93,21 @@
                 <form class="login-form">
                     <div class="input-group">
                         <span class="input-icon">✉</span>
-                        <input type="email" placeholder="Email Address" class="login-input" required>
+                        <input type="email" placeholder="Email Address" class="login-input" id="modalEmailInput" required>
                     </div>
                     
                     <div class="input-group">
                         <span class="input-icon">🔒</span>
-                        <input type="password" placeholder="Password" class="login-input" id="passwordInput" required>
+                        <input type="password" placeholder="Password" class="login-input" id="modalPasswordInput" required>
                         <span class="password-toggle" onclick="togglePassword()">👁</span>
+                    </div>
+                    
+                    <div class="remember-me-group">
+                        <label class="remember-me-label">
+                            <input type="checkbox" id="rememberMeCheckbox" class="remember-me-checkbox">
+                            <span class="checkmark"></span>
+                            Remember me
+                        </label>
                     </div>
                     
                     <button type="submit" class="modal-login-btn">Log In</button>
