@@ -53,11 +53,23 @@
             </div>
             <nav class="nav">
                 <div class="nav-left">
-                    <a href="index.html" class="nav-link">Home</a>
-                    <a href="contact.html" class="nav-link">Contact Us</a>
-                    <a href="about.html" class="nav-link">About Us</a>
+                    <a href="index.html" class="nav-link">
+                        <span class="nav-icon">⌂</span>
+                        <span>Home</span>
+                    </a>
+                    <a href="contact.html" class="nav-link">
+                        <span class="nav-icon">✉</span>
+                        <span>Contact Us</span>
+                    </a>
+                    <a href="about.html" class="nav-link">
+                        <span class="nav-icon">ⓘ</span>
+                        <span>About Us</span>
+                    </a>
 
-                    <a href="preorders.html" class="nav-link active admin-only">Pre-Orders</a>
+                    <a href="preorders.html" class="nav-link admin-only" id="preOrdersNav" style="display: none;">
+                        <span class="nav-icon">☰</span>
+                        <span>Pre-Orders</span>
+                    </a>
                 </div>
                 <div class="nav-right">
                     <div class="nav-icons">
@@ -72,7 +84,7 @@
                             <span id="authButtonText">Log In</span>
                         </a>
                         <div class="admin-dropdown" id="adminDropdown">
-                            <button class="dropdown-item" onclick="window.location.href='preorders.html'">
+                            <button class="dropdown-item" onclick="navigateToPreorders()">
                                 <span class="dropdown-icon">📋</span>
                                 <span>Pre-Orders</span>
                             </button>

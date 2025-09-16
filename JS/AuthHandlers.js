@@ -13,9 +13,7 @@ auth.onAuthStateChanged((user) => {
         // Redirect to preorders if on login page
         if (window.location.pathname.includes('login.html')) {
             console.log('AuthHandlers: Redirecting to preorders');
-            setTimeout(function() {
-                window.location.replace('preorders.html');
-            }, 500);
+            window.location.replace('preorders.html');
         }
     } else {
         // Force guest mode on index page regardless of admin status

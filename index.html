@@ -54,11 +54,23 @@
             </div>
             <nav class="nav">
                 <div class="nav-left">
-                    <a href="index.html" class="nav-link active">Home</a>
-                    <a href="contact.html" class="nav-link">Contact Us</a>
-                    <a href="about.html" class="nav-link">About Us</a>
+                    <a href="index.html" class="nav-link active">
+                        <span class="nav-icon">⌂</span>
+                        <span>Home</span>
+                    </a>
+                    <a href="contact.html" class="nav-link">
+                        <span class="nav-icon">✉</span>
+                        <span>Contact Us</span>
+                    </a>
+                    <a href="about.html" class="nav-link">
+                        <span class="nav-icon">ⓘ</span>
+                        <span>About Us</span>
+                    </a>
 
-                    <a href="preorders.html" class="nav-link admin-only" id="preOrdersNav" style="display: none;">Pre-Orders</a>
+                    <a href="preorders.html" class="nav-link admin-only" id="preOrdersNav" style="display: none;">
+                        <span class="nav-icon">☰</span>
+                        <span>Pre-Orders</span>
+                    </a>
                 </div>
                 <div class="nav-right">
                     <div class="nav-icons">
@@ -73,7 +85,7 @@
                             <span id="authButtonText">Log In</span>
                         </a>
                         <div class="admin-dropdown" id="adminDropdown">
-                            <button class="dropdown-item" onclick="window.location.href='preorders.html'">
+                            <button class="dropdown-item" onclick="navigateToPreorders()">
                                 <span class="dropdown-icon">📋</span>
                                 <span>Pre-Orders</span>
                             </button>
@@ -123,16 +135,6 @@
         <div class="login-modal-overlay" id="loginModalOverlay" onclick="hideLoginModal()">
             <div class="login-modal" onclick="event.stopPropagation()">
                 <div class="modal-header">
-                    <div class="glasses-icon">
-                        <svg viewBox="0 0 100 60" class="glasses-svg">
-                            <path d="M15 25 Q50 15 85 25 Q90 30 85 35 Q80 40 70 40 L60 40 Q55 35 50 35 Q45 35 40 40 L30 40 Q20 40 15 35 Q10 30 15 25 Z" 
-                                fill="none" stroke="white" stroke-width="3"/>
-                            <circle cx="25" cy="32" r="12" fill="none" stroke="white" stroke-width="3"/>
-                            <circle cx="75" cy="32" r="12" fill="none" stroke="white" stroke-width="3"/>
-                            <rect x="68" y="25" width="14" height="14" rx="2" fill="none" stroke="white" stroke-width="2"/>
-                            <text x="75" y="34" text-anchor="middle" fill="white" font-size="8" font-weight="bold">AR</text>
-                        </svg>
-                    </div>
                     <h2 class="modal-title">WELCOME</h2>
                 </div>
                 

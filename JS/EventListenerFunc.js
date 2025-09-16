@@ -87,6 +87,16 @@ function navigateToHome() {
     window.location.href = 'index.html';
 }
 
+function navigateToPreorders() {
+    try {
+        window.location.href = 'preorders.html';
+    } catch (error) {
+        console.error('Navigation error:', error);
+        // Fallback navigation method
+        window.location.replace('preorders.html');
+    }
+}
+
 // Admin functions for future expansion
 function enableAdminMode() {
     switchToAdminMode();

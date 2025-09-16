@@ -82,7 +82,36 @@
     margin-bottom: 35px;
     position: relative;
     z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80px;
 }
+
+.modal-header h2 {
+    color: white;
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: 4px;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    position: relative;
+    text-align: center;
+}
+
+.modal-header h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ffffff, transparent);
+    border-radius: 1px;
+}
+
+
 
 .glasses-icon {
     margin-bottom: 25px;

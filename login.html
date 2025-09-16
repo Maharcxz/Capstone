@@ -54,11 +54,23 @@
             </div>
             <nav class="nav">
                 <div class="nav-left">
-                    <a href="index.html" class="nav-link">Home</a>
-                    <a href="contact.html" class="nav-link">Contact Us</a>
-                    <a href="about.html" class="nav-link">About Us</a>
+                    <a href="index.html" class="nav-link">
+                        <span class="nav-icon">⌂</span>
+                        <span>Home</span>
+                    </a>
+                    <a href="contact.html" class="nav-link">
+                        <span class="nav-icon">✉</span>
+                        <span>Contact Us</span>
+                    </a>
+                    <a href="about.html" class="nav-link">
+                        <span class="nav-icon">ⓘ</span>
+                        <span>About Us</span>
+                    </a>
 
-                    <a href="preorders.html" class="nav-link admin-only" id="preOrdersNav" style="display: none;">Pre-Orders</a>
+                    <a href="preorders.html" class="nav-link admin-only" id="preOrdersNav" style="display: none;">
+                        <span class="nav-icon">☰</span>
+                        <span>Pre-Orders</span>
+                    </a>
                 </div>
                 <div class="nav-right">
                     <div class="nav-icons">
@@ -73,9 +85,9 @@
                             <span id="authButtonText">Log In</span>
                         </a>
                         <div class="admin-dropdown" id="adminDropdown">
-                            <button class="dropdown-item" onclick="window.location.href='preorders.html'">
+                            <button class="dropdown-item" onclick="navigateToPreorders()">
                                 <span class="dropdown-icon">📋</span>
-                                Pre-Orders
+                                <span>Pre-Orders</span>
                             </button>
                             <button class="dropdown-item" onclick="openEditModal('content')">
                                 <span class="dropdown-icon">📝</span>
@@ -121,18 +133,7 @@
         <div class="login-container">
             <div class="login-card">
                 <div class="login-header">
-                    <div class="glasses-icon">
-                        <svg viewBox="0 0 100 60" class="glasses-svg">
-                            <path d="M15 25 Q50 15 85 25 Q90 30 85 35 Q80 40 70 40 L60 40 Q55 35 50 35 Q45 35 40 40 L30 40 Q20 40 15 35 Q10 30 15 25 Z" 
-                                fill="none" stroke="#333" stroke-width="3"/>
-                            <circle cx="25" cy="32" r="12" fill="none" stroke="#333" stroke-width="3"/>
-                            <circle cx="75" cy="32" r="12" fill="none" stroke="#333" stroke-width="3"/>
-                            <rect x="68" y="25" width="14" height="14" rx="2" fill="none" stroke="#333" stroke-width="2"/>
-                            <text x="75" y="34" text-anchor="middle" fill="#333" font-size="8" font-weight="bold">AR</text>
-                        </svg>
-                    </div>
-                    <h2>ADMIN LOGIN</h2>
-                    <p>Access the administrative panel</p>
+                    <h2>WELCOME</h2>
                 </div>
                 
                 <form class="login-form" id="loginForm">
@@ -194,9 +195,7 @@
                             console.log('Firebase authentication successful');
                             localStorage.setItem('isAdminLoggedIn', 'true');
                             console.log('Login successful');
-                            setTimeout(function() {
-                                window.location.replace('preorders.html');
-                            }, 500);
+                            window.location.replace('preorders.html');
                         })
                         .catch((error) => {
                             console.log('Firebase authentication failed:', error.message);
@@ -206,9 +205,7 @@
                                 console.log('Hardcoded authentication successful');
                                 localStorage.setItem('isAdminLoggedIn', 'true');
                                 console.log('Login successful');
-                                setTimeout(function() {
-                                    window.location.replace('preorders.html');
-                                }, 500);
+                                window.location.replace('preorders.html');
                             } else {
                                 console.log('Authentication failed - invalid credentials');
                                 alert('Invalid email or password');

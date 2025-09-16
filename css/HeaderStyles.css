@@ -55,6 +55,22 @@
     position: relative;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-link .nav-icon {
+    font-size: 1rem;
+    color: white;
+    font-weight: normal;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    opacity: 0.9;
+}
+
+.nav-link:hover .nav-icon {
+    transform: scale(1.1);
+    opacity: 1;
 }
 
 .nav-link::before {
