@@ -54,25 +54,25 @@
             <nav class="nav">
                 <div class="nav-left">
                     <a href="index.html" class="nav-link">
-                        <span class="nav-icon">⌂</span>
                         <span>Home</span>
                     </a>
                     <a href="contact.html" class="nav-link">
-                        <span class="nav-icon">✉</span>
                         <span>Contact Us</span>
                     </a>
                     <a href="about.html" class="nav-link">
-                        <span class="nav-icon">ⓘ</span>
                         <span>About Us</span>
                     </a>
 
                     <a href="preorders.html" class="nav-link admin-only" id="preOrdersNav" style="display: none;">
-                        <span class="nav-icon">☰</span>
                         <span>Pre-Orders</span>
                     </a>
                 </div>
                 <div class="nav-right">
                     <div class="nav-icons">
+                        <div class="notification-wrapper">
+                            <span class="notification-icon" onclick="toggleNotifications()">🔔</span>
+                            <span class="notification-badge" id="notificationBadge">0</span>
+                        </div>
                         <span class="mail-icon">✉</span>
                     </div>
                     <a href="login.html" class="login-btn">
