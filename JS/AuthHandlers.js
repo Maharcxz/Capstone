@@ -10,11 +10,8 @@ auth.onAuthStateChanged((user) => {
     if (user) {
         // User is signed in through Firebase
         switchToAdminMode();
-        // Redirect to preorders if on login page
-        if (window.location.pathname.includes('login.html')) {
-            console.log('AuthHandlers: Redirecting to preorders');
-            window.location.replace('preorders.html');
-        }
+        // User is signed in through Firebase
+        console.log('AuthHandlers: User signed in, switching to admin mode');
     } else {
         // Force guest mode on index page regardless of admin status
         if (window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/')) {
@@ -28,9 +25,6 @@ auth.onAuthStateChanged((user) => {
             // Only switch to admin mode on admin-specific pages
             if (window.location.pathname.includes('preorders.html')) {
                 switchToAdminMode();
-            } else if (window.location.pathname.includes('login.html')) {
-                // Redirect to preorders if on login page
-                window.location.href = 'preorders.html';
             } else {
                 // For other pages, use guest mode
                 setGuestMode();
@@ -38,10 +32,9 @@ auth.onAuthStateChanged((user) => {
         } else {
             // User is signed out
             setGuestMode();
-            // Only redirect to login if not already being redirected and not on login page
-            if (window.location.pathname.includes('preorders.html') && 
-                !window.location.pathname.includes('login.html')) {
-                window.location.href = 'login.html';
+            // Redirect to index page if trying to access admin-only pages without authentication
+            if (window.location.pathname.includes('preorders.html')) {
+                window.location.href = 'index.html';
             }
         }
     }
