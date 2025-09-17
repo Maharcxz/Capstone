@@ -30,15 +30,30 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
-    padding: 12px 30px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(8px);
+    background: 
+        linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(84, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0.6) 100%),
+        radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+    padding: 16px 50px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
     margin: 0 -20px;
-    padding-left: 50px;
-    padding-right: 50px;
+    position: relative;
+    overflow: visible;
+}
+
+.nav::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+    pointer-events: none;
 }
 
 .nav-left {
@@ -108,21 +123,27 @@
 }
 
 .login-btn {
-    background-color: transparent;
-    border: 2px solid white;
-    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
     color: white;
-    padding: 8px 16px;
+    padding: 12px 20px;
     display: flex;
     align-items: center;
     gap: 8px;
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
     text-decoration: none;
     position: relative;
     overflow: hidden;
+    backdrop-filter: blur(10px);
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .login-btn::before {
@@ -132,16 +153,18 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
     transition: left 0.6s ease;
 }
 
 .login-btn:hover {
-    background-color: white;
+    background: rgba(255, 255, 255, 0.95);
     color: #540000;
     transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 
+        0 12px 32px rgba(255, 255, 255, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .login-btn:hover::before {
@@ -150,6 +173,9 @@
 
 .login-btn:active {
     transform: translateY(-1px) scale(1.02);
+    box-shadow: 
+        0 6px 20px rgba(255, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     transition: all 0.1s ease;
 }
 
@@ -161,12 +187,29 @@
 
 /* Admin Navigation Area Styles */
 .admin-nav-area {
-    background: linear-gradient(135deg, rgba(128, 0, 0, 0.95), rgba(84, 0, 0, 0.95));
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    margin: 20px 0;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(10px);
+    background: 
+        linear-gradient(135deg, rgba(84, 0, 0, 0.4) 0%, rgba(139, 0, 0, 0.3) 50%, rgba(84, 0, 0, 0.4) 100%),
+        radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.05) 0%, transparent 60%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    margin: 24px 0;
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-nav-area::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.02), transparent);
+    pointer-events: none;
 }
 
 .admin-nav-container {

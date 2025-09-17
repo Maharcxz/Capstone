@@ -48,9 +48,12 @@ auth.onAuthStateChanged((user) => {
 });
 
 function handleAuthClick() {
+    console.log('handleAuthClick called, isAdminMode:', isAdminMode);
     if (isAdminMode) {
+        console.log('Admin mode detected, calling toggleAdminDropdown');
         toggleAdminDropdown();
     } else {
+        console.log('Guest mode detected, showing login modal');
         showLoginModal();
     }
 }
@@ -74,9 +77,13 @@ function hideLoginModal() {
 }
 
 function toggleAdminDropdown() {
+    console.log('toggleAdminDropdown called, isAdminMode:', isAdminMode);
     const dropdown = document.getElementById('adminDropdown');
+    console.log('dropdown element found:', dropdown !== null);
     if (dropdown) {
         dropdown.classList.toggle('active');
+        console.log('dropdown classes after toggle:', dropdown.className);
+        console.log('dropdown display style:', window.getComputedStyle(dropdown).display);
     }
 }
 
@@ -197,3 +204,12 @@ function hideAdminDropdown() {
         dropdown.classList.remove('active');
     }
 }
+
+// Temporary function for testing admin mode
+function enableTestAdminMode() {
+    console.log('Enabling test admin mode...');
+    switchToAdminMode();
+}
+
+// Make function available globally for testing
+window.enableTestAdminMode = enableTestAdminMode;

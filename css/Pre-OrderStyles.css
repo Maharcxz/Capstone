@@ -196,26 +196,29 @@
 
 /* Pre-Order Page Styles */
 .preorder-content {
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
-    padding: 40px 0;
+    padding: 4rem 2rem;
 }
 
-.preorder-page-title {
-    font-size: 36px;
-    font-weight: normal;
-    letter-spacing: 4px;
-    margin-bottom: 40px;
+.preorder-title {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 600;
+    letter-spacing: 2px;
+    margin-bottom: 3rem;
     color: white;
     text-align: center;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.preorder-form-container {
-    background-color: rgba(0, 0, 0, 0.3);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 15px;
-    padding: 40px;
-    backdrop-filter: blur(10px);
+.preorder-container {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 3rem;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .preorder-page-form {
@@ -233,20 +236,23 @@
 .form-column {
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 2.5rem;
 }
 
 .form-field {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 1rem;
 }
 
 .field-label {
-    color: white;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
-    font-weight: normal;
-    letter-spacing: 1px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .name-inputs {
@@ -255,12 +261,16 @@
 }
 
 .name-input, .full-input, .quantity-select {
-    padding: 12px 15px;
-    background-color: transparent;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
     color: white;
-    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 }
 
 .name-input {
@@ -272,12 +282,16 @@
 }
 
 .name-input::placeholder, .full-input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 300;
 }
 
 .name-input:focus, .full-input:focus, .quantity-select:focus {
     outline: none;
-    border-color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
 }
 
 .quantity-select {
@@ -342,13 +356,57 @@
 }
 
 .submit-btn {
-    background-color: white;
-    color: #540000;
-    border: 2px solid white;
+    background: linear-gradient(135deg, #540000 0%, #8B0000 50%, #540000 100%);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1.25rem 2.5rem;
+    border-radius: 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+    margin-top: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    box-shadow: 
+        0 8px 32px rgba(84, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.submit-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    transition: left 0.6s ease;
 }
 
 .submit-btn:hover {
-    background-color: rgba(255, 255, 255, 0.9);
+    background: linear-gradient(135deg, #6B0000 0%, #A00000 50%, #6B0000 100%);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+        0 16px 40px rgba(84, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.submit-btn:hover::before {
+    left: 100%;
+}
+
+.submit-btn:active {
+    transform: translateY(-2px) scale(0.98);
+    box-shadow: 
+        0 8px 24px rgba(84, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.1s ease;
 }
 
 /* Pre-Order Page Responsive */

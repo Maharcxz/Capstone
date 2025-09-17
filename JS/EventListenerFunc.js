@@ -30,14 +30,43 @@ function initializeEventListeners() {
             }
             
             // Use Firebase Authentication
+            console.log('Attempting login with email:', email);
             firebaseServices.signInWithEmailAndPassword(email, password)
                 .then(user => {
                     console.log('Logged in successfully:', user.email);
+                    console.log('User object:', user);
                     switchToAdminMode();
                 })
                 .catch(error => {
-                    console.error('Login error:', error);
-                    alert('Login failed: ' + error.message);
+                    console.error('Login error details:', {
+                        code: error.code,
+                        message: error.message,
+                        email: email
+                    });
+                    
+                    // More specific error messages
+                    let errorMessage = 'Login failed: ';
+                    switch(error.code) {
+                        case 'auth/user-not-found':
+                            errorMessage += 'No account found with this email address.';
+                            break;
+                        case 'auth/wrong-password':
+                            errorMessage += 'Incorrect password.';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage += 'Invalid email address format.';
+                            break;
+                        case 'auth/user-disabled':
+                            errorMessage += 'This account has been disabled.';
+                            break;
+                        case 'auth/too-many-requests':
+                            errorMessage += 'Too many failed attempts. Please try again later.';
+                            break;
+                        default:
+                            errorMessage += error.message;
+                    }
+                    
+                    alert(errorMessage);
                 });
         });
     }

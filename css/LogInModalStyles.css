@@ -41,19 +41,20 @@
 }
 
 .login-modal {
-    background: linear-gradient(145deg, #540000 0%, #6d0000 50%, #540000 100%);
-    border-radius: 25px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(84, 0, 0, 0.75) 100%);
+    border-radius: 24px;
     padding: 45px;
     width: 90%;
     max-width: 420px;
     box-shadow: 
-        0 25px 50px rgba(0, 0, 0, 0.7),
-        0 15px 35px rgba(84, 0, 0, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 32px 64px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.15);
     position: relative;
     overflow: hidden;
+    backdrop-filter: blur(30px);
     animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
 }
 
 .login-modal::before {
@@ -79,7 +80,7 @@
 
 .modal-header {
     text-align: center;
-    margin-bottom: 35px;
+    margin-bottom: 2.5rem;
     position: relative;
     z-index: 1;
     display: flex;
@@ -90,11 +91,12 @@
 
 .modal-header h2 {
     color: white;
-    font-size: 28px;
-    font-weight: 300;
-    letter-spacing: 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(22px, 3vw, 28px);
+    font-weight: 600;
+    letter-spacing: 1px;
     margin: 0;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     position: relative;
     text-align: center;
 }
@@ -102,12 +104,12 @@
 .modal-header h2::after {
     content: '';
     position: absolute;
-    bottom: -10px;
+    bottom: -1rem;
     left: 50%;
     transform: translateX(-50%);
-    width: 60px;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #ffffff, transparent);
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
     border-radius: 1px;
 }
 
@@ -217,34 +219,37 @@
 
 .login-input {
     width: 100%;
-    padding: 18px 55px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 30px;
+    padding: 1.125rem 3.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50px;
     color: white;
-    font-size: 16px;
-    font-weight: 300;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(10px);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    backdrop-filter: blur(15px);
+    letter-spacing: 0.3px;
 }
 
 .login-input::placeholder {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.5);
     transition: color 0.3s ease;
+    font-weight: 300;
 }
 
 .login-input:focus {
     outline: none;
-    border-color: rgba(255, 255, 255, 0.6);
-    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.06);
     box-shadow: 
-        0 0 0 4px rgba(255, 255, 255, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 0 0 3px rgba(255, 255, 255, 0.08),
+        0 4px 12px rgba(0, 0, 0, 0.2);
     transform: translateY(-1px);
 }
 
 .login-input:focus::placeholder {
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .password-toggle {
@@ -266,21 +271,22 @@
 }
 
 .modal-login-btn {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    background: linear-gradient(135deg, #540000 0%, #8B0000 50%, #540000 100%);
     color: white;
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    padding: 18px 30px;
-    border-radius: 30px;
-    font-size: 16px;
-    font-weight: 500;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
-    margin-top: 15px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 1px;
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(10px);
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    box-shadow: 0 6px 20px rgba(84, 0, 0, 0.3);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .modal-login-btn::before {
@@ -291,25 +297,40 @@
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.6s ease;
+    transition: left 0.5s ease;
+}
+
+.modal-login-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
 }
 
 .modal-login-btn:hover::before {
     left: 100%;
 }
 
+.modal-login-btn:hover::after {
+    left: 100%;
+}
+
 .modal-login-btn:hover {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.8) 100%);
-    color: #540000;
-    border-color: white;
-    transform: translateY(-2px);
-    box-shadow: 
-        0 8px 25px rgba(255, 255, 255, 0.2),
-        0 4px 10px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #6B0000 0%, #A00000 50%, #6B0000 100%);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(84, 0, 0, 0.6);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: white;
 }
 
 .modal-login-btn:active {
-    transform: translateY(0);
+    transform: translateY(-1px) scale(0.98);
+    box-shadow: 0 6px 20px rgba(84, 0, 0, 0.5);
+    transition: all 0.1s ease;
 }
 
 .guest-option {
@@ -340,25 +361,45 @@
 }
 
 .guest-btn {
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 12px 35px;
-    border-radius: 25px;
-    font-size: 14px;
-    font-weight: 400;
+    background: linear-gradient(135deg, #7a0000 0%, #9d0000 50%, #7a0000 100%);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 16px 32px;
+    border-radius: 30px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(10px);
-    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(122, 0, 0, 0.3);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.guest-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.guest-btn:hover::before {
+    left: 100%;
 }
 
 .guest-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: linear-gradient(135deg, #9d0000 0%, #b30000 50%, #9d0000 100%);
     border-color: rgba(255, 255, 255, 0.5);
     color: white;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(122, 0, 0, 0.4);
 }
 
 /* Remember Me Checkbox Styles */
