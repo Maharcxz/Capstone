@@ -51,23 +51,108 @@
 
 .product-buttons {
     display: flex;
-    gap: 8px;
+    gap: 10px;
+    margin-top: 5px;
 }
 
 .virtual-try-btn {
     flex: 1;
-    background-color: #540000;
+    background: linear-gradient(135deg, #540000 0%, #6d0000 100%);
     color: white;
     border: none;
-    padding: 8px 12px;
-    border-radius: 20px;
+    padding: 10px 16px;
+    border-radius: 6px;
     font-size: 12px;
+    font-weight: 600;
+    font-family: 'Inter', 'Poppins', sans-serif;
     cursor: pointer;
-    font-weight: normal;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 3px 8px rgba(84, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.1);
+    text-transform: none;
+    letter-spacing: 0.25px;
+    position: relative;
+    overflow: hidden;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.virtual-try-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.virtual-try-btn:hover::before {
+    left: 100%;
 }
 
 .virtual-try-btn:hover {
-    background-color: #3D0000;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(84, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(135deg, #6d0000 0%, #8a0000 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.virtual-try-btn:active {
+    transform: translateY(0px);
+    box-shadow: 0 2px 8px rgba(84, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.virtual-try-btn:focus {
+    outline: none;
+    box-shadow: 0 4px 12px rgba(84, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(84, 0, 0, 0.2);
+}
+
+.virtual-try-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(84, 0, 0, 0.3);
+}
+
+/* Pre-order button specific styling - now using same red color as Virtual Try-On */
+.virtual-try-btn.preorder-btn {
+    background: linear-gradient(135deg, #540000 0%, #6d0000 100%);
+    box-shadow: 0 4px 12px rgba(84, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.virtual-try-btn.preorder-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.virtual-try-btn.preorder-btn:hover::before {
+    left: 100%;
+}
+
+.virtual-try-btn.preorder-btn:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, #6d0000 0%, #8a0000 100%);
+    box-shadow: 0 6px 20px rgba(84, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.virtual-try-btn.preorder-btn:active {
+    transform: translateY(0px);
+    box-shadow: 0 2px 8px rgba(84, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.virtual-try-btn.preorder-btn:focus {
+    box-shadow: 0 4px 12px rgba(84, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(84, 0, 0, 0.2);
 }
 
 /* Responsive Design */
@@ -243,6 +328,18 @@
         grid-template-columns: 1fr;
     }
     
+    .virtual-try-btn {
+        padding: 8px 14px;
+        font-size: 11px;
+        border-radius: 5px;
+        min-height: 32px;
+    }
+    
+    .product-buttons {
+        gap: 8px;
+        flex-direction: column;
+    }
+    
     .logo h1 {
         font-size: 28px;
         letter-spacing: 3px;
@@ -251,5 +348,31 @@
     .logo p {
         font-size: 12px;
         letter-spacing: 2px;
+    }
+}
+
+/* Additional responsive improvements for buttons */
+@media (max-width: 600px) {
+    .virtual-try-btn {
+        padding: 10px 12px;
+        font-size: 11px;
+        letter-spacing: 0.3px;
+    }
+    
+    .product-buttons {
+        gap: 6px;
+    }
+}
+
+@media (max-width: 360px) {
+         .virtual-try-btn {
+             padding: 6px 10px;
+             font-size: 10px;
+             border-radius: 4px;
+             min-height: 28px;
+         }
+    
+    .product-buttons {
+        gap: 5px;
     }
 }
