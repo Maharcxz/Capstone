@@ -170,7 +170,11 @@
 
             <div class="preorders-list">
                 <div class="preorders-header">
-                    <h3 id="orders-section-title">Recent Pre-Orders</h3>
+                    <div class="title-section">
+                        <h3 id="orders-section-title">Recent Pre-Orders</h3>
+                        <!-- Temporary debug button -->
+                        <button class="admin-btn delete-btn" onclick="clearAllPreOrders()">Clear All Data</button>
+                    </div>
                     <div class="filter-dropdown">
                         <select id="orderFilter" class="order-filter-select" onchange="filterOrders()">
                             <option value="pending">Pre-Orders</option>
@@ -217,6 +221,11 @@
             preOrdersRef.on('value', function(snapshot) {
                 const preOrders = snapshot.val();
                 
+                // Debug logging
+                console.log('Firebase snapshot received:', snapshot.exists());
+                console.log('Raw preOrders data:', preOrders);
+                console.log('Number of keys in preOrders:', preOrders ? Object.keys(preOrders).length : 0);
+                
                 if (preOrders) {
                     // Convert object to array and sort by date (newest first)
                     const preOrdersArray = Object.entries(preOrders).map(([id, order]) => {
@@ -236,12 +245,16 @@
                     
                     // Update counters
                     preOrdersArray.forEach(order => {
+                        console.log('Processing order:', order.id, 'Status:', order.status || 'pending');
                         if (order.status === 'completed') {
                             completedOrders++;
                         } else {
                             pendingOrders++;
                         }
                     });
+                    
+                    // Debug final counts
+                    console.log('Final counts - Total:', totalOrders, 'Pending:', pendingOrders, 'Completed:', completedOrders);
                     
                     // Update stats
                      document.getElementById('total-preorders').textContent = totalOrders;
@@ -309,16 +322,7 @@
             statusElement.style.color = status === 'completed' ? '#28a745' : '#ffc107';
             statusElement.style.fontWeight = '600';
             
-            // Prescription Details (if available)
-            const prescriptionSection = document.getElementById('modal-prescription-section');
-            if (order.prescription) {
-                prescriptionSection.style.display = 'block';
-                document.getElementById('modal-prescription-od').textContent = order.prescription.rightEye || 'N/A';
-                document.getElementById('modal-prescription-os').textContent = order.prescription.leftEye || 'N/A';
-                document.getElementById('modal-prescription-pd').textContent = order.prescription.pd || 'N/A';
-            } else {
-                prescriptionSection.style.display = 'none';
-            }
+            // Prescription Details section removed
             
             // Additional Notes (if available)
             const notesSection = document.getElementById('modal-notes-section');
@@ -525,14 +529,29 @@
                 });
             }
         }
+        
+        // Function to clear all pre-orders (for debugging)
+        function clearAllPreOrders() {
+            if (confirm('Are you sure you want to delete ALL pre-orders? This action cannot be undone.')) {
+                const preOrdersRef = firebase.database().ref('preOrders');
+                
+                preOrdersRef.remove().then(() => {
+                    console.log('All pre-orders cleared successfully');
+                    alert('All pre-orders have been cleared from the database.');
+                }).catch(error => {
+                    console.error('Error clearing all pre-orders:', error);
+                    alert('Error clearing pre-orders: ' + error.message);
+                });
+            }
+        }
     </script>
 
     <!-- Order Details Modal -->
     <div id="orderDetailsModal" class="modal">
         <div class="modal-content">
+            <span class="close" onclick="closeOrderDetailsModal()">&times;</span>
             <div class="modal-header">
                 <h2>Order Details</h2>
-                <span class="close" onclick="closeOrderDetailsModal()">&times;</span>
             </div>
             <div class="modal-body">
                 <div class="order-detail-section">
@@ -567,21 +586,7 @@
                     </div>
                 </div>
                 
-                <div class="order-detail-section" id="modal-prescription-section">
-                    <h3>Prescription Details</h3>
-                    <div class="detail-row">
-                        <span class="detail-label">Right Eye (OD):</span>
-                        <span id="modal-prescription-od"></span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Left Eye (OS):</span>
-                        <span id="modal-prescription-os"></span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">PD (Pupillary Distance):</span>
-                        <span id="modal-prescription-pd"></span>
-                    </div>
-                </div>
+
                 
                 <div class="order-detail-section" id="modal-notes-section">
                     <h3>Additional Notes</h3>
