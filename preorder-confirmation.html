@@ -69,11 +69,9 @@
                 </div>
                 <div class="nav-right">
                     <div class="nav-icons">
-                        <span class="mail-icon">✉</span>
                     </div>
                     <div class="auth-section">
                         <a href="#" class="login-btn" id="authButton" onclick="handleAuthClick()">
-                            <span class="user-icon">👤</span>
                             <span id="authButtonText">Log In</span>
                         </a>
                     </div>
@@ -90,30 +88,11 @@
                 
                 <form class="login-form">
                     <div class="input-group">
-                        <span class="input-icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                                <polyline points="22,6 12,13 2,6"/>
-                            </svg>
-                        </span>
                         <input type="email" placeholder="Email Address" class="login-input" id="modalEmailInput" required>
                     </div>
                     
                     <div class="input-group">
-                        <span class="input-icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                                <circle cx="12" cy="16" r="1"/>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                            </svg>
-                        </span>
                         <input type="password" placeholder="Password" class="login-input" id="modalPasswordInput" required>
-                        <span class="password-toggle" onclick="togglePassword()">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                <circle cx="12" cy="12" r="3"/>
-                            </svg>
-                        </span>
                     </div>
                     
                     <div class="remember-me-group">
@@ -149,7 +128,6 @@
                     </p>
                     
                     <div class="notification-info">
-                        <span class="notification-icon">🔔</span>
                         <p class="notification-text">
                             YOU'LL RECEIVE UPDATES VIA THE EMAIL OR PHONE NUMBER YOU PROVIDED.
                         </p>
@@ -157,9 +135,9 @@
                 </div>
             </div>
             
-            <div class="confirmation-actions">
-                <button class="return-home-btn" onclick="window.location.href='index.html'">Return to Home</button>
-                <button class="new-preorder-btn" onclick="window.location.href='preorder.html'">Submit Another Pre-Order</button>
+            <div class="form-actions">
+                <button type="button" class="cancel-btn" onclick="window.location.href='index.html'">Return to Home</button>
+                <button type="button" class="submit-btn" onclick="window.location.href='preorder.html'">New Pre-Order</button>
             </div>
         </main>
     </div>
