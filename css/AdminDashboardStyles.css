@@ -253,6 +253,7 @@
 
 .admin-product-card {
     background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #e9ecef;
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -263,6 +264,11 @@
 .admin-product-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    border-color: #dee2e6;
+}
+
+.admin-product-card:hover .product-image-admin {
+    border-color: #adb5bd;
 }
 
 /* Product Status */
@@ -293,11 +299,13 @@
     height: 150px;
     background: #f8f9fa;
     border-radius: 8px;
+    border: 2px solid #e9ecef;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 15px;
     overflow: hidden;
+    transition: border-color 0.3s ease;
 }
 
 .product-image-admin img {

@@ -177,8 +177,19 @@ async function editProduct(productId) {
         document.getElementById('productDescription').value = product.description || '';
         document.getElementById('productPrice').value = product.price;
         document.getElementById('productCategory').value = product.category;
-        document.getElementById('productImage').value = product.image || '';
-        document.getElementById('productBrandType').value = product.brandType || '';
+        
+        // Handle image URL - populate the URL input field
+        const imageUrlInput = document.getElementById('productImageUrl');
+        if (imageUrlInput) {
+            imageUrlInput.value = product.image || '';
+        }
+        
+        // Clear the file input when editing
+        const imageFileInput = document.getElementById('productImage');
+        if (imageFileInput) {
+            imageFileInput.value = '';
+        }
+        
         document.getElementById('productVisible').checked = product.visible;
         
         document.getElementById('productModal').classList.add('active');
@@ -198,13 +209,26 @@ function closeProductModal() {
 async function handleProductSubmit(event) {
     event.preventDefault();
     
+    // Get image URL from either the URL input or file input (for now, prioritize URL input)
+    const imageUrlInput = document.getElementById('productImageUrl');
+    const imageFileInput = document.getElementById('productImage');
+    let imageUrl = '';
+    
+    if (imageUrlInput && imageUrlInput.value.trim()) {
+        imageUrl = imageUrlInput.value.trim();
+    } else if (imageFileInput && imageFileInput.files && imageFileInput.files[0]) {
+        // For now, we'll show a message that file upload isn't implemented yet
+        // In a full implementation, you'd upload the file to Firebase Storage
+        showNotification('File upload not implemented yet. Please use image URL instead.', 'warning');
+        return;
+    }
+    
     const formData = {
         title: document.getElementById('productTitle').value.trim(),
         description: document.getElementById('productDescription').value.trim(),
         price: parseFloat(document.getElementById('productPrice').value),
         category: document.getElementById('productCategory').value,
-        image: document.getElementById('productImage').value.trim(),
-        brandType: document.getElementById('productBrandType').value.trim(),
+        image: imageUrl,
         visible: document.getElementById('productVisible').checked,
         updatedAt: new Date().toISOString()
     };
