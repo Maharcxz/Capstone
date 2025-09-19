@@ -4,6 +4,8 @@
 let allProducts = [];
 let filteredProducts = [];
 let editingProductId = null;
+let sidebarCategories = [];
+let currentCategory = 'all';
 
 // Initialize dashboard when page loads
 document.addEventListener('DOMContentLoaded', function() {
@@ -23,6 +25,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Set up form submission
     document.getElementById('productForm').addEventListener('submit', handleProductSubmit);
+    
+    // Initialize sidebar categories
+    loadSidebarCategories();
+    
+    // Set up sidebar management
+    setupSidebarManagement();
 });
 
 // Check if user has admin access
@@ -170,6 +178,7 @@ async function editProduct(productId) {
         document.getElementById('productPrice').value = product.price;
         document.getElementById('productCategory').value = product.category;
         document.getElementById('productImage').value = product.image || '';
+        document.getElementById('productBrandType').value = product.brandType || '';
         document.getElementById('productVisible').checked = product.visible;
         
         document.getElementById('productModal').classList.add('active');
@@ -195,6 +204,7 @@ async function handleProductSubmit(event) {
         price: parseFloat(document.getElementById('productPrice').value),
         category: document.getElementById('productCategory').value,
         image: document.getElementById('productImage').value.trim(),
+        brandType: document.getElementById('productBrandType').value.trim(),
         visible: document.getElementById('productVisible').checked,
         updatedAt: new Date().toISOString()
     };
@@ -333,8 +343,210 @@ document.getElementById('productModal').addEventListener('click', function(event
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         closeProductModal();
+        closeSidebarManagerModal();
     }
 });
+
+// ===== DYNAMIC SIDEBAR MANAGEMENT =====
+
+// Load sidebar categories from localStorage
+function loadSidebarCategories() {
+    const saved = localStorage.getItem('sidebarCategories');
+    sidebarCategories = saved ? JSON.parse(saved) : [];
+    renderSidebar();
+}
+
+// Save sidebar categories to localStorage
+function saveSidebarCategories() {
+    localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
+}
+
+// Setup sidebar management event listeners
+function setupSidebarManagement() {
+    // Manage Categories button
+    document.getElementById('manageCategoriesBtn').addEventListener('click', openSidebarManagerModal);
+    
+    // Close modal button
+    document.getElementById('closeSidebarManagerBtn').addEventListener('click', closeSidebarManagerModal);
+    
+    // Add category form
+    document.getElementById('addCategoryForm').addEventListener('submit', handleAddCategory);
+    
+    // Close modal when clicking outside
+    document.getElementById('sidebarManagerModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeSidebarManagerModal();
+        }
+    });
+}
+
+// Render sidebar with categories
+function renderSidebar() {
+    const sidebarContent = document.getElementById('sidebarContent');
+    
+    let html = `
+        <div class="sidebar-item ${currentCategory === 'all' ? 'active' : ''}" onclick="filterByCategory('all')">
+            <span class="sidebar-item-icon">📦</span>
+            <span class="sidebar-item-text">All Products</span>
+        </div>
+    `;
+    
+    sidebarCategories.forEach(category => {
+        html += `
+            <div class="sidebar-item ${currentCategory === category.id ? 'active' : ''}" onclick="filterByCategory('${category.id}')">
+                <span class="sidebar-item-icon">${category.icon || '🏷️'}</span>
+                <span class="sidebar-item-text">${category.name}</span>
+            </div>
+        `;
+    });
+    
+    sidebarContent.innerHTML = html;
+}
+
+// Filter products by category
+function filterByCategory(categoryId) {
+    currentCategory = categoryId;
+    
+    if (categoryId === 'all') {
+        filteredProducts = [...allProducts];
+    } else {
+        const category = sidebarCategories.find(cat => cat.id === categoryId);
+        if (category) {
+            filteredProducts = allProducts.filter(product => {
+                const productTag = product.brandType || product.brand || '';
+                return productTag.toLowerCase().includes(category.name.toLowerCase()) ||
+                       productTag.toLowerCase() === category.name.toLowerCase();
+            });
+        }
+    }
+    
+    renderProducts();
+    renderSidebar(); // Update active state
+}
+
+// Open sidebar manager modal
+function openSidebarManagerModal() {
+    document.getElementById('sidebarManagerModal').style.display = 'flex';
+    renderExistingCategories();
+}
+
+// Close sidebar manager modal
+function closeSidebarManagerModal() {
+    document.getElementById('sidebarManagerModal').style.display = 'none';
+    document.getElementById('addCategoryForm').reset();
+}
+
+// Handle add category form submission
+function handleAddCategory(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const categoryName = formData.get('categoryName').trim();
+    
+    if (!categoryName) {
+        alert('Please enter a category name');
+        return;
+    }
+    
+    // Check if category already exists
+    const exists = sidebarCategories.some(cat => 
+        cat.name.toLowerCase() === categoryName.toLowerCase()
+    );
+    
+    if (exists) {
+        alert('Category already exists');
+        return;
+    }
+    
+    // Add new category
+    const newCategory = {
+        id: generateCategoryId(categoryName),
+        name: categoryName,
+        icon: '🏷️',
+        createdAt: new Date().toISOString()
+    };
+    
+    sidebarCategories.push(newCategory);
+    saveSidebarCategories();
+    renderSidebar();
+    renderExistingCategories();
+    
+    // Reset form
+    event.target.reset();
+    
+    showNotification(`Category "${categoryName}" added successfully!`, 'success');
+}
+
+// Generate category ID from name
+function generateCategoryId(name) {
+    return name.toLowerCase()
+        .replace(/[^a-z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+}
+
+// Render existing categories in modal
+function renderExistingCategories() {
+    const container = document.getElementById('existingCategories');
+    
+    if (sidebarCategories.length === 0) {
+        container.innerHTML = '<div class="empty-categories">No categories created yet</div>';
+        return;
+    }
+    
+    let html = '';
+    sidebarCategories.forEach(category => {
+        html += `
+            <div class="category-item">
+                <div class="category-item-info">
+                    <span class="category-item-icon">${category.icon}</span>
+                    <span class="category-item-name">${category.name}</span>
+                </div>
+                <div class="category-item-actions">
+                    <button class="category-action-btn" onclick="editCategory('${category.id}')">Edit</button>
+                    <button class="category-action-btn delete" onclick="deleteCategory('${category.id}')">Delete</button>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Edit category (placeholder for future enhancement)
+function editCategory(categoryId) {
+    const category = sidebarCategories.find(cat => cat.id === categoryId);
+    if (category) {
+        const newName = prompt('Enter new category name:', category.name);
+        if (newName && newName.trim() && newName.trim() !== category.name) {
+            category.name = newName.trim();
+            category.id = generateCategoryId(newName.trim());
+            saveSidebarCategories();
+            renderSidebar();
+            renderExistingCategories();
+            showNotification(`Category updated successfully!`, 'success');
+        }
+    }
+}
+
+// Delete category
+function deleteCategory(categoryId) {
+    const category = sidebarCategories.find(cat => cat.id === categoryId);
+    if (category && confirm(`Are you sure you want to delete "${category.name}"?`)) {
+        sidebarCategories = sidebarCategories.filter(cat => cat.id !== categoryId);
+        saveSidebarCategories();
+        
+        // If currently viewing this category, switch to all products
+        if (currentCategory === categoryId) {
+            filterByCategory('all');
+        } else {
+            renderSidebar();
+        }
+        
+        renderExistingCategories();
+        showNotification(`Category "${category.name}" deleted successfully!`, 'success');
+    }
+}
 
 // Export functions for global access
 window.openAddProductModal = openAddProductModal;
