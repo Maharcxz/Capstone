@@ -401,41 +401,49 @@
 }
 
 .edit-btn {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    background: linear-gradient(135deg, #0d4f4f 0%, #0d6d6d 100%);
     color: white;
+    box-shadow: 0 4px 15px rgba(13, 79, 79, 0.3);
 }
 
 .edit-btn:hover {
-    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    background: linear-gradient(135deg, #0d6d6d 0%, #0d8a8a 100%);
     transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(13, 79, 79, 0.4);
 }
 
 .delete-btn {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    background: linear-gradient(135deg, #540000 0%, #6d0000 100%);
     color: white;
+    box-shadow: 0 4px 15px rgba(84, 0, 0, 0.3);
 }
 
 .delete-btn:hover {
-    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+    background: linear-gradient(135deg, #6d0000 0%, #8a0000 100%);
     transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(84, 0, 0, 0.4);
 }
 
 .toggle-visibility-btn {
-    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
     color: white;
+    box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
 }
 
 .toggle-visibility-btn:hover {
-    background: linear-gradient(135deg, #1e7e34 0%, #155724 100%);
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
     transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4);
 }
 
 .toggle-visibility-btn.hidden {
     background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
 }
 
 .toggle-visibility-btn.hidden:hover {
     background: linear-gradient(135deg, #545b62 0%, #3d4142 100%);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
 }
 
 /* Modal Styles */

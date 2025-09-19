@@ -181,52 +181,73 @@
     justify-content: center;
 }
 
+/* Edit button - Teal theme matching Add Category */
 .admin-btn {
-    background-color: #540000;
+    background: linear-gradient(135deg, #0d4f4f 0%, #0d6d6d 100%);
     color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     padding: 8px 16px;
     border-radius: 6px;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: 'Poppins', sans-serif;
     display: flex;
     align-items: center;
     gap: 6px;
+    box-shadow: 0 4px 15px rgba(13, 79, 79, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
 }
 
 .admin-btn:hover {
-    background-color: #6d0000;
+    background: linear-gradient(135deg, #0d6d6d 0%, #0d8a8a 100%);
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(84, 0, 0, 0.3);
+    box-shadow: 0 6px 20px rgba(13, 79, 79, 0.4);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.admin-btn:hover::before {
+    left: 100%;
 }
 
 .admin-btn:active {
     transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(13, 79, 79, 0.3);
 }
 
-/* Delete button - Red theme */
+/* Delete button - Dark red theme matching Add Product */
 .admin-btn.delete-btn {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+    background: linear-gradient(135deg, #540000 0%, #6d0000 100%);
+    box-shadow: 0 4px 15px rgba(84, 0, 0, 0.3);
 }
 
 .admin-btn.delete-btn:hover {
-    background: linear-gradient(135deg, #ec7063 0%, #d5534d 100%);
-    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+    background: linear-gradient(135deg, #6d0000 0%, #8a0000 100%);
+    box-shadow: 0 6px 20px rgba(84, 0, 0, 0.4);
 }
 
-/* Visible button - Green theme */
+/* Hide/Visible button - Complementary orange theme */
 .admin-btn.visible-btn {
-    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+    background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
+    box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
 }
 
 .admin-btn.visible-btn:hover {
-    background: linear-gradient(135deg, #58d68d 0%, #52c882 100%);
-    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4);
 }
 
 .admin-btn.pending {
