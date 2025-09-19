@@ -706,93 +706,72 @@
 
 /* Content Edit Modal Button Styles */
 .save-edit-btn {
-    background: linear-gradient(135deg, #540000 0%, #6d0000 50%, #540000 100%);
+    background: linear-gradient(135deg, #540000 0%, #8B0000 50%, #540000 100%);
     color: white;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    padding: 14px 28px;
-    border-radius: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.9rem 2rem;
+    border-radius: 14px;
     font-family: 'Poppins', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 6px 20px rgba(84, 0, 0, 0.3);
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    flex: 1;
+    max-width: 250px;
+    height: 48px;
     position: relative;
     overflow: hidden;
-}
-
-.save-edit-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s ease;
-}
-
-.save-edit-btn:hover::before {
-    left: 100%;
+    backdrop-filter: blur(10px);
+    box-shadow: 
+        0 6px 24px rgba(84, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.3px;
+    min-width: 140px;
 }
 
 .save-edit-btn:hover {
-    background: linear-gradient(135deg, #6d0000 0%, #8a0000 50%, #6d0000 100%);
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(84, 0, 0, 0.4);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: linear-gradient(135deg, #6B0000 0%, #A00000 50%, #6B0000 100%);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+        0 16px 40px rgba(84, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .save-edit-btn:active {
-    transform: translateY(0) scale(1);
-    transition: all 0.1s ease;
+    transform: translateY(-2px) scale(0.98);
 }
 
 .cancel-edit-btn {
-    background: linear-gradient(135deg, #7a0000 0%, #9d0000 50%, #7a0000 100%);
+    background: rgba(255, 255, 255, 0.05);
     color: white;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    padding: 14px 28px;
-    border-radius: 25px;
+    backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    padding: 0.9rem 2rem;
+    border-radius: 14px;
     font-family: 'Poppins', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 6px 20px rgba(122, 0, 0, 0.3);
-}
-
-.cancel-edit-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s ease;
-}
-
-.cancel-edit-btn:hover::before {
-    left: 100%;
+    letter-spacing: 0.3px;
+    min-width: 140px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    white-space: nowrap;
 }
 
 .cancel-edit-btn:hover {
-    background: linear-gradient(135deg, #9d0000 0%, #b30000 50%, #9d0000 100%);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(122, 0, 0, 0.4);
-}
-
-.cancel-edit-btn:active {
-    transform: translateY(0) scale(1);
-    transition: all 0.1s ease;
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
 }
 
 .edit-modal-actions {
@@ -840,16 +819,15 @@
 
 /* Contact Edit Modal Styles */
 .contact-edit-modal {
-    background: linear-gradient(135deg, #540000 0%, #3d0000 100%);
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
     border-radius: 20px;
     padding: 0;
     width: 90%;
     max-width: 900px;
     max-height: 90vh;
-    box-shadow: 
-        0 25px 80px rgba(0, 0, 0, 0.7),
-        0 0 0 1px rgba(255, 255, 255, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
     transform: scale(0.8) translateY(50px);
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     overflow: hidden;
@@ -886,10 +864,11 @@
 }
 
 .form-section {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    padding: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
 }
 
 .form-section.full-width {
@@ -950,23 +929,25 @@
 .form-group input,
 .form-group textarea {
     width: 100%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
     padding: 12px 16px;
     color: white;
     font-family: 'Poppins', sans-serif;
     font-size: 14px;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-sizing: border-box;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #ff6b6b;
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+    border-color: rgba(84, 0, 0, 0.6);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 3px rgba(84, 0, 0, 0.1), 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
 }
 
 .form-group input::placeholder,
@@ -1075,16 +1056,15 @@
 
 /* About Edit Modal Styles */
 .about-edit-modal {
-    background: linear-gradient(135deg, #540000 0%, #3d0000 100%);
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
     border-radius: 20px;
     padding: 0;
     width: 95%;
     max-width: 800px;
     max-height: 90vh;
-    box-shadow: 
-        0 25px 80px rgba(0, 0, 0, 0.7),
-        0 0 0 1px rgba(255, 255, 255, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
     transform: scale(0.8) translateY(50px);
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     overflow: hidden;
@@ -1108,10 +1088,11 @@
 }
 
 .about-form-grid .form-section {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 15px;
     padding: 25px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
 }
 
 .about-form-grid .form-section h4 {
@@ -1149,25 +1130,27 @@
 
 .about-form-grid .form-group textarea {
     width: 100%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
     padding: 12px 16px;
     color: white;
     font-family: 'Poppins', sans-serif;
     font-size: 14px;
     line-height: 1.6;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-sizing: border-box;
     resize: vertical;
     min-height: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .about-form-grid .form-group textarea:focus {
     outline: none;
-    border-color: #ff6b6b;
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+    border-color: rgba(84, 0, 0, 0.6);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 3px rgba(84, 0, 0, 0.1), 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
 }
 
 .about-form-grid .form-group textarea::placeholder {
@@ -1270,6 +1253,160 @@
 #editTextarea::placeholder {
     color: rgba(255, 255, 255, 0.5);
     font-style: italic;
+}
+
+/* Main Content Edit Modal Styles */
+.main-content-edit-modal {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 0;
+    width: 90%;
+    max-width: 700px;
+    max-height: 85vh;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    transform: scale(0.8) translateY(50px);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    overflow: hidden;
+}
+
+.edit-modal-overlay.active .main-content-edit-modal {
+    transform: scale(1) translateY(0);
+}
+
+.main-content-edit-content {
+    padding: 30px;
+    overflow-y: auto;
+    max-height: calc(85vh - 80px);
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.instruction-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.instruction-card i {
+    color: #FFD700;
+    font-size: 24px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.instruction-card h4 {
+    color: #FFD700;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    letter-spacing: 0.5px;
+}
+
+.instruction-card p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.editor-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.editor-section label {
+    color: #FFD700;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.main-content-edit-content #editTextarea {
+    width: 100%;
+    min-height: 300px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 20px;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    box-sizing: border-box;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.main-content-edit-content #editTextarea:focus {
+    outline: none;
+    border-color: rgba(84, 0, 0, 0.6);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 3px rgba(84, 0, 0, 0.1), 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.main-content-edit-content #editTextarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+}
+
+/* Responsive styles for main content modal */
+@media (max-width: 768px) {
+    .main-content-edit-modal {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .main-content-edit-content {
+        padding: 20px;
+        gap: 20px;
+    }
+    
+    .instruction-card {
+        padding: 15px;
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .main-content-edit-content #editTextarea {
+        min-height: 250px;
+        padding: 15px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content-edit-modal {
+        width: 98%;
+        margin: 10px;
+    }
+    
+    .main-content-edit-content {
+        padding: 15px;
+    }
+    
+    .instruction-card {
+        padding: 12px;
+    }
+    
+    .main-content-edit-content #editTextarea {
+        min-height: 200px;
+        padding: 12px;
+    }
 }
 
 /* Responsive button styles */

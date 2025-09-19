@@ -65,6 +65,11 @@ function addEditButtons() {
     editableContents.forEach(content => {
         const contentType = content.id.replace('Content', '');
         
+        // Skip adding edit button for mainContent (Home page)
+        if (content.id === 'mainContent') {
+            return;
+        }
+        
         // Create edit button
         const editButton = document.createElement('button');
         editButton.className = 'edit-content-btn admin-only';
@@ -98,22 +103,37 @@ function openEditModal(contentType) {
     } else if (contentType === 'about') {
         modalHTML = createAboutEditModal();
     } else {
-        // Default modal for other content types
+        // Default modal for other content types - User-friendly version
         modalHTML = `
             <div class="edit-modal-overlay active" id="editModalOverlay">
-                <div class="edit-modal">
+                <div class="main-content-edit-modal">
                     <div class="edit-modal-header">
-                        <h3>Edit ${contentType.charAt(0).toUpperCase() + contentType.slice(1)} Content</h3>
+                        <h3><i class="fas fa-edit"></i> Edit Main Content</h3>
                         <button class="close-edit-modal" onclick="closeEditModal()">&times;</button>
                     </div>
-                    <div class="edit-modal-content">
+                    <div class="main-content-edit-content">
                         <div class="edit-instructions">
-                            <p><strong>Note:</strong> You can edit HTML directly. Be careful with the structure to maintain proper formatting.</p>
+                            <div class="instruction-card">
+                                <i class="fas fa-info-circle"></i>
+                                <div>
+                                    <h4>Content Editor</h4>
+                                    <p>Edit your content below. You can use HTML tags for formatting or write plain text.</p>
+                                </div>
+                            </div>
                         </div>
-                        <textarea id="editTextarea" placeholder="Enter HTML content here..." rows="15">${getContentForEdit(contentType)}</textarea>
+                        
+                        <div class="editor-section">
+                            <label for="editTextarea">Content</label>
+                            <textarea id="editTextarea" placeholder="Enter your content here. You can use HTML tags like &lt;p&gt;, &lt;h1&gt;, &lt;strong&gt;, etc. for formatting..." rows="12">${getContentForEdit(contentType)}</textarea>
+                        </div>
+                        
                         <div class="edit-modal-actions">
-                            <button class="save-edit-btn" onclick="saveEditedContent()">Save Changes</button>
-                            <button class="cancel-edit-btn" onclick="closeEditModal()">Cancel</button>
+                            <button class="save-edit-btn" onclick="saveEditedContent()">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <button class="cancel-edit-btn" onclick="closeEditModal()">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
                         </div>
                     </div>
                 </div>

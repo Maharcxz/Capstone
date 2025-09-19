@@ -318,6 +318,7 @@
     .modal-title {
         font-size: 20px;
         letter-spacing: 2px;
+        text-align: center;
     }
     
     .login-input {

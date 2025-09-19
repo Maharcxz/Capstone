@@ -9,6 +9,9 @@ let currentCategory = 'all';
 
 // Initialize dashboard when page loads
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Admin dashboard initializing...');
+    console.log('Initial sidebarCategories:', sidebarCategories);
+    
     // Check if user is admin
     checkAdminAccess();
     
@@ -28,9 +31,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize sidebar categories
     loadSidebarCategories();
+    console.log('After loading sidebarCategories:', sidebarCategories);
     
     // Set up sidebar management
     setupSidebarManagement();
+    
+    console.log('Admin dashboard initialized');
 });
 
 // Check if user has admin access
@@ -378,6 +384,55 @@ function loadSidebarCategories() {
     const saved = localStorage.getItem('sidebarCategories');
     sidebarCategories = saved ? JSON.parse(saved) : [];
     renderSidebar();
+    populateCategoryDropdowns();
+}
+
+// Populate category dropdowns with available categories
+function populateCategoryDropdowns() {
+    const categoryFilter = document.getElementById('categoryFilter');
+    const productCategory = document.getElementById('productCategory');
+    
+    if (categoryFilter) {
+        // Clear existing options except the first one (All Categories)
+        while (categoryFilter.children.length > 1) {
+            categoryFilter.removeChild(categoryFilter.lastChild);
+        }
+        
+        // Add sidebar categories to filter dropdown
+        sidebarCategories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.name;
+            option.textContent = category.name;
+            categoryFilter.appendChild(option);
+        });
+    }
+    
+    if (productCategory) {
+        // Store current value
+        const currentValue = productCategory.value;
+        
+        // Clear existing options
+        productCategory.innerHTML = '';
+        
+        // Add default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Select Category';
+        productCategory.appendChild(defaultOption);
+        
+        // Add sidebar categories to product form dropdown
+        sidebarCategories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.name;
+            option.textContent = category.name;
+            productCategory.appendChild(option);
+        });
+        
+        // Restore previous value if it still exists
+        if (currentValue) {
+            productCategory.value = currentValue;
+        }
+    }
 }
 
 // Save sidebar categories to localStorage
@@ -393,15 +448,56 @@ function setupSidebarManagement() {
     // Close modal button
     document.getElementById('closeSidebarManagerBtn').addEventListener('click', closeSidebarManagerModal);
     
-    // Add category form
-    document.getElementById('addCategoryForm').addEventListener('submit', handleAddCategory);
-    
     // Close modal when clicking outside
     document.getElementById('sidebarManagerModal').addEventListener('click', function(event) {
         if (event.target === this) {
             closeSidebarManagerModal();
         }
     });
+}
+
+// Add category from form (called by button click)
+function addCategoryFromForm() {
+    console.log('addCategoryFromForm called');
+    const categoryNameInput = document.getElementById('categoryName');
+    const categoryName = categoryNameInput.value.trim();
+    console.log('Category name from input:', categoryName);
+    
+    if (!categoryName) {
+        alert('Please enter a category name');
+        return;
+    }
+    
+    // Check if category already exists
+    const exists = sidebarCategories.some(cat => 
+        cat.name.toLowerCase() === categoryName.toLowerCase()
+    );
+    
+    if (exists) {
+        alert('Category already exists');
+        return;
+    }
+    
+    // Add new category
+    const newCategory = {
+        id: generateCategoryId(categoryName),
+        name: categoryName,
+        icon: '🏷️',
+        createdAt: new Date().toISOString()
+    };
+    
+    sidebarCategories.push(newCategory);
+    console.log('Categories after push:', sidebarCategories);
+    saveSidebarCategories();
+    console.log('Categories saved to localStorage');
+    renderSidebar();
+    renderExistingCategories();
+    populateCategoryDropdowns();
+    
+    // Clear input
+    categoryNameInput.value = '';
+    
+    showNotification(`Category "${categoryName}" added successfully!`, 'success');
 }
 
 // Render sidebar with categories
@@ -463,9 +559,11 @@ function closeSidebarManagerModal() {
 // Handle add category form submission
 function handleAddCategory(event) {
     event.preventDefault();
+    console.log('handleAddCategory called');
     
     const formData = new FormData(event.target);
     const categoryName = formData.get('categoryName').trim();
+    console.log('Category name:', categoryName);
     
     if (!categoryName) {
         alert('Please enter a category name');
@@ -491,9 +589,12 @@ function handleAddCategory(event) {
     };
     
     sidebarCategories.push(newCategory);
+    console.log('Categories after push:', sidebarCategories);
     saveSidebarCategories();
+    console.log('Categories saved to localStorage');
     renderSidebar();
     renderExistingCategories();
+    populateCategoryDropdowns(); // Refresh dropdowns with new category
     
     // Reset form
     event.target.reset();
@@ -511,10 +612,13 @@ function generateCategoryId(name) {
 
 // Render existing categories in modal
 function renderExistingCategories() {
+    console.log('renderExistingCategories called, categories:', sidebarCategories);
     const container = document.getElementById('existingCategories');
+    console.log('Container element:', container);
     
     if (sidebarCategories.length === 0) {
         container.innerHTML = '<div class="empty-categories">No categories created yet</div>';
+        console.log('No categories, showing empty message');
         return;
     }
     
@@ -568,6 +672,7 @@ function deleteCategory(categoryId) {
         }
         
         renderExistingCategories();
+        populateCategoryDropdowns(); // Refresh dropdowns after deletion
         showNotification(`Category "${category.name}" deleted successfully!`, 'success');
     }
 }
@@ -579,3 +684,4 @@ window.deleteProduct = deleteProduct;
 window.toggleProductVisibility = toggleProductVisibility;
 window.closeProductModal = closeProductModal;
 window.filterProducts = filterProducts;
+window.addCategoryFromForm = addCategoryFromForm;
