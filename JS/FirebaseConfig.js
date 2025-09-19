@@ -25,6 +25,9 @@ let isAdminMode = false;
 // Reference to pre-orders collection in the database
 const preOrdersRef = db.ref('preOrders');
 
+// Reference to products collection in the database
+const productsRef = db.ref('products');
+
 // Function to save pre-order to Firebase
 function savePreOrderToFirebase(preOrder) {
     return preOrdersRef.push(preOrder);
@@ -50,6 +53,55 @@ function listenForNewPreOrders(callback) {
         const preOrder = snapshot.val();
         preOrder.id = snapshot.key;
         callback(preOrder);
+    });
+}
+
+// Product Management Functions
+function saveProductToFirebase(product) {
+    if (product.id) {
+        // Update existing product
+        return productsRef.child(product.id).set(product);
+    } else {
+        // Create new product
+        return productsRef.push(product);
+    }
+}
+
+async function getAllProducts() {
+    const snapshot = await productsRef.once('value');
+    const products = [];
+    
+    snapshot.forEach(childSnapshot => {
+        const product = childSnapshot.val();
+        product.id = childSnapshot.key;
+        products.push(product);
+    });
+    
+    return products;
+}
+
+async function getProductById(productId) {
+    const snapshot = await productsRef.child(productId).once('value');
+    const product = snapshot.val();
+    if (product) {
+        product.id = productId;
+    }
+    return product;
+}
+
+function deleteProductFromFirebase(productId) {
+    return productsRef.child(productId).remove();
+}
+
+function listenForProductChanges(callback) {
+    productsRef.on('value', snapshot => {
+        const products = [];
+        snapshot.forEach(childSnapshot => {
+            const product = childSnapshot.val();
+            product.id = childSnapshot.key;
+            products.push(product);
+        });
+        callback(products);
     });
 }
 
@@ -89,10 +141,16 @@ window.firebaseServices = {
     auth,
     db,
     preOrdersRef,
+    productsRef,
     savePreOrderToFirebase,
     getAllPreOrders,
     listenForNewPreOrders,
     stopListeningForNewPreOrders,
+    saveProductToFirebase,
+    getAllProducts,
+    getProductById,
+    deleteProductFromFirebase,
+    listenForProductChanges,
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged

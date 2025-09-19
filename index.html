@@ -43,6 +43,7 @@
     <script defer src="JS/PassToggleFunc.js"></script>
     <script defer src="JS/SeachFunc.js"></script>
     <script defer src="JS/SidebarFunc.js"></script>
+    <script defer src="JS/ProductLoader.js"></script>
 </head>
 <body>
     <div class="container">
@@ -67,10 +68,13 @@
                     <a href="preorders.html" class="nav-link admin-only" id="preOrdersNav" style="display: none;">
                         <span>Pre-Orders</span>
                     </a>
+                    <a href="admin-dashboard.html" class="nav-link admin-only" id="productManagementNav" style="display: none;">
+                        <span>Product Management</span>
+                    </a>
                 </div>
                 <div class="nav-right">
                     <div class="nav-icons">
-                        <div class="notification-wrapper">
+                        <div class="notification-wrapper admin-only" style="display: none;">
                             <span class="notification-icon" onclick="toggleNotifications()">🔔</span>
                             <span class="notification-badge" id="notificationBadge">0</span>
                         </div>
@@ -89,6 +93,7 @@
                                 </span>
                                 <span>Pre-Orders</span>
                             </button>
+
                             <button class="dropdown-item" onclick="toggleContentManagement()">
                                 <span class="dropdown-icon">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -250,177 +255,12 @@
         <div class="main-content" id="mainContent">
             <!-- Product Grid -->
             <main class="product-grid">
-            <div class="product-card">
-                <div class="product-image">
-                    <div class="image-placeholder">🖼</div>
+                <!-- Products will be loaded dynamically by ProductLoader.js -->
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: rgba(255, 255, 255, 0.7);">
+                    <h3 style="font-size: 24px; margin-bottom: 15px;">Loading products...</h3>
+                    <p style="font-size: 16px;">Please wait while we load the latest eyewear collection.</p>
                 </div>
-                <div class="product-info">
-                    <h3 class="product-title">Titanium Slim Frame</h3>
-                    <p class="product-price">₱ 2,499</p>
-                    <div class="product-buttons">
-                        <button class="virtual-try-btn">Virtual Try - On</button>
-                        <button class="virtual-try-btn preorder-btn guest-only" onclick="window.location.href='preorder.html'">Pre-Order</button>
-                    </div>
-                    <div class="admin-buttons" style="display: none;">
-                        <button class="admin-btn edit-btn" onclick="openFrameEditModal(this)">Edit</button>
-                        <button class="admin-btn delete-btn">Delete</button>
-                        <button class="admin-btn visible-btn">Visible</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <div class="image-placeholder">🖼</div>
-                </div>
-                <div class="product-info">
-                    <h3 class="product-title">Titanium Slim Frame</h3>
-                    <p class="product-price">₱ 2,499</p>
-                    <div class="product-buttons">
-                        <button class="virtual-try-btn">Virtual Try - On</button>
-                        <button class="virtual-try-btn preorder-btn guest-only" onclick="window.location.href='preorder.html'">Pre-Order</button>
-                    </div>
-                    <div class="admin-buttons" style="display: none;">
-                        <button class="admin-btn edit-btn" onclick="openFrameEditModal(this)">Edit</button>
-                        <button class="admin-btn delete-btn">Delete</button>
-                        <button class="admin-btn visible-btn">Visible</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <div class="image-placeholder">🖼</div>
-                </div>
-                <div class="product-info">
-                    <h3 class="product-title">Titanium Slim Frame</h3>
-                    <p class="product-price">₱ 2,499</p>
-                    <div class="product-buttons">
-                        <button class="virtual-try-btn">Virtual Try - On</button>
-                        <button class="virtual-try-btn preorder-btn guest-only" onclick="window.location.href='preorder.html'">Pre-Order</button>
-                    </div>
-                    <div class="admin-buttons" style="display: none;">
-                        <button class="admin-btn edit-btn" onclick="openFrameEditModal(this)">Edit</button>
-                        <button class="admin-btn delete-btn">Delete</button>
-                        <button class="admin-btn visible-btn">Visible</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <div class="image-placeholder">🖼</div>
-                </div>
-                <div class="product-info">
-                    <h3 class="product-title">Titanium Slim Frame</h3>
-                    <p class="product-price">₱ 2,499</p>
-                    <div class="product-buttons">
-                        <button class="virtual-try-btn">Virtual Try - On</button>
-                        <button class="virtual-try-btn preorder-btn guest-only" onclick="window.location.href='preorder.html'">Pre-Order</button>
-                    </div>
-                    <div class="admin-buttons" style="display: none;">
-                        <button class="admin-btn edit-btn" onclick="openFrameEditModal(this)">Edit</button>
-                        <button class="admin-btn delete-btn">Delete</button>
-                        <button class="admin-btn visible-btn">Visible</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <div class="image-placeholder">🖼</div>
-                </div>
-                <div class="product-info">
-                    <h3 class="product-title">Titanium Slim Frame</h3>
-                    <p class="product-price">₱ 2,499</p>
-                    <div class="product-buttons">
-                        <button class="virtual-try-btn">Virtual Try - On</button>
-                        <button class="virtual-try-btn preorder-btn guest-only" onclick="window.location.href='preorder.html'">Pre-Order</button>
-                    </div>
-                    <div class="admin-buttons" style="display: none;">
-                        <button class="admin-btn edit-btn" onclick="openFrameEditModal(this)">Edit</button>
-                        <button class="admin-btn delete-btn">Delete</button>
-                        <button class="admin-btn visible-btn">Visible</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <div class="image-placeholder">🖼</div>
-                </div>
-                <div class="product-info">
-                    <h3 class="product-title">Titanium Slim Frame</h3>
-                    <p class="product-price">₱ 2,499</p>
-                    <div class="product-buttons">
-                        <button class="virtual-try-btn">Virtual Try - On</button>
-                        <button class="virtual-try-btn preorder-btn guest-only" onclick="window.location.href='preorder.html'">Pre-Order</button>
-                    </div>
-                    <div class="admin-buttons" style="display: none;">
-                        <button class="admin-btn edit-btn" onclick="openFrameEditModal(this)">Edit</button>
-                        <button class="admin-btn delete-btn">Delete</button>
-                        <button class="admin-btn visible-btn">Visible</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <div class="image-placeholder">🖼</div>
-                </div>
-                <div class="product-info">
-                    <h3 class="product-title">Titanium Slim Frame</h3>
-                    <p class="product-price">₱ 2,499</p>
-                    <div class="product-buttons">
-                        <button class="virtual-try-btn">Virtual Try - On</button>
-                        <button class="virtual-try-btn preorder-btn" onclick="window.location.href='preorder.html'">Pre-Order</button>
-                    </div>
-                    <div class="admin-buttons" style="display: none;">
-                        <button class="admin-btn edit-btn">Edit</button>
-                        <button class="admin-btn delete-btn">Delete</button>
-                        <button class="admin-btn visible-btn">Visible</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <div class="image-placeholder">🖼</div>
-                </div>
-                <div class="product-info">
-                    <h3 class="product-title">Titanium Slim Frame</h3>
-                    <p class="product-price">₱ 2,499</p>
-                    <div class="product-buttons">
-                        <button class="virtual-try-btn">Virtual Try - On</button>
-                        <button class="virtual-try-btn preorder-btn" onclick="window.location.href='preorder.html'">Pre-Order</button>
-                    </div>
-                    <div class="admin-buttons" style="display: none;">
-                        <button class="admin-btn edit-btn">Edit</button>
-                        <button class="admin-btn delete-btn">Delete</button>
-                        <button class="admin-btn visible-btn">Visible</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <div class="image-placeholder">🖼</div>
-                </div>
-                <div class="product-info">
-                    <h3 class="product-title">Titanium Slim Frame</h3>
-                    <p class="product-price">₱ 2,499</p>
-                    <div class="product-buttons">
-                        <button class="virtual-try-btn">Virtual Try - On</button>
-                        <button class="virtual-try-btn preorder-btn" onclick="window.location.href='preorder.html'">Pre-Order</button>
-                    </div>
-                    <div class="admin-buttons" style="display: none;">
-                        <button class="admin-btn edit-btn">Edit</button>
-                        <button class="admin-btn delete-btn">Delete</button>
-                        <button class="admin-btn visible-btn">Visible</button>
-                    </div>
-                </div>
-            </div>
-        </main>
+            </main>
         </div> <!-- End main-content -->
     </div>
 

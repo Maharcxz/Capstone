@@ -126,6 +126,16 @@ function navigateToPreorders() {
     }
 }
 
+function navigateToProductManagement() {
+    try {
+        window.location.href = 'admin-dashboard.html';
+    } catch (error) {
+        console.error('Navigation error:', error);
+        // Fallback navigation method
+        window.location.replace('admin-dashboard.html');
+    }
+}
+
 // Admin functions for future expansion
 function enableAdminMode() {
     switchToAdminMode();

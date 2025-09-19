@@ -6,6 +6,49 @@
     align-items: center;
 }
 
+/* Pre-order Notification Styles */
+.preorder-notification-wrapper {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
+}
+
+.preorder-bell-icon {
+    color: #d4af37;
+    transition: transform 0.2s ease, color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.preorder-bell-icon:hover {
+    transform: scale(1.1);
+    color: #f4d03f;
+}
+
+.preorder-notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    border: 2px solid #2c3e50;
+}
+
+.preorder-notification-badge.hidden {
+    display: none;
+}
+
 .notification-icon {
     font-size: 18px;
     transition: transform 0.2s ease, opacity 0.2s ease;

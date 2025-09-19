@@ -106,8 +106,12 @@ function logoutFromFirebase() {
 function switchToAdminMode() {
     console.log('Switching to admin mode...');
     isAdminMode = true;
+    
+    // Set localStorage flag for admin dashboard access
+    localStorage.setItem('isAdminLoggedIn', 'true');
     const authButton = document.getElementById('authButtonText');
     const preOrdersNav = document.getElementById('preOrdersNav');
+    const productManagementNav = document.getElementById('productManagementNav');
     const adminButtons = document.querySelectorAll('.admin-buttons');
     const editButtons = document.querySelectorAll('.edit-content-btn');
     
@@ -118,6 +122,7 @@ function switchToAdminMode() {
     }
     
     if (preOrdersNav) preOrdersNav.style.display = 'block';
+    if (productManagementNav) productManagementNav.style.display = 'block';
     
     // Add admin-mode class to body to show admin-only elements
     if (document.body) {
@@ -144,11 +149,13 @@ function switchToGuestMode() {
     isAdminMode = false;
     const authButton = document.getElementById('authButtonText');
     const preOrdersNav = document.getElementById('preOrdersNav');
+    const productManagementNav = document.getElementById('productManagementNav');
     const adminButtons = document.querySelectorAll('.admin-buttons');
     const editButtons = document.querySelectorAll('.edit-content-btn');
     
     if (authButton) authButton.textContent = 'Log In';
     if (preOrdersNav) preOrdersNav.style.display = 'none';
+    if (productManagementNav) productManagementNav.style.display = 'none';
     
     // Remove admin-mode class to show guest-only elements
     document.body.classList.remove('admin-mode');
@@ -174,6 +181,7 @@ function setGuestMode() {
     isAdminMode = false;
     const authButton = document.getElementById('authButtonText');
     const preOrdersNav = document.getElementById('preOrdersNav');
+    const productManagementNav = document.getElementById('productManagementNav');
     const adminButtons = document.querySelectorAll('.admin-buttons');
     const editButtons = document.querySelectorAll('.edit-content-btn');
     

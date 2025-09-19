@@ -7,6 +7,40 @@ function toggleNotifications() {
     }
 }
 
+// Pre-order notifications functionality
+function togglePreorderNotifications() {
+    // Navigate to pre-orders page to view new orders
+    window.location.href = 'preorders.html';
+}
+
+function updatePreorderNotificationBadge() {
+    const badge = document.getElementById('preorderNotificationBadge');
+    
+    // Get count from Firebase
+    firebaseServices.getAllPreOrders()
+        .then(preOrders => {
+            // Filter for new/unread pre-orders (you can add a 'read' status later)
+            const newPreOrders = preOrders.filter(order => !order.read);
+            const count = newPreOrders.length;
+            
+            if (badge) {
+                badge.textContent = count;
+                if (count === 0) {
+                    badge.classList.add('hidden');
+                } else {
+                    badge.classList.remove('hidden');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error getting pre-orders count:', error);
+            if (badge) {
+                badge.textContent = '0';
+                badge.classList.add('hidden');
+            }
+        });
+}
+
 function hideNotifications() {
     const panel = document.getElementById('notificationsPanel');
     if (panel) {
