@@ -90,6 +90,12 @@ function renderProducts() {
     productsGrid.innerHTML = filteredProducts.map(product => `
         <div class="admin-product-card" data-product-id="${product.id}">
             <div class="product-status ${product.visible ? 'status-visible' : 'status-hidden'}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    ${product.visible ? 
+                        '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>' :
+                        '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>'
+                    }
+                </svg>
                 ${product.visible ? 'Visible' : 'Hidden'}
             </div>
             
@@ -102,7 +108,14 @@ function renderProducts() {
                     if (primaryImage) {
                         return `<img src="${primaryImage}" alt="${product.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                 <div class="image-placeholder-admin" style="display: none;">🖼</div>
-                                ${imageCount > 1 ? `<div class="image-count-badge">${imageCount} images</div>` : ''}`;
+                                ${imageCount > 1 ? `<div class="image-count-badge">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <polyline points="21,15 16,10 5,21"></polyline>
+                                    </svg>
+                                    ${imageCount} images
+                                </div>` : ''}`;
                     } else {
                         return `<div class="image-placeholder-admin">🖼</div>`;
                     }

@@ -301,13 +301,17 @@
 /* Product Status */
 .product-status {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: 8px;
+    right: 8px;
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 }
 
 .status-visible {
@@ -1299,7 +1303,7 @@
 .image-count-badge {
     position: absolute;
     top: 8px;
-    right: 8px;
+    left: 8px;
     background: rgba(84, 0, 0, 0.9);
     color: white;
     font-size: 11px;
@@ -1309,4 +1313,8 @@
     backdrop-filter: blur(4px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 }
