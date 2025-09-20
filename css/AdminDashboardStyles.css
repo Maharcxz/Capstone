@@ -482,7 +482,7 @@
     margin: 0;
     border-radius: 0;
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
 }
 
@@ -493,6 +493,27 @@
     margin: 0;
     text-align: left;
     font-family: 'Poppins', sans-serif;
+}
+
+.product-modal .close-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    line-height: 1;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-modal .close-btn:hover {
+    color: white;
 }
 
 .modal-content {
@@ -779,7 +800,7 @@
 }
 
 #sidebarManagerModal .modal-header {
-    background: #540000;
+    background: linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%);
     color: white;
     padding: 20px;
     border-radius: 12px 12px 0 0;

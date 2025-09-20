@@ -442,18 +442,38 @@ function saveSidebarCategories() {
 
 // Setup sidebar management event listeners
 function setupSidebarManagement() {
+    console.log('Setting up sidebar management event listeners...');
+    
     // Manage Categories button
-    document.getElementById('manageCategoriesBtn').addEventListener('click', openSidebarManagerModal);
+    const manageCategoriesBtn = document.getElementById('manageCategoriesBtn');
+    if (manageCategoriesBtn) {
+        manageCategoriesBtn.addEventListener('click', openSidebarManagerModal);
+        console.log('Manage Categories button event listener added');
+    } else {
+        console.error('manageCategoriesBtn not found');
+    }
     
     // Close modal button
-    document.getElementById('closeSidebarManagerBtn').addEventListener('click', closeSidebarManagerModal);
+    const closeSidebarManagerBtn = document.getElementById('closeSidebarManagerBtn');
+    if (closeSidebarManagerBtn) {
+        closeSidebarManagerBtn.addEventListener('click', closeSidebarManagerModal);
+        console.log('Close sidebar manager button event listener added');
+    } else {
+        console.error('closeSidebarManagerBtn not found');
+    }
     
     // Close modal when clicking outside
-    document.getElementById('sidebarManagerModal').addEventListener('click', function(event) {
-        if (event.target === this) {
-            closeSidebarManagerModal();
-        }
-    });
+    const sidebarManagerModal = document.getElementById('sidebarManagerModal');
+    if (sidebarManagerModal) {
+        sidebarManagerModal.addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeSidebarManagerModal();
+            }
+        });
+        console.log('Modal outside click event listener added');
+    } else {
+        console.error('sidebarManagerModal not found');
+    }
 }
 
 // Add category from form (called by button click)
@@ -552,8 +572,22 @@ function openSidebarManagerModal() {
 
 // Close sidebar manager modal
 function closeSidebarManagerModal() {
-    document.getElementById('sidebarManagerModal').style.display = 'none';
-    document.getElementById('addCategoryForm').reset();
+    console.log('closeSidebarManagerModal called');
+    const modal = document.getElementById('sidebarManagerModal');
+    const form = document.getElementById('addCategoryForm');
+    
+    if (modal) {
+        modal.style.display = 'none';
+        console.log('Modal closed successfully');
+    } else {
+        console.error('Modal element not found');
+    }
+    
+    if (form) {
+        form.reset();
+    } else {
+        console.error('Form element not found');
+    }
 }
 
 // Handle add category form submission
@@ -685,3 +719,5 @@ window.toggleProductVisibility = toggleProductVisibility;
 window.closeProductModal = closeProductModal;
 window.filterProducts = filterProducts;
 window.addCategoryFromForm = addCategoryFromForm;
+window.openSidebarManagerModal = openSidebarManagerModal;
+window.closeSidebarManagerModal = closeSidebarManagerModal;
