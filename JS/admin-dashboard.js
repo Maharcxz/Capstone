@@ -438,6 +438,18 @@ function populateCategoryDropdowns() {
 // Save sidebar categories to localStorage
 function saveSidebarCategories() {
     localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
+    
+    // Trigger a custom event to notify other windows/tabs about category changes
+    window.dispatchEvent(new CustomEvent('categoriesUpdated', {
+        detail: { categories: sidebarCategories }
+    }));
+    
+    // Also trigger storage event manually for same-window updates
+    window.dispatchEvent(new StorageEvent('storage', {
+        key: 'sidebarCategories',
+        newValue: JSON.stringify(sidebarCategories),
+        storageArea: localStorage
+    }));
 }
 
 // Setup sidebar management event listeners
