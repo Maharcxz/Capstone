@@ -238,18 +238,39 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="productImage">Image Upload</label>
-                    <input type="file" class="form-input file-input" id="productImage" accept="image/*">
-                    <small class="form-help-text">Upload an image file or provide a URL below</small>
-                    <input type="url" class="form-input" id="productImageUrl" placeholder="Or enter image URL: https://example.com/image.jpg" style="margin-top: 8px;">
-                </div>
-
-                <div class="form-group">
-                    <div class="form-checkbox-group">
-                        <input type="checkbox" class="form-checkbox" id="productVisible" checked>
-                        <label class="form-label checkbox-label" for="productVisible">Visible on Homepage</label>
+                    <label class="form-label">Product Images</label>
+                    
+                    <!-- Image Upload Options -->
+                    <div class="image-upload-section">
+                        <div class="upload-option">
+                            <label class="form-label" for="productImages">Upload Files (Multiple)</label>
+                            <input type="file" class="form-input file-input" id="productImages" accept="image/*" multiple>
+                            <small class="form-help-text">Select multiple image files</small>
+                        </div>
+                        
+                        <div class="upload-option">
+                            <label class="form-label" for="productImageUrl">Add Image URL</label>
+                            <div class="url-input-group">
+                                <input type="url" class="form-input" id="productImageUrl" placeholder="https://example.com/image.jpg">
+                                <button type="button" class="add-url-btn" onclick="addImageUrl()">Add URL</button>
+                            </div>
+                            <small class="form-help-text">Add images by URL one at a time</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Image Preview Area -->
+                    <div class="image-preview-container" id="imagePreviewContainer">
+                        <div class="preview-header">
+                            <span class="preview-title">Selected Images</span>
+                            <button type="button" class="clear-all-btn" onclick="clearAllImages()">Clear All</button>
+                        </div>
+                        <div class="image-preview-grid" id="imagePreviewGrid">
+                            <!-- Image previews will be added here -->
+                        </div>
                     </div>
                 </div>
+
+
             </form>
             
             <div class="modal-actions">

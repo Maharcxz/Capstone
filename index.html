@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="CSS/NotificationIconPanelStyles.css">
     <link rel="stylesheet" href="CSS/Pre-OrderStyles.css">
     <link rel="stylesheet" href="CSS/ProductGridStyles.css">
+    <link rel="stylesheet" href="CSS/ProductModals.css">
     <link rel="stylesheet" href="CSS/ResponsiveNotifStyles.css">
     <link rel="stylesheet" href="CSS/SidebarStyles.css">
     
@@ -231,6 +232,10 @@
         <!-- Frame Type Header -->
         <div class="frame-type-header">
             <h2 class="frame-type-title" id="frameTypeTitle">All Frames</h2>
+            <button class="add-new-product-btn admin-only" id="addNewProductBtn" onclick="openAddNewProductModal()" style="display: none;">
+                <span class="add-icon">+</span>
+                Add New
+            </button>
         </div>
 
         <!-- Sidebar Overlay -->
@@ -297,6 +302,93 @@
                     <button class="enable-preorder-btn">Enable Pre - Order</button>
                     <button class="save-frame-btn" onclick="saveFrameEdit()">Edit</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div id="productDetailModal" class="modal" style="display: none;">
+        <div class="modal-content product-detail-modal">
+            <div class="modal-header">
+                <h3>Product Details</h3>
+                <button class="close-modal" onclick="closeProductDetailModal()">&times;</button>
+            </div>
+            <div class="product-detail-content">
+                <div class="product-images-section">
+                    <div class="product-image-gallery">
+                        <div class="main-image-container">
+                            <img id="mainProductImage" src="" alt="Product Image" class="main-product-image">
+                        </div>
+                        <div class="thumbnail-container" id="thumbnailContainer">
+                            <!-- Thumbnails will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="product-info-section">
+                    <h2 id="productDetailTitle" class="product-detail-title"></h2>
+                    <p id="productDetailPrice" class="product-detail-price"></p>
+                    <div class="product-description">
+                        <h4>Description</h4>
+                        <p id="productDetailDescription"></p>
+                    </div>
+                    <div class="product-actions">
+                        <button class="virtual-try-btn">Virtual Try - On</button>
+                        <button class="preorder-btn" onclick="window.location.href='preorder.html'">Pre-Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add New Product Modal -->
+    <div id="addNewProductModal" class="modal" style="display: none;">
+        <div class="modal-content add-product-modal">
+            <div class="modal-header">
+                <h3>Add New Product</h3>
+                <button class="close-modal" onclick="closeAddNewProductModal()">&times;</button>
+            </div>
+            <div class="add-product-content">
+                <form id="addProductForm" class="product-form">
+                    <div class="form-group">
+                        <label for="newProductTitle">Product Title</label>
+                        <input type="text" id="newProductTitle" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newProductDescription">Description</label>
+                        <textarea id="newProductDescription" name="description" rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="newProductPrice">Price (₱)</label>
+                        <input type="number" id="newProductPrice" name="price" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newProductCategory">Category</label>
+                        <select id="newProductCategory" name="category">
+                            <option value="All Frames">All Frames</option>
+                            <option value="Classic">Classic</option>
+                            <option value="Modern">Modern</option>
+                            <option value="Vintage">Vintage</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="newProductImages">Product Images</label>
+                        <input type="file" id="newProductImages" name="images" multiple accept="image/*">
+                        <div id="newProductImagePreview" class="image-preview-container">
+                            <!-- Image previews will be shown here -->
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="newProductVisible" name="visible" checked>
+                            <span class="checkmark"></span>
+                            Make product visible
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" onclick="closeAddNewProductModal()">Cancel</button>
+                        <button type="submit" class="save-btn">Add Product</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

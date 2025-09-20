@@ -87,7 +87,7 @@ function renderProductGrid() {
     }
     
     productGrid.innerHTML = filteredProductsData.map(product => `
-        <div class="product-card">
+        <div class="product-card" onclick="openProductDetailModal('${product.id}')" style="cursor: pointer;">
             <div class="product-image">
                 ${product.image ? 
                     `<img src="${product.image}" alt="${escapeHtml(product.title)}" 
@@ -259,9 +259,164 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Product Detail Modal Functions
+function openProductDetailModal(productId) {
+    const product = allProductsData.find(p => p.id === productId);
+    if (!product) return;
+
+    // Populate modal with product data
+    document.getElementById('productDetailTitle').textContent = product.title;
+    document.getElementById('productDetailPrice').textContent = `₱ ${parseFloat(product.price).toLocaleString()}`;
+    document.getElementById('productDetailDescription').textContent = product.description || 'No description available.';
+
+    // Handle images
+    const mainImage = document.getElementById('mainProductImage');
+    const thumbnailContainer = document.getElementById('thumbnailContainer');
+    
+    if (product.images && product.images.length > 0) {
+        // Set main image
+        mainImage.src = product.images[0];
+        mainImage.alt = product.title;
+        
+        // Create thumbnails
+        thumbnailContainer.innerHTML = product.images.map((image, index) => `
+            <img src="${image}" alt="${product.title} ${index + 1}" 
+                 class="thumbnail-image ${index === 0 ? 'active' : ''}"
+                 onclick="setMainImage('${image}', ${index})">
+        `).join('');
+    } else if (product.image) {
+        // Fallback to single image
+        mainImage.src = product.image;
+        mainImage.alt = product.title;
+        thumbnailContainer.innerHTML = `
+            <img src="${product.image}" alt="${product.title}" 
+                 class="thumbnail-image active">
+        `;
+    } else {
+        // No image available
+        mainImage.src = '';
+        mainImage.alt = 'No image available';
+        thumbnailContainer.innerHTML = '<div class="no-image-placeholder">No images available</div>';
+    }
+
+    // Show modal
+    document.getElementById('productDetailModal').style.display = 'flex';
+}
+
+function setMainImage(imageSrc, index) {
+    document.getElementById('mainProductImage').src = imageSrc;
+    
+    // Update active thumbnail
+    document.querySelectorAll('.thumbnail-image').forEach((thumb, i) => {
+        thumb.classList.toggle('active', i === index);
+    });
+}
+
+function closeProductDetailModal() {
+    document.getElementById('productDetailModal').style.display = 'none';
+}
+
+// Add New Product Modal Functions
+function openAddNewProductModal() {
+    document.getElementById('addNewProductModal').style.display = 'flex';
+    document.getElementById('addProductForm').reset();
+    document.getElementById('newProductImagePreview').innerHTML = '';
+}
+
+function closeAddNewProductModal() {
+    document.getElementById('addNewProductModal').style.display = 'none';
+}
+
+// Handle new product form submission
+document.addEventListener('DOMContentLoaded', function() {
+    const addProductForm = document.getElementById('addProductForm');
+    if (addProductForm) {
+        addProductForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const productData = {
+                id: Date.now().toString(), // Simple ID generation
+                title: formData.get('title'),
+                description: formData.get('description'),
+                price: parseFloat(formData.get('price')),
+                category: formData.get('category'),
+                visible: formData.get('visible') === 'on',
+                images: []
+            };
+
+            // Handle image files
+            const imageFiles = document.getElementById('newProductImages').files;
+            if (imageFiles.length > 0) {
+                // In a real app, you'd upload these to a server
+                // For now, we'll create object URLs
+                for (let file of imageFiles) {
+                    productData.images.push(URL.createObjectURL(file));
+                }
+                productData.image = productData.images[0]; // Set first image as main
+            }
+
+            try {
+                // Add to local data
+                allProductsData.push(productData);
+                
+                // Save to localStorage as fallback
+                localStorage.setItem('products', JSON.stringify(allProductsData));
+                
+                // Refresh the grid
+                applyCurrentFilters();
+                
+                // Close modal and show success message
+                closeAddNewProductModal();
+                showHomepageNotification('Product added successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error adding product:', error);
+                showHomepageNotification('Error adding product. Please try again.', 'error');
+            }
+        });
+    }
+
+    // Handle image preview for new product
+    const newProductImages = document.getElementById('newProductImages');
+    if (newProductImages) {
+        newProductImages.addEventListener('change', function(e) {
+            const files = e.target.files;
+            const previewContainer = document.getElementById('newProductImagePreview');
+            previewContainer.innerHTML = '';
+
+            for (let file of files) {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imagePreview = document.createElement('div');
+                        imagePreview.className = 'image-preview-item';
+                        imagePreview.innerHTML = `
+                            <img src="${e.target.result}" alt="Preview">
+                            <button type="button" class="remove-image" onclick="removeImagePreview(this)">×</button>
+                        `;
+                        previewContainer.appendChild(imagePreview);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+    }
+});
+
+function removeImagePreview(button) {
+    button.parentElement.remove();
+}
+
 // Export functions for global access
 window.selectFrameCategory = selectFrameCategory;
 window.searchProducts = searchProducts;
 window.editProductFromHomepage = editProductFromHomepage;
 window.deleteProductFromHomepage = deleteProductFromHomepage;
 window.toggleProductVisibilityFromHomepage = toggleProductVisibilityFromHomepage;
+window.openProductDetailModal = openProductDetailModal;
+window.closeProductDetailModal = closeProductDetailModal;
+window.openAddNewProductModal = openAddNewProductModal;
+window.closeAddNewProductModal = closeAddNewProductModal;
+window.setMainImage = setMainImage;
+window.removeImagePreview = removeImagePreview;

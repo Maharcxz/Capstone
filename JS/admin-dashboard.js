@@ -29,6 +29,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set up form submission
     document.getElementById('productForm').addEventListener('submit', handleProductSubmit);
     
+    // Set up file upload event listener
+    document.getElementById('productImages').addEventListener('change', handleFileUpload);
+    
     // Initialize sidebar categories
     loadSidebarCategories();
     console.log('After loading sidebarCategories:', sidebarCategories);
@@ -91,11 +94,19 @@ function renderProducts() {
             </div>
             
             <div class="product-image-admin">
-                ${product.image ? 
-                    `<img src="${product.image}" alt="${product.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                     <div class="image-placeholder-admin" style="display: none;">🖼</div>` :
-                    `<div class="image-placeholder-admin">🖼</div>`
-                }
+                ${(() => {
+                    const images = product.images || (product.image ? [product.image] : []);
+                    const primaryImage = images[0];
+                    const imageCount = images.length;
+                    
+                    if (primaryImage) {
+                        return `<img src="${primaryImage}" alt="${product.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="image-placeholder-admin" style="display: none;">🖼</div>
+                                ${imageCount > 1 ? `<div class="image-count-badge">${imageCount} images</div>` : ''}`;
+                    } else {
+                        return `<div class="image-placeholder-admin">🖼</div>`;
+                    }
+                })()}
             </div>
             
             <div class="product-details">
@@ -162,7 +173,7 @@ function openAddProductModal() {
     editingProductId = null;
     document.getElementById('modalTitle').textContent = 'Add New Product';
     document.getElementById('productForm').reset();
-    document.getElementById('productVisible').checked = true;
+    clearAllImages(); // Clear any existing images
     document.getElementById('productModal').classList.add('active');
 }
 
@@ -184,10 +195,17 @@ async function editProduct(productId) {
         document.getElementById('productPrice').value = product.price;
         document.getElementById('productCategory').value = product.category;
         
-        // Handle image URL - populate the URL input field
-        const imageUrlInput = document.getElementById('productImageUrl');
-        if (imageUrlInput) {
-            imageUrlInput.value = product.image || '';
+        // Handle multiple images - load existing images into the preview
+        clearAllImages(); // Clear any existing images first
+        
+        if (product.images && Array.isArray(product.images)) {
+            // Load multiple images from array
+            product.images.forEach((imageUrl, index) => {
+                addImageToPreview(imageUrl, `Image ${index + 1}`);
+            });
+        } else if (product.image) {
+            // Backward compatibility - load single image
+            addImageToPreview(product.image, 'Primary Image');
         }
         
         // Clear the file input when editing
@@ -195,8 +213,6 @@ async function editProduct(productId) {
         if (imageFileInput) {
             imageFileInput.value = '';
         }
-        
-        document.getElementById('productVisible').checked = product.visible;
         
         document.getElementById('productModal').classList.add('active');
     } catch (error) {
@@ -209,23 +225,24 @@ async function editProduct(productId) {
 function closeProductModal() {
     document.getElementById('productModal').classList.remove('active');
     editingProductId = null;
+    clearAllImages(); // Clear images when closing modal
 }
 
 // Handle product form submission
 async function handleProductSubmit(event) {
     event.preventDefault();
     
-    // Get image URL from either the URL input or file input (for now, prioritize URL input)
-    const imageUrlInput = document.getElementById('productImageUrl');
-    const imageFileInput = document.getElementById('productImage');
-    let imageUrl = '';
+    // Get images from the productImages array
+    const images = productImages.map(img => img.src);
     
-    if (imageUrlInput && imageUrlInput.value.trim()) {
-        imageUrl = imageUrlInput.value.trim();
-    } else if (imageFileInput && imageFileInput.files && imageFileInput.files[0]) {
-        // For now, we'll show a message that file upload isn't implemented yet
-        // In a full implementation, you'd upload the file to Firebase Storage
-        showNotification('File upload not implemented yet. Please use image URL instead.', 'warning');
+    // Debug logging
+    console.log('Product Images Array:', productImages);
+    console.log('Extracted Images:', images);
+    console.log('Images Length:', images.length);
+    
+    // Validation - require at least one image
+    if (images.length === 0) {
+        showNotification('Please add at least one image', 'error');
         return;
     }
     
@@ -234,8 +251,9 @@ async function handleProductSubmit(event) {
         description: document.getElementById('productDescription').value.trim(),
         price: parseFloat(document.getElementById('productPrice').value),
         category: document.getElementById('productCategory').value,
-        image: imageUrl,
-        visible: document.getElementById('productVisible').checked,
+        images: images, // Store multiple images
+        image: images[0], // Keep first image for backward compatibility
+        visible: true, // Default to visible since we removed the checkbox
         updatedAt: new Date().toISOString()
     };
     
@@ -723,6 +741,103 @@ function deleteCategory(categoryId) {
     }
 }
 
+// Multiple Image Management Functions
+let productImages = [];
+
+function handleFileUpload(event) {
+    const files = event.target.files;
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                addImageToPreview(e.target.result, file.name);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    // Clear the input to allow re-uploading the same file
+    event.target.value = '';
+}
+
+function addImageUrl() {
+    const urlInput = document.getElementById('productImageUrl');
+    const url = urlInput.value.trim();
+    
+    if (url) {
+        // Validate URL format
+        try {
+            new URL(url);
+            addImageToPreview(url, 'URL Image');
+            urlInput.value = '';
+        } catch (e) {
+            showNotification('Please enter a valid URL', 'error');
+        }
+    }
+}
+
+function addImageToPreview(src, name) {
+    const imageId = Date.now() + Math.random();
+    const imageData = {
+        id: imageId,
+        src: src,
+        name: name
+    };
+    
+    productImages.push(imageData);
+    renderImagePreview();
+}
+
+function removeImage(imageId) {
+    productImages = productImages.filter(img => img.id !== imageId);
+    renderImagePreview();
+}
+
+function moveImageUp(imageId) {
+    const index = productImages.findIndex(img => img.id === imageId);
+    if (index > 0) {
+        [productImages[index], productImages[index - 1]] = [productImages[index - 1], productImages[index]];
+        renderImagePreview();
+    }
+}
+
+function moveImageDown(imageId) {
+    const index = productImages.findIndex(img => img.id === imageId);
+    if (index < productImages.length - 1) {
+        [productImages[index], productImages[index + 1]] = [productImages[index + 1], productImages[index]];
+        renderImagePreview();
+    }
+}
+
+function renderImagePreview() {
+    const container = document.getElementById('imagePreviewGrid');
+    
+    if (productImages.length === 0) {
+        container.innerHTML = '<p class="no-images">No images added yet</p>';
+        return;
+    }
+    
+    container.innerHTML = productImages.map((image, index) => `
+        <div class="image-preview-item" data-image-id="${image.id}">
+            <img src="${image.src}" alt="${image.name}" class="preview-image">
+            <div class="image-controls">
+                <span class="image-name">${image.name}</span>
+                <div class="image-actions">
+                    ${index > 0 ? `<button type="button" onclick="moveImageUp(${image.id})" class="btn-move" title="Move Up">↑</button>` : ''}
+                    ${index < productImages.length - 1 ? `<button type="button" onclick="moveImageDown(${image.id})" class="btn-move" title="Move Down">↓</button>` : ''}
+                    <button type="button" onclick="removeImage(${image.id})" class="btn-remove" title="Remove">×</button>
+                </div>
+            </div>
+            ${index === 0 ? '<span class="primary-badge">Primary</span>' : ''}
+        </div>
+    `).join('');
+}
+
+function clearAllImages() {
+    productImages = [];
+    renderImagePreview();
+}
+
 // Export functions for global access
 window.openAddProductModal = openAddProductModal;
 window.editProduct = editProduct;
@@ -733,3 +848,9 @@ window.filterProducts = filterProducts;
 window.addCategoryFromForm = addCategoryFromForm;
 window.openSidebarManagerModal = openSidebarManagerModal;
 window.closeSidebarManagerModal = closeSidebarManagerModal;
+window.handleFileUpload = handleFileUpload;
+window.addImageUrl = addImageUrl;
+window.removeImage = removeImage;
+window.moveImageUp = moveImageUp;
+window.moveImageDown = moveImageDown;
+window.clearAllImages = clearAllImages;
