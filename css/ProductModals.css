@@ -20,7 +20,7 @@
 }
 
 .modal-content {
-    background-color: #ffffff;
+    background: linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%);
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     max-width: 90vw;
@@ -91,14 +91,59 @@
     height: auto;
 }
 
+/* Product Detail Modal Specific Styles */
+.product-detail-header {
+    background: linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.product-detail-title-header {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: white;
+}
+
+.product-detail-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    line-height: 1;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-detail-close:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
 .product-detail-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
     padding: 15px 20px 20px 20px;
+    margin-bottom: 20px;
     flex: 1;
     overflow: hidden;
-    color: #333;
+    color: white;
 }
 
 .product-images-section {
@@ -112,11 +157,12 @@
     height: 380px;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    background: #f8f9fa;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: 5px;
 }
 
 .main-product-image {
@@ -124,6 +170,7 @@
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
+    border-radius: 12px;
 }
 
 .main-product-image:hover {
@@ -143,7 +190,7 @@
     object-fit: cover;
     border-radius: 6px;
     cursor: pointer;
-    border: 2px solid transparent;
+    border: 2px solid white;
     transition: all 0.3s ease;
 }
 
@@ -223,24 +270,25 @@
 }
 
 .product-actions .virtual-try-btn {
-    background-color: #8B0000;
+    background: linear-gradient(135deg, #540000 0%, #8B0000 100%);
     color: white;
 }
 
 .product-actions .virtual-try-btn:hover {
-    background-color: #A52A2A;
+    background: linear-gradient(135deg, #8B0000 0%, #a50000 100%);
     transform: translateY(-2px);
 }
 
 .product-actions .preorder-btn {
-    background-color: #f8f9fa;
-    color: #8B0000;
-    border: 2px solid #8B0000;
+    background: linear-gradient(135deg, #8B0000 0%, #a50000 100%);
+    color: white;
+    border: 2px solid #540000;
 }
 
 .product-actions .preorder-btn:hover {
-    background-color: #8B0000;
+    background: linear-gradient(135deg, #a50000 0%, #c50000 100%);
     color: white;
+    transform: translateY(-2px);
 }
 
 /* Add New Product Modal Styles */
@@ -254,6 +302,7 @@
     padding: 20px;
     flex: 1;
     overflow-y: auto;
+    background: transparent;
 }
 
 .product-form {
@@ -270,7 +319,7 @@
 
 .form-group label {
     font-weight: 600;
-    color: #333;
+    color: white;
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -280,19 +329,25 @@
 .form-group textarea,
 .form-group select {
     padding: 12px 15px;
-    border: 2px solid #e9ecef;
+    border: 2px solid #4a3426;
     border-radius: 6px;
     font-size: 16px;
     transition: all 0.3s ease;
-    background-color: #fff;
+    background-color: #3d2b1f;
+    color: white;
 }
 
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #8B0000;
-    box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
+    border-color: #d4a574;
+    box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.2);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #a0a0a0;
 }
 
 .form-group textarea {
@@ -322,9 +377,31 @@
     gap: 10px;
     margin-top: 10px;
     padding: 15px;
-    border: 2px dashed #e9ecef;
+    border: 2px dashed #4a3426;
     border-radius: 6px;
     min-height: 200px;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.file-upload-area {
+    border: 2px dashed #4a3426;
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    color: white;
+}
+
+.file-upload-area:hover {
+    border-color: #d4a574;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.file-upload-area p {
+    margin: 0;
+    color: #a0a0a0;
 }
 
 .image-preview-item {
@@ -388,22 +465,24 @@
 }
 
 .cancel-btn {
-    background-color: #6c757d;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid #4a3426;
     color: white;
 }
 
 .cancel-btn:hover {
-    background-color: #5a6268;
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #d4a574;
     transform: translateY(-2px);
 }
 
 .save-btn {
-    background-color: #8B0000;
+    background: linear-gradient(135deg, #d4a574 0%, #b8956a 100%);
     color: white;
 }
 
 .save-btn:hover {
-    background-color: #A52A2A;
+    background: linear-gradient(135deg, #b8956a 0%, #a0845c 100%);
     transform: translateY(-2px);
 }
 
@@ -429,7 +508,7 @@
     align-items: center;
     gap: 8px;
     padding: 12px 20px;
-    background: linear-gradient(135deg, #8B0000, #A52A2A);
+    background: linear-gradient(135deg, #d4a574 0%, #b8956a 100%);
     color: white;
     border: none;
     border-radius: 6px;
@@ -438,12 +517,13 @@
     transition: all 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    box-shadow: 0 4px 15px rgba(139, 0, 0, 0.3);
+    box-shadow: 0 4px 15px rgba(212, 165, 116, 0.3);
 }
 
 .add-new-product-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(139, 0, 0, 0.4);
+    box-shadow: 0 6px 20px rgba(212, 165, 116, 0.4);
+    background: linear-gradient(135deg, #b8956a 0%, #a0845c 100%);
 }
 
 .add-icon {
