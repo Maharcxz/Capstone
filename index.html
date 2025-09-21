@@ -232,10 +232,6 @@
         <!-- Frame Type Header -->
         <div class="frame-type-header">
             <h2 class="frame-type-title" id="frameTypeTitle">All Frames</h2>
-            <button class="add-new-product-btn admin-only" id="addNewProductBtn" onclick="openAddNewProductModal()" style="display: none;">
-                <span class="add-icon">+</span>
-                Add New
-            </button>
         </div>
 
         <!-- Sidebar Overlay -->
@@ -340,57 +336,6 @@
         </div>
     </div>
 
-    <!-- Add New Product Modal -->
-    <div id="addNewProductModal" class="modal" style="display: none;">
-        <div class="modal-content add-product-modal">
-            <div class="modal-header">
-                <h3>Add New Product</h3>
-                <button class="close-modal" onclick="closeAddNewProductModal()">&times;</button>
-            </div>
-            <div class="add-product-content">
-                <form id="addProductForm" class="product-form">
-                    <div class="form-group">
-                        <label for="newProductTitle">Product Title</label>
-                        <input type="text" id="newProductTitle" name="title" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="newProductDescription">Description</label>
-                        <textarea id="newProductDescription" name="description" rows="4"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="newProductPrice">Price (₱)</label>
-                        <input type="number" id="newProductPrice" name="price" step="0.01" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="newProductCategory">Category</label>
-                        <select id="newProductCategory" name="category">
-                            <option value="All Frames">All Frames</option>
-                            <option value="Classic">Classic</option>
-                            <option value="Modern">Modern</option>
-                            <option value="Vintage">Vintage</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="newProductImages">Product Images</label>
-                        <input type="file" id="newProductImages" name="images" multiple accept="image/*">
-                        <div id="newProductImagePreview" class="image-preview-container">
-                            <!-- Image previews will be shown here -->
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="newProductVisible" name="visible" checked>
-                            <span class="checkmark"></span>
-                            Make product visible
-                        </label>
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="cancel-btn" onclick="closeAddNewProductModal()">Cancel</button>
-                        <button type="submit" class="save-btn">Add Product</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+
 </body>
 </html>

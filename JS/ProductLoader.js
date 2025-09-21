@@ -98,8 +98,10 @@ function renderProductGrid() {
                 }
             </div>
             <div class="product-info">
-                <h3 class="product-title">${escapeHtml(product.title)}</h3>
-                <p class="product-price">₱ ${parseFloat(product.price).toLocaleString()}</p>
+                <div class="product-title-price-row">
+                    <h3 class="product-title">${escapeHtml(product.title)}</h3>
+                    <p class="product-price">₱ ${parseFloat(product.price).toLocaleString()}</p>
+                </div>
                 <div class="product-buttons">
                     <button class="virtual-try-btn">Virtual Try - On</button>
                     <button class="virtual-try-btn preorder-btn guest-only" onclick="window.location.href='preorder.html'">Pre-Order</button>
@@ -316,97 +318,29 @@ function closeProductDetailModal() {
     document.getElementById('productDetailModal').style.display = 'none';
 }
 
-// Add New Product Modal Functions
-function openAddNewProductModal() {
-    document.getElementById('addNewProductModal').style.display = 'flex';
-    document.getElementById('addProductForm').reset();
-    document.getElementById('newProductImagePreview').innerHTML = '';
-}
-
-function closeAddNewProductModal() {
-    document.getElementById('addNewProductModal').style.display = 'none';
-}
-
-// Handle new product form submission
+// Add click-outside-to-close functionality for product detail modal
 document.addEventListener('DOMContentLoaded', function() {
-    const addProductForm = document.getElementById('addProductForm');
-    if (addProductForm) {
-        addProductForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const productData = {
-                id: Date.now().toString(), // Simple ID generation
-                title: formData.get('title'),
-                description: formData.get('description'),
-                price: parseFloat(formData.get('price')),
-                category: formData.get('category'),
-                visible: formData.get('visible') === 'on',
-                images: []
-            };
-
-            // Handle image files
-            const imageFiles = document.getElementById('newProductImages').files;
-            if (imageFiles.length > 0) {
-                // In a real app, you'd upload these to a server
-                // For now, we'll create object URLs
-                for (let file of imageFiles) {
-                    productData.images.push(URL.createObjectURL(file));
-                }
-                productData.image = productData.images[0]; // Set first image as main
-            }
-
-            try {
-                // Add to local data
-                allProductsData.push(productData);
-                
-                // Save to localStorage as fallback
-                localStorage.setItem('products', JSON.stringify(allProductsData));
-                
-                // Refresh the grid
-                applyCurrentFilters();
-                
-                // Close modal and show success message
-                closeAddNewProductModal();
-                showHomepageNotification('Product added successfully!', 'success');
-                
-            } catch (error) {
-                console.error('Error adding product:', error);
-                showHomepageNotification('Error adding product. Please try again.', 'error');
+    const productDetailModal = document.getElementById('productDetailModal');
+    if (productDetailModal) {
+        productDetailModal.addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeProductDetailModal();
             }
         });
     }
-
-    // Handle image preview for new product
-    const newProductImages = document.getElementById('newProductImages');
-    if (newProductImages) {
-        newProductImages.addEventListener('change', function(e) {
-            const files = e.target.files;
-            const previewContainer = document.getElementById('newProductImagePreview');
-            previewContainer.innerHTML = '';
-
-            for (let file of files) {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const imagePreview = document.createElement('div');
-                        imagePreview.className = 'image-preview-item';
-                        imagePreview.innerHTML = `
-                            <img src="${e.target.result}" alt="Preview">
-                            <button type="button" class="remove-image" onclick="removeImagePreview(this)">×</button>
-                        `;
-                        previewContainer.appendChild(imagePreview);
-                    };
-                    reader.readAsDataURL(file);
-                }
+    
+    // Handle escape key to close modal
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const modal = document.getElementById('productDetailModal');
+            if (modal && modal.style.display === 'flex') {
+                closeProductDetailModal();
             }
-        });
-    }
+        }
+    });
 });
 
-function removeImagePreview(button) {
-    button.parentElement.remove();
-}
+
 
 // Export functions for global access
 window.selectFrameCategory = selectFrameCategory;
@@ -416,7 +350,4 @@ window.deleteProductFromHomepage = deleteProductFromHomepage;
 window.toggleProductVisibilityFromHomepage = toggleProductVisibilityFromHomepage;
 window.openProductDetailModal = openProductDetailModal;
 window.closeProductDetailModal = closeProductDetailModal;
-window.openAddNewProductModal = openAddNewProductModal;
-window.closeAddNewProductModal = closeAddNewProductModal;
 window.setMainImage = setMainImage;
-window.removeImagePreview = removeImagePreview;
