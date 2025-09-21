@@ -130,10 +130,10 @@ function switchToAdminMode() {
         console.log('Added admin-mode class to body');
     }
     
-    // Show admin buttons on product cards
-    adminButtons.forEach(btn => btn.style.display = 'flex');
+    // Update admin button visibility based on current page
+    updateAdminButtonVisibility();
     
-    // Show edit buttons on content pages
+    // Show edit buttons on content pages (these are for content editing, not product management)
     editButtons.forEach(btn => btn.style.display = 'block');
     
     console.log('Admin mode set successfully');
@@ -206,11 +206,26 @@ function hideAdminDropdown() {
     }
 }
 
+// Utility function to handle admin button visibility based on current page
+function updateAdminButtonVisibility() {
+    const adminButtons = document.querySelectorAll('.admin-buttons');
+    const isAdminDashboard = window.location.pathname.includes('admin-dashboard.html');
+    
+    if (isAdminMode && isAdminDashboard) {
+        // Show admin buttons only on admin dashboard when in admin mode
+        adminButtons.forEach(btn => btn.style.display = 'flex');
+    } else {
+        // Hide admin buttons on all other pages or when not in admin mode
+        adminButtons.forEach(btn => btn.style.display = 'none');
+    }
+}
+
 // Temporary function for testing admin mode
 function enableTestAdminMode() {
     console.log('Enabling test admin mode...');
     switchToAdminMode();
 }
 
-// Make function available globally for testing
+// Make functions globally available
 window.enableTestAdminMode = enableTestAdminMode;
+window.updateAdminButtonVisibility = updateAdminButtonVisibility;

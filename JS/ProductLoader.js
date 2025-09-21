@@ -116,6 +116,11 @@ function renderProductGrid() {
             </div>
         </div>
     `).join('');
+    
+    // Ensure admin buttons are properly hidden/shown based on current page and admin status
+    if (typeof updateAdminButtonVisibility === 'function') {
+        updateAdminButtonVisibility();
+    }
 }
 
 // Filter products by category

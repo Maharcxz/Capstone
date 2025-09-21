@@ -33,6 +33,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!document.querySelector('.edit-content-btn')) {
             addEditButtons();
         }
+        
+        // Update admin button visibility based on current page
+        if (typeof updateAdminButtonVisibility === 'function') {
+            updateAdminButtonVisibility();
+        }
     }
     
     // Load content from Firebase asynchronously (non-blocking)
