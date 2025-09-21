@@ -355,11 +355,22 @@
     color: #333;
 }
 
+.product-title-price-row-admin {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+    gap: 15px;
+}
+
 .product-title-admin {
     font-size: 18px;
     font-weight: 600;
-    margin-bottom: 8px;
+    margin: 0;
     color: #000;
+    flex: 1;
+    text-align: left;
 }
 
 .product-description-admin {
@@ -373,7 +384,9 @@
     font-size: 16px;
     font-weight: 700;
     color: #540000;
-    margin-bottom: 15px;
+    margin: 0;
+    text-align: right;
+    white-space: nowrap;
 }
 
 .product-category-admin {

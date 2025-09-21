@@ -123,9 +123,11 @@ function renderProducts() {
             </div>
             
             <div class="product-details">
-                <h3 class="product-title-admin">${escapeHtml(product.title)}</h3>
+                <div class="product-title-price-row-admin">
+                    <h3 class="product-title-admin">${escapeHtml(product.title)}</h3>
+                    <p class="product-price-admin">₱ ${parseFloat(product.price).toLocaleString()}</p>
+                </div>
                 <p class="product-description-admin">${escapeHtml(product.description || 'No description available')}</p>
-                <p class="product-price-admin">₱ ${parseFloat(product.price).toLocaleString()}</p>
                 <p class="product-category-admin">${escapeHtml(product.category)}</p>
                 
                 <div class="admin-actions">
