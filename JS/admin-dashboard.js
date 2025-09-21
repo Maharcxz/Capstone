@@ -777,16 +777,49 @@ function addImageUrl() {
     const urlInput = document.getElementById('productImageUrl');
     const url = urlInput.value.trim();
     
-    if (url) {
-        // Validate URL format
-        try {
-            new URL(url);
+    if (!url) {
+        showNotification('Please enter an image URL', 'error');
+        return;
+    }
+    
+    // Validate URL format
+    try {
+        new URL(url);
+    } catch (e) {
+        showNotification('Please enter a valid URL', 'error');
+        return;
+    }
+    
+    // Check if it's likely an image URL
+    const imageExtensions = /\.(jpg|jpeg|png|gif|bmp|webp|svg)(\?.*)?$/i;
+    const isImageUrl = imageExtensions.test(url) || url.includes('imgur.com') || url.includes('i.pinimg.com') || url.includes('images.') || url.includes('img.');
+    
+    if (!isImageUrl) {
+        // Still allow it but show a warning
+        console.warn('URL might not be an image:', url);
+    }
+    
+    // Test if the image can be loaded
+    const testImg = new Image();
+    testImg.onload = function() {
+        addImageToPreview(url, 'URL Image');
+        showNotification('Image added successfully', 'success');
+        urlInput.value = '';
+    };
+    testImg.onerror = function() {
+        showNotification('Failed to load image from URL. Please check the URL and try again.', 'error');
+    };
+    
+    // Set a timeout for the image loading
+    setTimeout(() => {
+        if (!testImg.complete) {
+            showNotification('Image is taking too long to load. Adding anyway...', 'warning');
             addImageToPreview(url, 'URL Image');
             urlInput.value = '';
-        } catch (e) {
-            showNotification('Please enter a valid URL', 'error');
         }
-    }
+    }, 5000);
+    
+    testImg.src = url;
 }
 
 function addImageToPreview(src, name) {
@@ -831,17 +864,16 @@ function renderImagePreview() {
     }
     
     container.innerHTML = productImages.map((image, index) => `
-        <div class="image-preview-item" data-image-id="${image.id}">
-            <img src="${image.src}" alt="${image.name}" class="preview-image">
-            <div class="image-controls">
-                <span class="image-name">${image.name}</span>
-                <div class="image-actions">
-                    ${index > 0 ? `<button type="button" onclick="moveImageUp(${image.id})" class="btn-move" title="Move Up">↑</button>` : ''}
-                    ${index < productImages.length - 1 ? `<button type="button" onclick="moveImageDown(${image.id})" class="btn-move" title="Move Down">↓</button>` : ''}
-                    <button type="button" onclick="removeImage(${image.id})" class="btn-remove" title="Remove">×</button>
-                </div>
+        <div class="image-preview-item ${index === 0 ? 'primary' : ''}" data-image-id="${image.id}">
+            <img src="${image.src}" alt="${image.name}" class="image-preview-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="image-error-placeholder" style="display: none; align-items: center; justify-content: center; height: 80px; background: #f8f9fa; color: #666; font-size: 12px;">
+                Failed to load image
             </div>
-            ${index === 0 ? '<span class="primary-badge">Primary</span>' : ''}
+            <div class="image-preview-controls">
+                ${index > 0 ? `<button type="button" onclick="moveImageUp(${image.id})" class="image-control-btn" title="Move Up" style="background: rgba(0, 123, 255, 0.9); color: white;">↑</button>` : ''}
+                ${index < productImages.length - 1 ? `<button type="button" onclick="moveImageDown(${image.id})" class="image-control-btn" title="Move Down" style="background: rgba(0, 123, 255, 0.9); color: white;">↓</button>` : ''}
+                <button type="button" onclick="removeImage(${image.id})" class="image-control-btn remove-image-btn" title="Remove">×</button>
+            </div>
         </div>
     `).join('');
 }
