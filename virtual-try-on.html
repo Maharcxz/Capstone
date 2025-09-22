@@ -45,6 +45,14 @@
             font-size: 24px;
             font-weight: 700;
             margin: 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        
+        .try-on-title:hover {
+            color: #4CAF50;
+            transform: translateY(-1px);
         }
         
         .back-button {
@@ -271,7 +279,7 @@
     <div class="virtual-try-on-container">
         <!-- Header -->
         <div class="try-on-header">
-            <h1 class="try-on-title">Virtual Try-On</h1>
+            <h1 class="try-on-title" id="tryOnTitle" onclick="navigateToHome()">Virtual Try-On</h1>
             <a href="index.html" class="back-button">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
                     <path d="M19 12H5M12 19l-7-7 7-7"/>
