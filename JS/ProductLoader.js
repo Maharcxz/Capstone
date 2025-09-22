@@ -314,6 +314,25 @@ function openProductDetailModal(productId) {
         };
     }
 
+    // Update Virtual Try-On button with product information
+    const virtualTryOnBtn = document.querySelector('#productDetailModal .virtual-try-btn');
+    if (virtualTryOnBtn) {
+        virtualTryOnBtn.onclick = function() {
+            // Map product ID to frame ID for virtual try-on
+            const frameMapping = {
+                'glasses-6': 'glasses-6',
+                'glasses-7': 'glasses-7', 
+                'glasses-10': 'glasses-10',
+                'glasses-11b': 'glasses-11b',
+                'glasses-12': 'glasses-12',
+                'glasses-5b': 'glasses-5b'
+            };
+            
+            const frameId = frameMapping[product.id] || 'glasses-6'; // Default frame
+            window.location.href = `virtual-try-on.html?frame=${frameId}&productName=${encodeURIComponent(product.title)}`;
+        };
+    }
+
     // Show modal
     document.getElementById('productDetailModal').style.display = 'flex';
 }
