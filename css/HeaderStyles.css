@@ -43,6 +43,7 @@
     margin: 0 -20px;
     position: relative;
     overflow: visible;
+    z-index: 2000;
 }
 
 .nav::before {

@@ -2,6 +2,7 @@
 .auth-section {
     position: relative;
     overflow: visible !important;
+    z-index: 2500;
 }
 
 .admin-dropdown {
@@ -16,7 +17,7 @@
     backdrop-filter: blur(10px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     display: none;
-    z-index: 1000;
+    z-index: 4000;
     min-width: 200px;
     animation: dropdownSlide 0.2s ease-out;
 }
