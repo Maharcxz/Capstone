@@ -14,7 +14,7 @@
     
     <!-- Three.js for 3D rendering -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/GLTFLoader.js"></script>
     
     <!-- MediaPipe for face detection -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
@@ -110,7 +110,7 @@
         }
         
         .controls-panel {
-            width: 300px;
+            width: 250px;
             background: rgba(0, 0, 0, 0.9);
             padding: 20px;
             display: flex;
@@ -174,51 +174,7 @@
             font-family: 'Poppins', sans-serif;
         }
         
-        .adjustment-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .slider-control {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .slider-label {
-            color: #fff;
-            font-size: 14px;
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        .slider {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: rgba(255, 255, 255, 0.2);
-            outline: none;
-            -webkit-appearance: none;
-        }
-        
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #4CAF50;
-            cursor: pointer;
-        }
-        
-        .slider::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #4CAF50;
-            cursor: pointer;
-            border: none;
-        }
+
         
         .action-buttons {
             display: flex;
@@ -350,35 +306,11 @@
                     </div>
                 </div>
                 
-                <!-- Adjustment Controls -->
-                <div class="control-section">
-                    <div class="control-title">Adjustments</div>
-                    <div class="adjustment-controls">
-                        <div class="slider-control">
-                            <label class="slider-label">Size</label>
-                            <input type="range" min="0.5" max="1.5" value="1" step="0.1" class="slider" id="sizeSlider">
-                        </div>
-                        <div class="slider-control">
-                            <label class="slider-label">Position X</label>
-                            <input type="range" min="-50" max="50" value="0" step="1" class="slider" id="positionXSlider">
-                        </div>
-                        <div class="slider-control">
-                            <label class="slider-label">Position Y</label>
-                            <input type="range" min="-50" max="50" value="0" step="1" class="slider" id="positionYSlider">
-                        </div>
-                        <div class="slider-control">
-                            <label class="slider-label">Rotation</label>
-                            <input type="range" min="-30" max="30" value="0" step="1" class="slider" id="rotationSlider">
-                        </div>
-                    </div>
-                </div>
-                
                 <!-- Action Buttons -->
                 <div class="control-section">
                     <div class="control-title">Actions</div>
                     <div class="action-buttons">
                         <button class="action-btn" id="captureBtn">📸 Capture Photo</button>
-                        <button class="action-btn secondary" id="resetBtn">🔄 Reset Position</button>
                         <button class="action-btn secondary" id="switchCameraBtn">📷 Switch Camera</button>
                     </div>
                 </div>

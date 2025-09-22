@@ -68,122 +68,192 @@ class VirtualTryOn {
             throw new Error('Camera API not supported in this browser.');
         }
         
+        // Check current permission status
+        let permissionStatus = 'prompt';
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 },
-                    facingMode: 'user'
-                },
-                audio: false
-            });
-            
-            this.video.srcObject = stream;
-            
-            return new Promise((resolve) => {
-                this.video.onloadedmetadata = () => {
-                    this.video.play();
-                    this.resizeCanvas();
-                    resolve();
-                };
-            });
-        } catch (error) {
-            let errorMessage = 'Camera access denied or not available.';
-            
-            if (error.name === 'NotAllowedError') {
-                errorMessage = 'Camera access was denied. Please allow camera access and refresh the page.';
-            } else if (error.name === 'NotFoundError') {
-                errorMessage = 'No camera found on this device.';
-            } else if (error.name === 'NotSupportedError') {
-                errorMessage = 'Camera is not supported on this device.';
+            if (navigator.permissions && navigator.permissions.query) {
+                const permission = await navigator.permissions.query({ name: 'camera' });
+                permissionStatus = permission.state;
             }
-            
-            throw new Error(errorMessage);
+        } catch (e) {
+            // Permission API not supported, continue with getUserMedia
+            console.log('Permission API not supported, proceeding with getUserMedia');
         }
+        
+        // Retry logic for camera access
+        const maxRetries = 3;
+        let lastError = null;
+        
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                console.log(`Camera setup attempt ${attempt}/${maxRetries}, permission status: ${permissionStatus}`);
+                
+                const constraints = {
+                    video: {
+                        width: { ideal: 1280, min: 640 },
+                        height: { ideal: 720, min: 480 },
+                        facingMode: 'user'
+                    },
+                    audio: false
+                };
+                
+                // For subsequent attempts, try with more basic constraints
+                if (attempt > 1) {
+                    constraints.video = {
+                        facingMode: 'user'
+                    };
+                }
+                
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                this.video.srcObject = stream;
+                
+                return new Promise((resolve, reject) => {
+                    const timeoutId = setTimeout(() => {
+                        reject(new Error('Video loading timeout'));
+                    }, 10000); // 10 second timeout
+                    
+                    this.video.onloadedmetadata = () => {
+                        clearTimeout(timeoutId);
+                        this.video.play().then(() => {
+                            this.resizeCanvas();
+                            console.log('Camera initialized successfully');
+                            resolve();
+                        }).catch(reject);
+                    };
+                    
+                    this.video.onerror = (e) => {
+                        clearTimeout(timeoutId);
+                        reject(new Error('Video element error: ' + e.message));
+                    };
+                });
+                
+            } catch (error) {
+                lastError = error;
+                console.error(`Camera setup attempt ${attempt} failed:`, error);
+                
+                // If it's a permission error and we're not on the last attempt, wait and retry
+                if (error.name === 'NotAllowedError' && attempt < maxRetries) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+                
+                // If it's not a permission error, break early
+                if (error.name !== 'NotAllowedError' && error.name !== 'NotReadableError') {
+                    break;
+                }
+                
+                // Wait before retry
+                if (attempt < maxRetries) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+        }
+        
+        // If we get here, all attempts failed
+        let errorMessage = 'Camera access failed after multiple attempts.';
+        
+        if (lastError) {
+            if (lastError.name === 'NotAllowedError') {
+                errorMessage = 'Camera access was denied. Please allow camera access and refresh the page.';
+            } else if (lastError.name === 'NotFoundError') {
+                errorMessage = 'No camera found on this device.';
+            } else if (lastError.name === 'NotSupportedError') {
+                errorMessage = 'Camera is not supported on this device.';
+            } else if (lastError.name === 'NotReadableError') {
+                errorMessage = 'Camera is already in use by another application. Please close other applications using the camera and try again.';
+            } else if (lastError.name === 'OverconstrainedError') {
+                errorMessage = 'Camera constraints could not be satisfied. Please try with a different camera.';
+            } else {
+                errorMessage = `Camera error: ${lastError.message}`;
+            }
+        }
+        
+        throw new Error(errorMessage);
     }
     
     async setupFaceDetection() {
-        this.faceMesh = new FaceMesh({
-            locateFile: (file) => {
-                return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+        try {
+            // Check if FaceMesh is available
+            if (typeof FaceMesh === 'undefined') {
+                console.warn('MediaPipe FaceMesh not available, face detection will be disabled');
+                this.faceMesh = null;
+                return;
             }
-        });
-        
-        this.faceMesh.setOptions({
-            maxNumFaces: 1,
-            refineLandmarks: true,
-            minDetectionConfidence: 0.5,
-            minTrackingConfidence: 0.5
-        });
-        
-        this.faceMesh.onResults((results) => {
-            this.onFaceDetectionResults(results);
-        });
+            
+            this.faceMesh = new FaceMesh({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+                }
+            });
+            
+            this.faceMesh.setOptions({
+                maxNumFaces: 1,
+                refineLandmarks: true,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+            });
+            
+            this.faceMesh.onResults((results) => {
+                this.onFaceDetectionResults(results);
+            });
+            
+            console.log('Face detection initialized successfully');
+        } catch (error) {
+            console.warn('Face detection setup failed:', error);
+            this.faceMesh = null;
+            // Don't throw error - allow the app to continue without face detection
+        }
     }
     
     setupThreeJS() {
-        // Create Three.js scene
-        this.scene = new THREE.Scene();
-        
-        // Create camera
-        this.camera = new THREE.PerspectiveCamera(
-            75,
-            this.canvas.width / this.canvas.height,
-            0.1,
-            1000
-        );
-        this.camera.position.z = 5;
-        
-        // Create renderer
-        this.renderer = new THREE.WebGLRenderer({
-            canvas: this.canvas,
-            alpha: true,
-            antialias: true
-        });
-        this.renderer.setSize(this.canvas.width, this.canvas.height);
-        this.renderer.setClearColor(0x000000, 0); // Transparent background
-        
-        // Add lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        this.scene.add(ambientLight);
-        
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(0, 1, 1);
-        this.scene.add(directionalLight);
+        try {
+            // Check if Three.js is available
+            if (typeof THREE === 'undefined') {
+                console.warn('Three.js not available, 3D rendering will be disabled');
+                return;
+            }
+            
+            // Create Three.js scene
+            this.scene = new THREE.Scene();
+            
+            // Create camera
+            this.camera = new THREE.PerspectiveCamera(
+                75,
+                this.canvas.width / this.canvas.height,
+                0.1,
+                1000
+            );
+            this.camera.position.z = 5;
+            
+            // Create renderer
+            this.renderer = new THREE.WebGLRenderer({
+                canvas: this.canvas,
+                alpha: true,
+                antialias: true
+            });
+            this.renderer.setSize(this.canvas.width, this.canvas.height);
+            this.renderer.setClearColor(0x000000, 0); // Transparent background
+            
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            this.scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(0, 1, 1);
+            this.scene.add(directionalLight);
+            
+            console.log('Three.js initialized successfully');
+        } catch (error) {
+            console.warn('Three.js setup failed:', error);
+            // Don't throw error - allow the app to continue without 3D rendering
+        }
     }
     
     setupControls() {
-        // Size control
-        document.getElementById('sizeSlider').addEventListener('input', (e) => {
-            this.adjustments.size = parseFloat(e.target.value);
-            this.updateGlassesTransform();
-        });
-        
-        // Position X control
-        document.getElementById('positionXSlider').addEventListener('input', (e) => {
-            this.adjustments.positionX = parseFloat(e.target.value);
-            this.updateGlassesTransform();
-        });
-        
-        // Position Y control
-        document.getElementById('positionYSlider').addEventListener('input', (e) => {
-            this.adjustments.positionY = parseFloat(e.target.value);
-            this.updateGlassesTransform();
-        });
-        
-        // Rotation control
-        document.getElementById('rotationSlider').addEventListener('input', (e) => {
-            this.adjustments.rotation = parseFloat(e.target.value);
-            this.updateGlassesTransform();
-        });
-        
         // Action buttons
         document.getElementById('captureBtn').addEventListener('click', () => {
             this.capturePhoto();
-        });
-        
-        document.getElementById('resetBtn').addEventListener('click', () => {
-            this.resetAdjustments();
         });
         
         document.getElementById('switchCameraBtn').addEventListener('click', () => {
@@ -225,27 +295,42 @@ class VirtualTryOn {
     
     async loadGlassesModel(modelPath) {
         return new Promise((resolve, reject) => {
-            const loader = new THREE.GLTFLoader();
-            loader.load(
-                modelPath,
-                (gltf) => {
-                    // Remove previous model
-                    if (this.glassesModel) {
-                        this.scene.remove(this.glassesModel);
-                    }
-                    
-                    this.glassesModel = gltf.scene;
-                    this.glassesModel.scale.set(0.1, 0.1, 0.1); // Adjust scale as needed
-                    this.scene.add(this.glassesModel);
-                    resolve();
-                },
-                (progress) => {
-                    // Loading progress
-                },
-                (error) => {
-                    reject(error);
+            try {
+                // Check if GLTFLoader is available
+                if (typeof THREE.GLTFLoader === 'undefined') {
+                    console.warn('GLTFLoader not available, 3D models will not be loaded');
+                    resolve(); // Don't reject, just continue without 3D models
+                    return;
                 }
-            );
+                
+                const loader = new THREE.GLTFLoader();
+                loader.load(
+                    modelPath,
+                    (gltf) => {
+                        // Remove previous model
+                        if (this.glassesModel) {
+                            this.scene.remove(this.glassesModel);
+                        }
+                        
+                        this.glassesModel = gltf.scene;
+                        this.glassesModel.scale.set(0.1, 0.1, 0.1); // Adjust scale as needed
+                        this.scene.add(this.glassesModel);
+                        console.log('3D model loaded successfully');
+                        resolve();
+                    },
+                    (progress) => {
+                        // Loading progress
+                        console.log('Loading progress:', (progress.loaded / progress.total * 100) + '%');
+                    },
+                    (error) => {
+                        console.warn('Failed to load 3D model:', error);
+                        resolve(); // Don't reject, continue without the model
+                    }
+                );
+            } catch (error) {
+                console.warn('GLTFLoader initialization failed:', error);
+                resolve(); // Don't reject, continue without 3D models
+            }
         });
     }
     
@@ -336,10 +421,22 @@ class VirtualTryOn {
     
     startDetection() {
         const detect = async () => {
-            if (this.video.readyState === 4) {
-                await this.faceMesh.send({ image: this.video });
+            try {
+                if (this.video.readyState === 4) {
+                    // Only try face detection if faceMesh is available
+                    if (this.faceMesh) {
+                        await this.faceMesh.send({ image: this.video });
+                    }
+                    
+                    // Always render the 3D scene (even without face detection)
+                    this.render3D();
+                }
+                this.animationId = requestAnimationFrame(detect);
+            } catch (error) {
+                console.warn('Detection error:', error);
+                // Continue the animation loop even if detection fails
+                this.animationId = requestAnimationFrame(detect);
             }
-            this.animationId = requestAnimationFrame(detect);
         };
         detect();
     }
@@ -381,22 +478,7 @@ class VirtualTryOn {
         link.click();
     }
     
-    resetAdjustments() {
-        this.adjustments = {
-            size: 1.0,
-            positionX: 0,
-            positionY: 0,
-            rotation: 0
-        };
-        
-        // Reset sliders
-        document.getElementById('sizeSlider').value = 1.0;
-        document.getElementById('positionXSlider').value = 0;
-        document.getElementById('positionYSlider').value = 0;
-        document.getElementById('rotationSlider').value = 0;
-        
-        this.updateGlassesTransform();
-    }
+
     
     async switchCamera() {
         try {
@@ -406,21 +488,110 @@ class VirtualTryOn {
             if (videoDevices.length > 1) {
                 // Switch between front and back camera
                 const currentTrack = this.video.srcObject.getVideoTracks()[0];
-                const currentFacingMode = currentTrack.getSettings().facingMode;
+                const currentSettings = currentTrack.getSettings();
+                const currentFacingMode = currentSettings.facingMode || 'user';
                 const newFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
                 
+                console.log(`Switching camera from ${currentFacingMode} to ${newFacingMode}`);
+                
+                // Stop current track
                 currentTrack.stop();
                 
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: newFacingMode },
+                // Try to get new stream with different facing mode
+                const constraints = {
+                    video: { 
+                        facingMode: { exact: newFacingMode },
+                        width: { ideal: 1280, min: 640 },
+                        height: { ideal: 720, min: 480 }
+                    },
                     audio: false
-                });
+                };
                 
-                this.video.srcObject = stream;
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    this.video.srcObject = stream;
+                    
+                    // Wait for video to load
+                    return new Promise((resolve) => {
+                        this.video.onloadedmetadata = () => {
+                            this.video.play().then(() => {
+                                this.resizeCanvas();
+                                console.log('Camera switched successfully');
+                                resolve();
+                            });
+                        };
+                    });
+                } catch (exactError) {
+                    // If exact facing mode fails, try without exact constraint
+                    console.log('Exact facing mode failed, trying without exact constraint');
+                    const fallbackConstraints = {
+                        video: { 
+                            facingMode: newFacingMode,
+                            width: { ideal: 1280, min: 640 },
+                            height: { ideal: 720, min: 480 }
+                        },
+                        audio: false
+                    };
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
+                    this.video.srcObject = stream;
+                    
+                    return new Promise((resolve) => {
+                        this.video.onloadedmetadata = () => {
+                            this.video.play().then(() => {
+                                this.resizeCanvas();
+                                console.log('Camera switched successfully (fallback)');
+                                resolve();
+                            });
+                        };
+                    });
+                }
+            } else {
+                console.log('Only one camera available, cannot switch');
+                // Show a brief notification that only one camera is available
+                this.showTemporaryMessage('Only one camera available');
             }
         } catch (error) {
             console.error('Error switching camera:', error);
+            // Try to restore the original camera if switching failed
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user' },
+                    audio: false
+                });
+                this.video.srcObject = stream;
+            } catch (restoreError) {
+                console.error('Failed to restore camera:', restoreError);
+                this.showError('Camera switching failed. Please refresh the page.');
+            }
         }
+    }
+    
+    showTemporaryMessage(message) {
+        // Create a temporary message overlay
+        const messageDiv = document.createElement('div');
+        messageDiv.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            z-index: 10000;
+            pointer-events: none;
+        `;
+        messageDiv.textContent = message;
+        document.body.appendChild(messageDiv);
+        
+        // Remove after 2 seconds
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.parentNode.removeChild(messageDiv);
+            }
+        }, 2000);
     }
     
     hideLoading() {
