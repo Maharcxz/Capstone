@@ -208,14 +208,16 @@
                             
                             <div class="form-field">
                                 <label class="field-label">Frame Name</label>
-                                <input type="text" placeholder="Frame Name or Model" class="full-input" name="frameName" id="frameName">
+                                <div class="autocomplete-container">
+                                    <input type="text" placeholder="Frame Name or Model" class="full-input" name="frameName" id="frameName" autocomplete="off">
+                                    <div class="autocomplete-dropdown" id="frameNameDropdown"></div>
+                                </div>
                             </div>
                             
                             <div class="form-field">
                                 <label class="field-label">Quantity</label>
                                 <select class="quantity-select" name="quantity" id="quantity" required>
-                                    <option value="">Select Quantity</option>
-                                    <option value="1">1</option>
+                                    <option value="1" selected>1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
                                     <option value="4">4</option>
@@ -254,8 +256,20 @@
     </div>
     
     <script>
+        let allFrameNames = [];
+        let isDropdownVisible = false;
+        
         document.addEventListener('DOMContentLoaded', function() {
             const preorderForm = document.getElementById('preorderForm');
+            
+            // Load frame names from database
+            loadFrameNames();
+            
+            // Set up auto-suggestion for frame name input
+            setupFrameNameAutocomplete();
+            
+            // Auto-fill frame name if passed via URL parameter
+            autoFillFrameName();
             
             if (preorderForm) {
                 preorderForm.addEventListener('submit', function(e) {
@@ -290,6 +304,187 @@
                 });
             }
         });
+        
+        // Load frame names from database
+        async function loadFrameNames() {
+            try {
+                if (typeof getAllProducts === 'function') {
+                    const products = await getAllProducts();
+                    allFrameNames = products
+                        .filter(product => product.visible && product.title) // Only visible products with titles
+                        .map(product => product.title)
+                        .sort(); // Sort alphabetically
+                } else {
+                    console.warn('getAllProducts function not available');
+                }
+            } catch (error) {
+                console.error('Error loading frame names:', error);
+            }
+        }
+        
+        // Auto-fill frame name from URL parameter
+        function autoFillFrameName() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const frameName = urlParams.get('frameName');
+            
+            if (frameName) {
+                const frameNameInput = document.getElementById('frameName');
+                if (frameNameInput) {
+                    frameNameInput.value = decodeURIComponent(frameName);
+                    // Trigger input event to update any related functionality
+                    frameNameInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+        }
+        
+        // Set up autocomplete functionality for frame name input
+        function setupFrameNameAutocomplete() {
+            const frameNameInput = document.getElementById('frameName');
+            const dropdown = document.getElementById('frameNameDropdown');
+            
+            if (!frameNameInput || !dropdown) return;
+            
+            // Handle input events
+            frameNameInput.addEventListener('input', function() {
+                const query = this.value.trim();
+                if (query.length > 0) {
+                    showSuggestions(query);
+                } else {
+                    hideSuggestions();
+                }
+            });
+            
+            // Handle focus events
+            frameNameInput.addEventListener('focus', function() {
+                const query = this.value.trim();
+                if (query.length > 0) {
+                    showSuggestions(query);
+                }
+            });
+            
+            // Handle blur events (with delay to allow for clicks)
+            frameNameInput.addEventListener('blur', function() {
+                setTimeout(() => {
+                    hideSuggestions();
+                }, 150);
+            });
+            
+            // Handle keyboard navigation
+            frameNameInput.addEventListener('keydown', function(e) {
+                if (!isDropdownVisible) return;
+                
+                const suggestions = dropdown.querySelectorAll('.autocomplete-item');
+                const activeSuggestion = dropdown.querySelector('.autocomplete-item.active');
+                let activeIndex = -1;
+                
+                if (activeSuggestion) {
+                    activeIndex = Array.from(suggestions).indexOf(activeSuggestion);
+                }
+                
+                switch (e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        activeIndex = Math.min(activeIndex + 1, suggestions.length - 1);
+                        updateActiveSuggestion(suggestions, activeIndex);
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        activeIndex = Math.max(activeIndex - 1, -1);
+                        updateActiveSuggestion(suggestions, activeIndex);
+                        break;
+                    case 'Enter':
+                        e.preventDefault();
+                        if (activeSuggestion) {
+                            selectSuggestion(activeSuggestion.textContent);
+                        }
+                        break;
+                    case 'Escape':
+                        hideSuggestions();
+                        break;
+                }
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!frameNameInput.contains(e.target) && !dropdown.contains(e.target)) {
+                    hideSuggestions();
+                }
+            });
+        }
+        
+        // Show suggestions based on query
+        function showSuggestions(query) {
+            const dropdown = document.getElementById('frameNameDropdown');
+            if (!dropdown) return;
+            
+            const filteredNames = allFrameNames.filter(name => 
+                name.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            if (filteredNames.length === 0) {
+                hideSuggestions();
+                return;
+            }
+            
+            dropdown.innerHTML = filteredNames
+                .slice(0, 10) // Limit to 10 suggestions
+                .map(name => `
+                    <div class="autocomplete-item" onclick="selectSuggestion('${escapeHtml(name)}')">
+                        ${highlightMatch(name, query)}
+                    </div>
+                `).join('');
+            
+            dropdown.style.display = 'block';
+            isDropdownVisible = true;
+        }
+        
+        // Hide suggestions dropdown
+        function hideSuggestions() {
+            const dropdown = document.getElementById('frameNameDropdown');
+            if (dropdown) {
+                dropdown.style.display = 'none';
+                isDropdownVisible = false;
+            }
+        }
+        
+        // Select a suggestion
+        function selectSuggestion(frameName) {
+            const frameNameInput = document.getElementById('frameName');
+            if (frameNameInput) {
+                frameNameInput.value = frameName;
+                hideSuggestions();
+                frameNameInput.focus();
+            }
+        }
+        
+        // Update active suggestion for keyboard navigation
+        function updateActiveSuggestion(suggestions, activeIndex) {
+            suggestions.forEach((item, index) => {
+                if (index === activeIndex) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+        
+        // Highlight matching text in suggestions
+        function highlightMatch(text, query) {
+            const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+            return text.replace(regex, '<strong>$1</strong>');
+        }
+        
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Escape regex special characters
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
         
         // Function to save pre-order to Firebase
         function savePreOrderToFirebase(preOrder) {

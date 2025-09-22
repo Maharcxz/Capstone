@@ -104,7 +104,7 @@ function renderProductGrid() {
                 </div>
                 <div class="product-buttons">
                     <button class="virtual-try-btn">Virtual Try - On</button>
-                    <button class="virtual-try-btn preorder-btn guest-only" onclick="window.location.href='preorder.html'">Pre-Order</button>
+                    <button class="virtual-try-btn preorder-btn guest-only" onclick="window.location.href='preorder.html?frameName=${encodeURIComponent(product.title)}'">Pre-Order</button>
                 </div>
                 <div class="admin-buttons" style="display: none;">
                     <button class="admin-btn edit-btn" onclick="editProductFromHomepage('${product.id}')">Edit</button>
@@ -304,6 +304,14 @@ function openProductDetailModal(productId) {
         mainImage.src = '';
         mainImage.alt = 'No image available';
         thumbnailContainer.innerHTML = '<div class="no-image-placeholder">No images available</div>';
+    }
+
+    // Update Pre-Order button with product title
+    const preorderBtn = document.querySelector('#productDetailModal .preorder-btn');
+    if (preorderBtn) {
+        preorderBtn.onclick = function() {
+            window.location.href = `preorder.html?frameName=${encodeURIComponent(product.title)}`;
+        };
     }
 
     // Show modal
