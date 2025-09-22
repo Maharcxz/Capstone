@@ -189,6 +189,7 @@ function openAddProductModal() {
     document.getElementById('modalTitle').textContent = 'Add New Product';
     document.getElementById('productForm').reset();
     clearAllImages(); // Clear any existing images
+    clearAllGlbFiles(); // Clear any existing 3D models
     document.getElementById('productModal').classList.add('active');
 }
 
@@ -223,10 +224,25 @@ async function editProduct(productId) {
             addImageToPreview(product.image, 'Primary Image');
         }
         
-        // Clear the file input when editing
+        // Handle .glb files - load existing .glb files into the preview
+        clearAllGlbFiles(); // Clear any existing .glb files first
+        
+        if (product.glbFiles && Array.isArray(product.glbFiles)) {
+            // Load multiple .glb files from array
+            product.glbFiles.forEach((glbFile, index) => {
+                addGlbFileToPreview(glbFile.src, glbFile.name || `GLB Model ${index + 1}`);
+            });
+        }
+        
+        // Clear the file inputs when editing
         const imageFileInput = document.getElementById('productImage');
         if (imageFileInput) {
             imageFileInput.value = '';
+        }
+        
+        const glbFileInput = document.getElementById('productGlbFiles');
+        if (glbFileInput) {
+            glbFileInput.value = '';
         }
         
         document.getElementById('productModal').classList.add('active');
@@ -241,6 +257,7 @@ function closeProductModal() {
     document.getElementById('productModal').classList.remove('active');
     editingProductId = null;
     clearAllImages(); // Clear images when closing modal
+    clearAllGlbFiles(); // Clear .glb files when closing modal
 }
 
 // Handle product form submission
@@ -250,10 +267,20 @@ async function handleProductSubmit(event) {
     // Get images from the productImages array
     const images = productImages.map(img => img.src);
     
+    // Get .glb files from the productGlbFiles array
+    const glbFiles = productGlbFiles.map(glb => ({
+        src: glb.src,
+        name: glb.name,
+        size: glb.size
+    }));
+    
     // Debug logging
     console.log('Product Images Array:', productImages);
     console.log('Extracted Images:', images);
     console.log('Images Length:', images.length);
+    console.log('Product GLB Files Array:', productGlbFiles);
+    console.log('Extracted GLB Files:', glbFiles);
+    console.log('GLB Files Length:', glbFiles.length);
     
     // Validation - require at least one image
     if (images.length === 0) {
@@ -268,6 +295,7 @@ async function handleProductSubmit(event) {
         category: document.getElementById('productCategory').value,
         images: images, // Store multiple images
         image: images[0], // Keep first image for backward compatibility
+        glbFiles: glbFiles, // Store .glb files
         visible: true, // Default to visible since we removed the checkbox
         updatedAt: new Date().toISOString()
     };
@@ -885,6 +913,141 @@ function clearAllImages() {
     renderImagePreview();
 }
 
+// GLB File Management Functions
+let productGlbFiles = [];
+
+function handleGlbFileUpload(event) {
+    const files = event.target.files;
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.name.toLowerCase().endsWith('.glb')) {
+            addGlbFileToPreview(file, file.name);
+        } else {
+            showNotification('Only .glb files are allowed for 3D models', 'error');
+        }
+    }
+    // Clear the input to allow re-uploading the same file
+    event.target.value = '';
+}
+
+function addGlbUrl() {
+    const urlInput = document.getElementById('productGlbUrl');
+    const url = urlInput.value.trim();
+    
+    if (!url) {
+        showNotification('Please enter a .glb file URL', 'error');
+        return;
+    }
+    
+    // Validate URL format
+    try {
+        new URL(url);
+    } catch (e) {
+        showNotification('Please enter a valid URL', 'error');
+        return;
+    }
+    
+    // Check if it's likely a .glb file URL
+    if (!url.toLowerCase().endsWith('.glb')) {
+        showNotification('URL must point to a .glb file', 'error');
+        return;
+    }
+    
+    addGlbFileToPreview(url, 'GLB Model from URL');
+    showNotification('GLB file added successfully', 'success');
+    urlInput.value = '';
+}
+
+function addGlbFileToPreview(src, name) {
+    const glbId = 'glb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    const fileSize = src instanceof File ? formatFileSize(src.size) : 'Unknown size';
+    
+    productGlbFiles.push({
+        id: glbId,
+        src: src instanceof File ? URL.createObjectURL(src) : src,
+        name: name,
+        size: fileSize,
+        file: src instanceof File ? src : null
+    });
+    
+    renderGlbPreview();
+}
+
+function removeGlbFile(glbId) {
+    productGlbFiles = productGlbFiles.filter(glb => glb.id !== glbId);
+    renderGlbPreview();
+}
+
+function moveGlbFileUp(glbId) {
+    const index = productGlbFiles.findIndex(glb => glb.id === glbId);
+    if (index > 0) {
+        [productGlbFiles[index], productGlbFiles[index - 1]] = [productGlbFiles[index - 1], productGlbFiles[index]];
+        renderGlbPreview();
+    }
+}
+
+function moveGlbFileDown(glbId) {
+    const index = productGlbFiles.findIndex(glb => glb.id === glbId);
+    if (index < productGlbFiles.length - 1) {
+        [productGlbFiles[index], productGlbFiles[index + 1]] = [productGlbFiles[index + 1], productGlbFiles[index]];
+        renderGlbPreview();
+    }
+}
+
+function renderGlbPreview() {
+    const container = document.getElementById('glbPreviewGrid');
+    if (!container) return;
+    
+    if (productGlbFiles.length === 0) {
+        container.innerHTML = '<p class="no-images">No 3D models added yet</p>';
+        return;
+    }
+    
+    container.innerHTML = productGlbFiles.map((glb, index) => `
+        <div class="glb-preview-item" data-glb-id="${glb.id}">
+            <div class="glb-file-icon">
+                <div class="glb-icon-background">
+                    <i class="fas fa-cube glb-main-icon"></i>
+                    <div class="glb-format-badge">GLB</div>
+                </div>
+                <div class="glb-3d-indicator">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                </div>
+            </div>
+            <div class="glb-file-info">
+                <div class="glb-file-name" title="${glb.name}">${glb.name}</div>
+                <div class="glb-file-size">${glb.size}</div>
+            </div>
+            <div class="glb-preview-controls">
+                <button type="button" class="control-btn move-up" onclick="moveGlbFileUp('${glb.id}')" 
+                        ${index === 0 ? 'disabled' : ''} title="Move up">
+                    <i class="fas fa-chevron-up"></i>
+                </button>
+                <button type="button" class="control-btn move-down" onclick="moveGlbFileDown('${glb.id}')" 
+                        ${index === productGlbFiles.length - 1 ? 'disabled' : ''} title="Move down">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <button type="button" class="control-btn remove" onclick="removeGlbFile('${glb.id}')" title="Remove">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function clearAllGlbFiles() {
+    productGlbFiles = [];
+    renderGlbPreview();
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
 // Export functions for global access
 window.openAddProductModal = openAddProductModal;
 window.editProduct = editProduct;
@@ -901,3 +1064,9 @@ window.removeImage = removeImage;
 window.moveImageUp = moveImageUp;
 window.moveImageDown = moveImageDown;
 window.clearAllImages = clearAllImages;
+window.handleGlbFileUpload = handleGlbFileUpload;
+window.addGlbUrl = addGlbUrl;
+window.removeGlbFile = removeGlbFile;
+window.moveGlbFileUp = moveGlbFileUp;
+window.moveGlbFileDown = moveGlbFileDown;
+window.clearAllGlbFiles = clearAllGlbFiles;
