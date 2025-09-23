@@ -13,8 +13,9 @@
     <link rel="stylesheet" href="CSS/HeaderStyles.css">
     
     <!-- Three.js for 3D rendering -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/GLTFLoader.js"></script>
+    <script src="https://unpkg.com/three@0.150.1/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.150.1/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://unpkg.com/three@0.150.1/examples/js/controls/OrbitControls.js"></script>
     
     <!-- MediaPipe for face detection -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
@@ -142,45 +143,7 @@
             margin-bottom: 10px;
         }
         
-        .frame-selector {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-        
-        .frame-option {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid transparent;
-            border-radius: 8px;
-            padding: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-        
-        .frame-option:hover {
-            border-color: rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.15);
-        }
-        
-        .frame-option.active {
-            border-color: #4CAF50;
-            background: rgba(76, 175, 80, 0.2);
-        }
-        
-        .frame-option img {
-            width: 100%;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 4px;
-            margin-bottom: 5px;
-        }
-        
-        .frame-option span {
-            color: #fff;
-            font-size: 12px;
-            font-family: 'Poppins', sans-serif;
-        }
+
         
 
         
@@ -306,11 +269,26 @@
             
             <!-- Controls Panel -->
             <div class="controls-panel">
-                <!-- Frame Selection -->
-                <div class="control-section">
-                    <div class="control-title">Select Frame</div>
-                    <div class="frame-selector" id="frameSelector">
-                        <!-- Frames will be loaded dynamically -->
+                <!-- 3D Model Controls -->
+                <div class="control-section" id="modelControls" style="display: none;">
+                    <div class="control-title">Model Adjustments</div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div>
+                            <label style="color: #fff; font-size: 12px; margin-bottom: 5px; display: block;">Scale</label>
+                            <input type="range" id="modelScale" min="0.5" max="2.0" step="0.1" value="1.0" 
+                                   style="width: 100%;" onchange="virtualTryOn.updateModelScale(this.value)">
+                        </div>
+                        <div>
+                            <label style="color: #fff; font-size: 12px; margin-bottom: 5px; display: block;">Position Y</label>
+                            <input type="range" id="modelPositionY" min="-0.5" max="0.5" step="0.05" value="0" 
+                                   style="width: 100%;" onchange="virtualTryOn.updateModelPositionY(this.value)">
+                        </div>
+                        <div>
+                            <label style="color: #fff; font-size: 12px; margin-bottom: 5px; display: block;">Rotation Y</label>
+                            <input type="range" id="modelRotationY" min="-180" max="180" step="5" value="0" 
+                                   style="width: 100%;" onchange="virtualTryOn.updateModelRotationY(this.value)">
+                        </div>
+                        <button class="action-btn secondary" onclick="virtualTryOn.resetModelTransform()">Reset Position</button>
                     </div>
                 </div>
                 

@@ -32,8 +32,31 @@ class VirtualTryOn {
             rotation: 0
         };
         
-        // Available frames - will be loaded dynamically from database
-        this.availableFrames = [];
+
+        
+        // Get URL parameters
+        this.urlParams = new URLSearchParams(window.location.search);
+        this.frameId = this.urlParams.get('frame');
+        this.productName = this.urlParams.get('productName');
+        
+        // Frame ID to GLB model mapping (matches ProductLoader.js mapping)
+        this.frameToGLBMapping = {
+            'glasses-6': { id: 'base', name: 'Base Model', path: '../Assets/base.glb' },
+            'glasses-7': { id: 'base_pbr', name: 'Base PBR', path: '../Assets/base_basic_pbr.glb' },
+            'glasses-10': { id: 'base_shaded', name: 'Base Shaded', path: '../Assets/base_basic_shaded.glb' },
+            'glasses-11b': { id: 'base', name: 'Base Model', path: '../Assets/base.glb' },
+            'glasses-12': { id: 'base_pbr', name: 'Base PBR', path: '../Assets/base_basic_pbr.glb' },
+            'glasses-5b': { id: 'base_shaded', name: 'Base Shaded', path: '../Assets/base_basic_shaded.glb' }
+        };
+        
+        // Get the assigned GLB model for this product
+        this.assignedGLBModel = this.frameId ? this.frameToGLBMapping[this.frameId] : null;
+        this.currentGLBModel = null;
+        
+        // Performance optimization settings
+        this.performanceMode = 'high'; // 'high', 'medium', 'low'
+        this.lastRenderTime = 0;
+        this.performanceStats = null;
         
         this.init();
     }
@@ -45,8 +68,10 @@ class VirtualTryOn {
             this.setupThreeJS();
             this.setupControls();
             this.enhanceControls(); // Add enhanced controls with face detection toggle
-            await this.loadAvailableFrames(); // Load frames from database
-            this.loadFrameSelector();
+            
+            // Automatically load the assigned GLB model
+            await this.loadAssignedGLBModel();
+            
             this.hideLoading();
             
             // Set up fallback if face detection is not available
@@ -484,220 +509,120 @@ class VirtualTryOn {
         });
     }
     
-    async loadAvailableFrames() {
-        try {
-            console.log('🔍 Loading available frames...');
+    async loadAssignedGLBModel() {
+        console.log('🔍 Loading assigned GLB model...');
+        console.log('🔍 Frame ID:', this.frameId);
+        console.log('🔍 Product Name:', this.productName);
+        console.log('🔍 Assigned GLB Model:', this.assignedGLBModel);
+        
+        // Update header title with product name
+        if (this.productName) {
+            this.updateHeaderTitle(`Virtual Try-On - ${this.productName}`);
+        }
+        
+        // Load the assigned GLB model if available
+        if (this.assignedGLBModel) {
+            console.log('Loading assigned GLB model:', this.assignedGLBModel);
+            this.currentGLBModel = this.assignedGLBModel;
+            await this.loadGlassesModel(this.assignedGLBModel.path);
             
-            // Check if getAllProducts function is available
-            if (typeof getAllProducts === 'function') {
-                console.log('📡 Database connection available, fetching products...');
-                const products = await getAllProducts();
-                console.log(`📦 Found ${products.length} total products in database`);
-                
-                // Debug: Log all products to see their structure
-                products.forEach((product, index) => {
-                    console.log(`Product ${index + 1}:`, {
-                        id: product.id,
-                        title: product.title,
-                        visible: product.visible,
-                        hasGlbFiles: !!product.glbFiles,
-                        glbFilesCount: product.glbFiles ? product.glbFiles.length : 0,
-                        glbFiles: product.glbFiles
-                    });
-                });
-                
-                // Filter products that have .glb files and are visible
-                this.availableFrames = products
-                    .filter(product => {
-                        const hasValidGlb = product.visible && 
-                                          product.glbFiles && 
-                                          Array.isArray(product.glbFiles) && 
-                                          product.glbFiles.length > 0;
-                        
-                        if (!hasValidGlb) {
-                            console.log(`❌ Product "${product.title}" filtered out:`, {
-                                visible: product.visible,
-                                hasGlbFiles: !!product.glbFiles,
-                                isArray: Array.isArray(product.glbFiles),
-                                length: product.glbFiles ? product.glbFiles.length : 0
-                            });
-                        }
-                        
-                        return hasValidGlb;
-                    })
-                    .map(product => ({
-                        id: product.id,
-                        name: product.title,
-                        model: product.glbFiles[0].src, // Use the first .glb file
-                        product: product // Store full product data for reference
-                    }));
-                
-                console.log(`✅ Loaded ${this.availableFrames.length} frames with .glb files from database`);
-                
-                // If no products with .glb files found, use fallback
-                if (this.availableFrames.length === 0) {
-                    console.warn('⚠️ No products with .glb files found in database, using fallback frames');
-                    this.availableFrames = [
-                        { id: 'glasses-6', name: 'Classic Round', model: 'Assets/glasses-6.glb' },
-                        { id: 'glasses-7', name: 'Modern Square', model: 'Assets/glasses-7.glb' },
-                        { id: 'glasses-10', name: 'Vintage Style', model: 'Assets/glasses-10.glb' }
-                    ];
-                }
-                
-                // Listen for real-time product updates
-                if (typeof listenForProductChanges === 'function') {
-                    listenForProductChanges((updatedProducts) => {
-                        this.updateAvailableFrames(updatedProducts);
-                    });
-                }
-            } else {
-                console.warn('⚠️ getAllProducts function not available, using fallback frames');
-                // Fallback to hardcoded frames if database is not available
-                this.availableFrames = [
-                    { id: 'glasses-6', name: 'Classic Round', model: 'Assets/glasses-6.glb' },
-                    { id: 'glasses-7', name: 'Modern Square', model: 'Assets/glasses-7.glb' },
-                    { id: 'glasses-10', name: 'Vintage Style', model: 'Assets/glasses-10.glb' }
-                ];
-            }
+            // Show model controls
+            this.showModelControls();
             
-            console.log('🎯 Final available frames:', this.availableFrames);
-        } catch (error) {
-            console.error('❌ Error loading frames from database:', error);
-            // Fallback to hardcoded frames on error
-            this.availableFrames = [
-                { id: 'glasses-6', name: 'Classic Round', model: 'Assets/glasses-6.glb' },
-                { id: 'glasses-7', name: 'Modern Square', model: 'Assets/glasses-7.glb' },
-                { id: 'glasses-10', name: 'Vintage Style', model: 'Assets/glasses-10.glb' }
-            ];
-            console.log('🔄 Using fallback frames:', this.availableFrames);
+            this.showTemporaryMessage(`✅ Loaded ${this.assignedGLBModel.name} for ${this.productName || 'product'}`, 3000);
+        } else {
+            // No frame ID provided or invalid frame ID
+            const message = this.frameId ? 
+                `❌ No GLB model found for frame: ${this.frameId}` : 
+                '⚠️ No frame specified in URL parameters';
+            console.warn(message);
+            this.showTemporaryMessage(message, 5000);
         }
     }
     
-    updateAvailableFrames(products) {
-        // Filter products that have .glb files and are visible
-        const previousCount = this.availableFrames.length;
-        
-        this.availableFrames = products
-            .filter(product => {
-                return product.visible && 
-                       product.glbFiles && 
-                       Array.isArray(product.glbFiles) && 
-                       product.glbFiles.length > 0;
-            })
-            .map(product => ({
-                id: product.id,
-                name: product.title,
-                model: product.glbFiles[0].src, // Use the first .glb file
-                product: product // Store full product data for reference
-            }));
-        
-        console.log(`Updated frames: ${previousCount} -> ${this.availableFrames.length} frames with .glb files`);
-        
-        // Refresh the frame selector UI
-        this.loadFrameSelector();
-        
-        // If the currently selected frame is no longer available, clear selection
-        if (this.currentFrame && !this.availableFrames.find(f => f.id === this.currentFrame.id)) {
-            this.currentFrame = null;
-            // Clear the 3D model
-            if (this.glassesModel) {
-                this.scene.remove(this.glassesModel);
-                this.glassesModel = null;
-            }
-            // Update header title
-            this.updateHeaderTitle();
+
+    
+
+
+    
+
+    
+    showModelControls() {
+        const modelControls = document.getElementById('modelControls');
+        if (modelControls) {
+            modelControls.style.display = 'block';
         }
     }
     
-    loadFrameSelector() {
-        const frameSelector = document.getElementById('frameSelector');
-        
-        if (this.availableFrames.length === 0) {
-            frameSelector.innerHTML = `
-                <div style="text-align: center; padding: 20px; color: rgba(255,255,255,0.7);">
-                    <div style="font-size: 48px; margin-bottom: 10px;">👓</div>
-                    <div style="font-size: 14px; line-height: 1.4;">
-                        No 3D models available<br>
-                        <small style="font-size: 12px; opacity: 0.8;">Products need .glb files to appear here</small>
-                    </div>
-                </div>
-            `;
-            return;
+    hideModelControls() {
+        const modelControls = document.getElementById('modelControls');
+        if (modelControls) {
+            modelControls.style.display = 'none';
         }
-        
-        frameSelector.innerHTML = this.availableFrames.map(frame => `
-            <div class="frame-option" data-frame-id="${frame.id}" onclick="virtualTryOn.selectFrame('${frame.id}')">
-                <div style="width: 100%; height: 60px; background: rgba(255,255,255,0.1); border-radius: 4px; display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
-                    <span style="font-size: 24px;">👓</span>
-                </div>
-                <span>${frame.name}</span>
-            </div>
-        `).join('');
     }
     
-    async selectFrame(frameId) {
-        const frame = this.availableFrames.find(f => f.id === frameId);
-        if (!frame) {
-            console.error('Frame not found:', frameId);
-            this.show3DModelError('Selected frame not found');
-            return;
-        }
-        
-        // Store current selected frame for retry functionality
-        this.currentSelectedFrame = frame;
-        
-        // Update UI
-        document.querySelectorAll('.frame-option').forEach(option => {
-            option.classList.remove('active');
-        });
-        const frameElement = document.querySelector(`[data-frame-id="${frameId}"]`);
-        if (frameElement) {
-            frameElement.classList.add('active');
-        }
-        
-        // Load 3D model - check for glbFile property from database
-        try {
-            let modelPath = null;
-            
-            // Check for .glb file from database (glbFiles array)
-            if (frame.glbFiles && frame.glbFiles.length > 0) {
-                modelPath = frame.glbFiles[0]; // Use first .glb file
-                console.log('Loading .glb file from database:', modelPath);
-            } 
-            // Fallback to model property for backward compatibility
-            else if (frame.model) {
-                modelPath = frame.model;
-                console.log('Loading model from fallback property:', modelPath);
-            }
-            
-            if (modelPath) {
-                // Store the model path for retry functionality
-                this.currentSelectedFrame.glbFile = modelPath;
-                await this.loadGlassesModel(modelPath);
-                this.currentFrame = frame;
-                
-                // Update header title with current product name
-                this.updateHeaderTitle(frame.name);
-            } else {
-                console.warn('No 3D model found for frame:', frame);
-                this.show3DModelError('No 3D model available for this product');
-            }
-        } catch (error) {
-            console.error('Error loading frame model:', error);
-            this.show3DModelError('Failed to load 3D model');
+    updateModelScale(scale) {
+        if (this.glassesModel) {
+            const scaleValue = parseFloat(scale);
+            this.glassesModel.scale.set(scaleValue * 0.1, scaleValue * 0.1, scaleValue * 0.1);
+            console.log('Model scale updated to:', scaleValue);
         }
     }
+    
+    updateModelPositionY(positionY) {
+        if (this.glassesModel) {
+            const yValue = parseFloat(positionY);
+            this.glassesModel.position.y = yValue;
+            console.log('Model position Y updated to:', yValue);
+        }
+    }
+    
+    updateModelRotationY(rotationY) {
+        if (this.glassesModel) {
+            const rotValue = parseFloat(rotationY) * (Math.PI / 180); // Convert to radians
+            this.glassesModel.rotation.y = rotValue;
+            console.log('Model rotation Y updated to:', rotationY, 'degrees');
+        }
+    }
+    
+    resetModelTransform() {
+        if (this.glassesModel) {
+            this.glassesModel.scale.set(0.1, 0.1, 0.1);
+            this.glassesModel.position.set(0, 0.2, 0);
+            this.glassesModel.rotation.set(0, 0, 0);
+            
+            // Reset UI controls
+            document.getElementById('modelScale').value = 1.0;
+            document.getElementById('modelPositionY').value = 0;
+            document.getElementById('modelRotationY').value = 0;
+            
+            console.log('Model transform reset to defaults');
+        }
+    }
+    
+
     
     async loadGlassesModel(modelPath) {
         return new Promise((resolve, reject) => {
             try {
                 console.log('🔄 Starting 3D model loading process...');
                 console.log('📁 Model path:', modelPath);
+                console.log('📍 Call stack:', new Error().stack);
+                
+                // Check if THREE is available
+                if (typeof THREE === 'undefined') {
+                    console.warn('❌ THREE.js not available');
+                    this.show3DModelError('3D model viewer not available - THREE.js missing');
+                    resolve();
+                    return;
+                }
+                console.log('✅ THREE.js is available');
                 
                 // Check if GLTFLoader is available
                 if (typeof THREE.GLTFLoader === 'undefined') {
                     console.warn('❌ GLTFLoader not available, 3D models will not be loaded');
-                    this.show3DModelError('3D model viewer not available');
+                    console.log('Available THREE properties:', Object.keys(THREE));
+                    this.show3DModelError('3D model viewer not available - GLTFLoader missing');
                     resolve(); // Don't reject, just continue without 3D models
                     return;
                 }
@@ -1024,14 +949,27 @@ class VirtualTryOn {
         const ndcY = -(glassesCenter.y * 2 - 1);
         const ndcZ = glassesCenter.z * 2;
         
+        // Enhanced positioning for GLB models
+        const isGLBModel = this.currentGLBModel !== null;
+        const positionMultiplier = isGLBModel ? 2.0 : 1.5; // GLB models may need different positioning
+        const depthMultiplier = isGLBModel ? 0.3 : 0.5;   // GLB models closer to face
+        
         // Position the glasses with depth consideration
-        this.glassesModel.position.x = ndcX * 1.5;
-        this.glassesModel.position.y = ndcY * 1.5;
-        this.glassesModel.position.z = ndcZ * 0.5;
+        this.glassesModel.position.x = ndcX * positionMultiplier;
+        this.glassesModel.position.y = ndcY * positionMultiplier;
+        this.glassesModel.position.z = ndcZ * depthMultiplier;
         
         // Enhanced scaling based on face size and distance
         const faceWidth = Math.abs(rightEyeOuter.x - leftEyeOuter.x);
-        const baseScale = Math.max(0.3, Math.min(2.0, faceWidth * 3.5)); // Clamp scale
+        let baseScale;
+        
+        if (isGLBModel) {
+            // GLB models often need different scaling
+            baseScale = Math.max(0.1, Math.min(1.5, faceWidth * 2.5));
+        } else {
+            baseScale = Math.max(0.3, Math.min(2.0, faceWidth * 3.5));
+        }
+        
         this.glassesModel.scale.set(baseScale, baseScale, baseScale);
         
         // Calculate rotation based on eye alignment and face orientation
@@ -1047,6 +985,17 @@ class VirtualTryOn {
         // Add subtle Y-axis rotation for face angle
         const faceAngle = this.calculateFaceAngle();
         this.glassesModel.rotation.y = faceAngle * 0.3; // Subtle rotation
+        
+        // Additional X-axis rotation for GLB models to better align with face
+        if (isGLBModel) {
+            const noseToForehead = {
+                x: foreheadCenter.x - noseBridge.x,
+                y: foreheadCenter.y - noseBridge.y,
+                z: foreheadCenter.z - noseBridge.z
+            };
+            const faceNormalAngle = Math.atan2(noseToForehead.y, noseToForehead.z);
+            this.glassesModel.rotation.x = faceNormalAngle * 0.2; // Subtle face normal alignment
+        }
         
         this.glassesModel.visible = true;
         this.updateGlassesTransform();
@@ -1205,13 +1154,67 @@ class VirtualTryOn {
     }
     
     render3D() {
-        if (this.renderer && this.scene && this.camera) {
+        if (!this.renderer || !this.scene || !this.camera) return;
+        
+        // Performance optimization: limit frame rate
+        const now = performance.now();
+        if (!this.lastRenderTime) this.lastRenderTime = now;
+        
+        const deltaTime = now - this.lastRenderTime;
+        const targetFPS = this.performanceMode === 'high' ? 60 : 30;
+        const frameInterval = 1000 / targetFPS;
+        
+        if (deltaTime < frameInterval) return;
+        
+        this.lastRenderTime = now;
+        
+        // Only render if there's a model to show
+        if (this.glassesModel) {
             // Ensure glasses model is visible if it exists
-            if (this.glassesModel && !this.glassesModel.visible) {
+            if (!this.glassesModel.visible) {
                 this.glassesModel.visible = true;
             }
             
+            // Frustum culling optimization
+            this.glassesModel.frustumCulled = true;
+            
             this.renderer.render(this.scene, this.camera);
+            
+            // Update performance stats
+            this.updatePerformanceStats(deltaTime);
+        }
+    }
+    
+    updatePerformanceStats(deltaTime) {
+        if (!this.performanceStats) {
+            this.performanceStats = {
+                frameCount: 0,
+                totalTime: 0,
+                avgFPS: 0,
+                lastUpdate: performance.now()
+            };
+        }
+        
+        this.performanceStats.frameCount++;
+        this.performanceStats.totalTime += deltaTime;
+        
+        // Update FPS every second
+        const now = performance.now();
+        if (now - this.performanceStats.lastUpdate > 1000) {
+            this.performanceStats.avgFPS = Math.round(1000 / (this.performanceStats.totalTime / this.performanceStats.frameCount));
+            
+            // Auto-adjust performance mode based on FPS
+            if (this.performanceStats.avgFPS < 20 && this.performanceMode !== 'low') {
+                this.performanceMode = 'low';
+                console.log('Switching to low performance mode for better frame rate');
+            } else if (this.performanceStats.avgFPS > 45 && this.performanceMode !== 'high') {
+                this.performanceMode = 'high';
+            }
+            
+            // Reset stats
+            this.performanceStats.frameCount = 0;
+            this.performanceStats.totalTime = 0;
+            this.performanceStats.lastUpdate = now;
         }
     }
 
@@ -1404,9 +1407,9 @@ class VirtualTryOn {
     }
 
     retryModelLoading() {
-        if (this.currentSelectedFrame && this.currentSelectedFrame.glbFile) {
+        if (this.currentGLBModel && this.currentGLBModel.path) {
             console.log('Retrying 3D model loading...');
-            this.loadGlassesModel(this.currentSelectedFrame.glbFile);
+            this.loadGlassesModel(this.currentGLBModel.path);
         } else {
             this.show3DModelError('No 3D model to retry loading');
         }
@@ -1706,39 +1709,7 @@ window.addEventListener('resize', () => {
     }
 });
 
-// Get frame from URL parameters
-function getFrameFromURL() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const frameId = urlParams.get('frame');
-    const productName = urlParams.get('productName');
-    
-    if (frameId && virtualTryOn) {
-        // Wait for initialization to complete
-        setTimeout(() => {
-            virtualTryOn.selectFrame(frameId);
-        }, 1000);
-    }
-    
-    // Update page title if product name is provided
-    if (productName) {
-        document.title = `Virtual Try-On - ${productName} - Trinity Optimum Vision Center`;
-        // Use the updateHeaderTitle method if virtualTryOn is available
-        if (virtualTryOn && virtualTryOn.updateHeaderTitle) {
-            virtualTryOn.updateHeaderTitle(productName);
-        } else {
-            // Fallback for when virtualTryOn is not yet initialized
-            const titleElement = document.getElementById('tryOnTitle');
-            if (titleElement) {
-                titleElement.textContent = `Virtual Try-On – ${productName}`;
-            }
-        }
-    }
-}
 
-// Call this function when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-    getFrameFromURL();
-});
 
 // Function to navigate to home page when header title is clicked
 function navigateToHome() {
