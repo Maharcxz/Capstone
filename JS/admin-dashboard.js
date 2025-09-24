@@ -188,6 +188,7 @@ function openAddProductModal() {
     editingProductId = null;
     document.getElementById('modalTitle').textContent = 'Add New Product';
     document.getElementById('productForm').reset();
+    document.getElementById('productStock').value = 0; // Reset stock to 0
     clearAllImages(); // Clear any existing images
     clearAllGlbFiles(); // Clear any existing 3D models
     document.getElementById('productModal').classList.add('active');
@@ -210,6 +211,7 @@ async function editProduct(productId) {
         document.getElementById('productDescription').value = product.description || '';
         document.getElementById('productPrice').value = product.price;
         document.getElementById('productCategory').value = product.category;
+        document.getElementById('productStock').value = product.stock || 0;
         
         // Handle multiple images - load existing images into the preview
         clearAllImages(); // Clear any existing images first
@@ -293,6 +295,7 @@ async function handleProductSubmit(event) {
         description: document.getElementById('productDescription').value.trim(),
         price: parseFloat(document.getElementById('productPrice').value),
         category: document.getElementById('productCategory').value,
+        stock: parseInt(document.getElementById('productStock').value) || 0,
         images: images, // Store multiple images
         image: images[0], // Keep first image for backward compatibility
         glbFiles: glbFiles, // Store .glb files
@@ -301,7 +304,7 @@ async function handleProductSubmit(event) {
     };
     
     // Validation
-    if (!formData.title || !formData.category || isNaN(formData.price) || formData.price < 0) {
+    if (!formData.title || !formData.category || isNaN(formData.price) || formData.price < 0 || isNaN(formData.stock) || formData.stock < 0) {
         showNotification('Please fill in all required fields correctly', 'error');
         return;
     }

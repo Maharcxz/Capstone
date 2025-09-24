@@ -323,13 +323,42 @@
                 <div class="product-info-section">
                     <h2 id="productDetailTitle" class="product-detail-title"></h2>
                     <p id="productDetailPrice" class="product-detail-price"></p>
+                    
+                    <!-- Stock Information -->
+                    <div class="stock-info">
+                        <p id="stockDisplay" class="stock-display">Stock: <span id="stockQuantity">0</span></p>
+                    </div>
+                    
                     <div class="product-description">
                         <h4>Description</h4>
                         <p id="productDetailDescription"></p>
                     </div>
+                    
+                    <!-- Quantity Selector for Customers -->
+                    <div class="quantity-section guest-only">
+                        <h4>Quantity</h4>
+                        <div class="quantity-selector">
+                            <button class="quantity-btn" id="decreaseQty" onclick="changeQuantity(-1)">-</button>
+                            <input type="number" id="quantityInput" value="1" min="1" max="99" readonly>
+                            <button class="quantity-btn" id="increaseQty" onclick="changeQuantity(1)">+</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Admin Stock Management Section -->
+                    <div class="admin-stock-section admin-only" style="display: none;">
+                        <h4>Stock Management (Admin)</h4>
+                        <div class="admin-stock-controls">
+                            <div class="stock-input-group">
+                                <label for="adminStockInput">Update Stock:</label>
+                                <input type="number" id="adminStockInput" min="0" max="9999" placeholder="Enter stock quantity">
+                            </div>
+                            <button class="admin-btn update-stock-btn" onclick="updateProductStock()">Update Stock</button>
+                        </div>
+                    </div>
+                    
                     <div class="product-actions">
                         <button class="virtual-try-btn">Virtual Try - On</button>
-                        <button class="preorder-btn" onclick="window.location.href='preorder.html'">Pre-Order</button>
+                        <button class="preorder-btn" id="preorderBtn" onclick="handlePreOrder()">Pre-Order</button>
                     </div>
                 </div>
             </div>

@@ -4,6 +4,7 @@
 let allProductsData = [];
 let filteredProductsData = [];
 let currentCategory = 'All Frames';
+let currentProductId = null; // Track currently viewed product in modal
 
 // Initialize product loading when page loads
 document.addEventListener('DOMContentLoaded', function() {
@@ -102,9 +103,17 @@ function renderProductGrid() {
                     <h3 class="product-title">${escapeHtml(product.title)}</h3>
                     <p class="product-price">₱ ${parseFloat(product.price).toLocaleString()}</p>
                 </div>
+                <div class="product-stock-info">
+                    <p class="product-stock ${(product.stock || 0) === 0 ? 'out-of-stock' : (product.stock || 0) <= 5 ? 'low-stock' : ''}">
+                        Stock: ${product.stock || 0}
+                    </p>
+                </div>
                 <div class="product-buttons">
                     <button class="virtual-try-btn">Virtual Try - On</button>
-                    <button class="virtual-try-btn preorder-btn guest-only" onclick="window.location.href='preorder.html?frameName=${encodeURIComponent(product.title)}'">Pre-Order</button>
+                    <button class="virtual-try-btn preorder-btn guest-only ${(product.stock || 0) === 0 ? 'disabled' : ''}" 
+                            onclick="${(product.stock || 0) === 0 ? 'return false;' : `window.location.href='preorder.html?frameName=${encodeURIComponent(product.title)}'`}">
+                        ${(product.stock || 0) === 0 ? 'Out of Stock' : 'Pre-Order'}
+                    </button>
                 </div>
                 <div class="admin-buttons" style="display: none;">
                     <button class="admin-btn edit-btn" onclick="editProductFromHomepage('${product.id}')">Edit</button>
@@ -271,10 +280,22 @@ function openProductDetailModal(productId) {
     const product = allProductsData.find(p => p.id === productId);
     if (!product) return;
 
+    // Store current product ID for reference
+    currentProductId = productId;
+
     // Populate modal with product data
     document.getElementById('productDetailTitle').textContent = product.title;
     document.getElementById('productDetailPrice').textContent = `₱ ${parseFloat(product.price).toLocaleString()}`;
     document.getElementById('productDetailDescription').textContent = product.description || 'No description available.';
+
+    // Update stock information
+    updateStockDisplay(product.stock || 0);
+    
+    // Initialize quantity selector
+    initializeQuantitySelector(product.stock || 0);
+    
+    // Initialize admin stock controls
+    initializeAdminStockControls(product.stock || 0);
 
     // Handle images
     const mainImage = document.getElementById('mainProductImage');
@@ -375,6 +396,206 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // Export functions for global access
+// Inventory Management Functions
+
+// Update stock display in modal
+function updateStockDisplay(stock) {
+    const stockQuantityElement = document.getElementById('stockQuantity');
+    const stockDisplayElement = document.getElementById('stockDisplay');
+    
+    if (stockQuantityElement && stockDisplayElement) {
+        stockQuantityElement.textContent = stock;
+        
+        // Update styling based on stock level
+        stockDisplayElement.className = 'stock-display';
+        if (stock === 0) {
+            stockDisplayElement.classList.add('out-of-stock');
+        } else if (stock <= 5) {
+            stockDisplayElement.classList.add('low-stock');
+        }
+    }
+}
+
+// Initialize quantity selector
+function initializeQuantitySelector(stock) {
+    const quantityInput = document.getElementById('quantityInput');
+    const decreaseBtn = document.getElementById('decreaseQty');
+    const increaseBtn = document.getElementById('increaseQty');
+    const preorderBtn = document.getElementById('preorderBtn');
+    
+    if (quantityInput && decreaseBtn && increaseBtn && preorderBtn) {
+        // Reset quantity to 1
+        quantityInput.value = 1;
+        quantityInput.max = Math.max(1, stock);
+        
+        // Update button states
+        updateQuantityButtons(stock);
+        updatePreorderButton(stock);
+    }
+}
+
+// Initialize admin stock controls
+function initializeAdminStockControls(stock) {
+    const adminStockInput = document.getElementById('adminStockInput');
+    
+    if (adminStockInput) {
+        adminStockInput.value = stock;
+    }
+}
+
+// Change quantity function
+function changeQuantity(change) {
+    const quantityInput = document.getElementById('quantityInput');
+    const product = allProductsData.find(p => p.id === currentProductId);
+    
+    if (!quantityInput || !product) return;
+    
+    const currentQty = parseInt(quantityInput.value) || 1;
+    const newQty = Math.max(1, Math.min(currentQty + change, product.stock || 0));
+    
+    quantityInput.value = newQty;
+    updateQuantityButtons(product.stock || 0);
+}
+
+// Update quantity button states
+function updateQuantityButtons(stock) {
+    const quantityInput = document.getElementById('quantityInput');
+    const decreaseBtn = document.getElementById('decreaseQty');
+    const increaseBtn = document.getElementById('increaseQty');
+    
+    if (!quantityInput || !decreaseBtn || !increaseBtn) return;
+    
+    const currentQty = parseInt(quantityInput.value) || 1;
+    
+    decreaseBtn.disabled = currentQty <= 1;
+    increaseBtn.disabled = currentQty >= stock || stock === 0;
+}
+
+// Update pre-order button state
+function updatePreorderButton(stock) {
+    const preorderBtn = document.getElementById('preorderBtn');
+    
+    if (!preorderBtn) return;
+    
+    if (stock === 0) {
+        preorderBtn.disabled = true;
+        preorderBtn.textContent = 'Out of Stock';
+        preorderBtn.onclick = null;
+    } else {
+        preorderBtn.disabled = false;
+        preorderBtn.textContent = 'Pre-Order';
+        preorderBtn.onclick = handlePreOrder;
+    }
+}
+
+// Handle pre-order with quantity
+function handlePreOrder() {
+    const product = allProductsData.find(p => p.id === currentProductId);
+    const quantityInput = document.getElementById('quantityInput');
+    
+    if (!product || !quantityInput) return;
+    
+    const quantity = parseInt(quantityInput.value) || 1;
+    const stock = product.stock || 0;
+    
+    if (quantity > stock) {
+        alert('Selected quantity exceeds available stock.');
+        return;
+    }
+    
+    if (stock === 0) {
+        alert('This product is out of stock.');
+        return;
+    }
+    
+    // Store quantity in session storage for the pre-order page
+    sessionStorage.setItem('preorderQuantity', quantity);
+    sessionStorage.setItem('preorderProductId', currentProductId);
+    
+    // Redirect to pre-order page
+    window.location.href = `preorder.html?frameName=${encodeURIComponent(product.title)}&quantity=${quantity}`;
+}
+
+// Update product stock (Admin function)
+async function updateProductStock() {
+    if (!currentProductId) {
+        alert('No product selected.');
+        return;
+    }
+    
+    const adminStockInput = document.getElementById('adminStockInput');
+    if (!adminStockInput) return;
+    
+    const newStock = parseInt(adminStockInput.value);
+    
+    if (isNaN(newStock) || newStock < 0) {
+        alert('Please enter a valid stock quantity (0 or greater).');
+        return;
+    }
+    
+    try {
+        // Update product in Firebase
+        const productRef = firebase.database().ref(`products/${currentProductId}`);
+        await productRef.update({ stock: newStock });
+        
+        // Update local data
+        const product = allProductsData.find(p => p.id === currentProductId);
+        if (product) {
+            product.stock = newStock;
+        }
+        
+        // Update displays
+        updateStockDisplay(newStock);
+        initializeQuantitySelector(newStock);
+        
+        // Refresh product grid to show updated stock
+        renderProductGrid();
+        
+        // Show success notification
+        if (typeof showHomepageNotification === 'function') {
+            showHomepageNotification('Stock updated successfully!', 'success');
+        } else {
+            alert('Stock updated successfully!');
+        }
+        
+    } catch (error) {
+        console.error('Error updating stock:', error);
+        alert('Error updating stock: ' + error.message);
+    }
+}
+
+// Reduce stock after successful pre-order
+async function reduceProductStock(productId, quantity) {
+    try {
+        const product = allProductsData.find(p => p.id === productId);
+        if (!product) return false;
+        
+        const newStock = Math.max(0, (product.stock || 0) - quantity);
+        
+        // Update product in Firebase
+        const productRef = firebase.database().ref(`products/${productId}`);
+        await productRef.update({ stock: newStock });
+        
+        // Update local data
+        product.stock = newStock;
+        
+        // If modal is open for this product, update displays
+        if (currentProductId === productId) {
+            updateStockDisplay(newStock);
+            initializeQuantitySelector(newStock);
+        }
+        
+        // Refresh product grid
+        renderProductGrid();
+        
+        return true;
+    } catch (error) {
+        console.error('Error reducing stock:', error);
+        return false;
+    }
+}
+
+// Export functions to global scope
 window.selectFrameCategory = selectFrameCategory;
 window.searchProducts = searchProducts;
 window.editProductFromHomepage = editProductFromHomepage;
@@ -383,3 +604,7 @@ window.toggleProductVisibilityFromHomepage = toggleProductVisibilityFromHomepage
 window.openProductDetailModal = openProductDetailModal;
 window.closeProductDetailModal = closeProductDetailModal;
 window.setMainImage = setMainImage;
+window.changeQuantity = changeQuantity;
+window.handlePreOrder = handlePreOrder;
+window.updateProductStock = updateProductStock;
+window.reduceProductStock = reduceProductStock;
