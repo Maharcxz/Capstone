@@ -39,38 +39,297 @@ class VirtualTryOn {
         this.frameId = this.urlParams.get('frame');
         this.productName = this.urlParams.get('productName');
         
-        // Frame ID to GLB model mapping (matches ProductLoader.js mapping)
+        // Fixed frame ID to GLB model mapping with correct paths
         this.frameToGLBMapping = {
-            'glasses-6': { id: 'base', name: 'Base Model', path: '../Assets/base.glb' },
-            'glasses-7': { id: 'base_pbr', name: 'Base PBR', path: '../Assets/base_basic_pbr.glb' },
-            'glasses-10': { id: 'base_shaded', name: 'Base Shaded', path: '../Assets/base_basic_shaded.glb' },
-            'glasses-11b': { id: 'base', name: 'Base Model', path: '../Assets/base.glb' },
-            'glasses-12': { id: 'base_pbr', name: 'Base PBR', path: '../Assets/base_basic_pbr.glb' },
-            'glasses-5b': { id: 'base_shaded', name: 'Base Shaded', path: '../Assets/base_basic_shaded.glb' }
+            'glasses-6': { id: 'base', name: 'Base Model', path: 'Assets/base.glb' },
+            'glasses-7': { id: 'base_pbr', name: 'Base PBR', path: 'Assets/base_basic_pbr.glb' },
+            'glasses-10': { id: 'base_shaded', name: 'Base Shaded', path: 'Assets/base_basic_shaded.glb' },
+            'glasses-11b': { id: 'base', name: 'Base Model', path: 'Assets/base.glb' },
+            'glasses-12': { id: 'base_pbr', name: 'Base PBR', path: 'Assets/base_basic_pbr.glb' },
+            'glasses-5b': { id: 'base_shaded', name: 'Base Shaded', path: 'Assets/base_basic_shaded.glb' }
         };
+        
+        // Fallback models for different scenarios
+        this.fallbackModels = [
+            'Assets/base.glb',
+            'Assets/base_basic_pbr.glb',
+            'Assets/base_basic_shaded.glb'
+        ];
+        
+        // Enhanced 3D model management
+        this.modelLoadAttempts = 0;
+        this.maxLoadAttempts = 3;
+        this.modelLoadTimeout = 15000; // 15 seconds
+        this.fallbackModelUsed = false;
+        this.webglSupported = false;
+        this.threeJSReady = false;
         
         // Get the assigned GLB model for this product
         this.assignedGLBModel = this.frameId ? this.frameToGLBMapping[this.frameId] : null;
         this.currentGLBModel = null;
         
-        // Performance optimization settings
-        this.performanceMode = 'high'; // 'high', 'medium', 'low'
+        // Device capabilities and performance settings
+        this.deviceCapabilities = window.deviceCapabilities || {};
+        this.threeJSConfig = window.threeJSConfig || {};
+        this.performanceMode = this.deviceCapabilities.isMobile ? 'low' : 'high';
         this.lastRenderTime = 0;
         this.performanceStats = null;
         
-        this.init();
+        // Adaptive quality settings based on device capabilities
+        this.qualitySettings = {
+            low: {
+                renderScale: 0.5,
+                targetFPS: 30,
+                maxParticles: 50,
+                shadowMapSize: 512,
+                antialias: false,
+                precision: 'lowp'
+            },
+            medium: {
+                renderScale: 0.75,
+                targetFPS: 45,
+                maxParticles: 100,
+                shadowMapSize: 1024,
+                antialias: true,
+                precision: 'mediump'
+            },
+            high: {
+                renderScale: 1.0,
+                targetFPS: 60,
+                maxParticles: 200,
+                shadowMapSize: 2048,
+                antialias: true,
+                precision: 'highp'
+            }
+        };
+        
+        // Initialize when ready
+        this.waitForDependencies().then(() => this.init());
+    }
+    
+    async waitForDependencies() {
+        // Add browser compatibility polyfills first
+        this.addBrowserPolyfills();
+        
+        // Check browser compatibility
+        const browserSupport = this.checkBrowserCompatibility();
+        if (!browserSupport.supported) {
+            this.showBrowserCompatibilityError(browserSupport.issues);
+            return;
+        }
+        
+        // Wait for WebGL and Three.js to be ready
+        let attempts = 0;
+        const maxAttempts = 50; // 5 seconds max wait
+        
+        while (attempts < maxAttempts) {
+            if (typeof window.webglSupported !== 'undefined' && typeof window.threeJSLoaded !== 'undefined') {
+                // Handle both object and boolean values for webglSupported
+                this.webglSupported = window.webglSupported && (window.webglSupported.supported !== false);
+                this.threeJSReady = window.threeJSLoaded;
+                break;
+            }
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+        
+        if (attempts >= maxAttempts) {
+            console.warn('Timeout waiting for dependencies, proceeding with limited functionality');
+            this.webglSupported = false;
+            this.threeJSReady = false;
+        }
+    }
+    
+    addBrowserPolyfills() {
+        // Add performance.now() polyfill for older browsers
+        if (!window.performance || !window.performance.now) {
+            window.performance = window.performance || {};
+            window.performance.now = function() {
+                return Date.now();
+            };
+        }
+        
+        // Add requestAnimationFrame polyfill
+        if (!window.requestAnimationFrame) {
+            window.requestAnimationFrame = function(callback) {
+                return setTimeout(callback, 1000 / 60);
+            };
+        }
+        
+        // Add cancelAnimationFrame polyfill
+        if (!window.cancelAnimationFrame) {
+            window.cancelAnimationFrame = function(id) {
+                clearTimeout(id);
+            };
+        }
+        
+        // Add getUserMedia polyfill
+        if (!navigator.mediaDevices) {
+            navigator.mediaDevices = {};
+        }
+        
+        if (!navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia = function(constraints) {
+                const getUserMedia = navigator.webkitGetUserMedia || 
+                                   navigator.mozGetUserMedia || 
+                                   navigator.msGetUserMedia;
+                
+                if (!getUserMedia) {
+                    return Promise.reject(new Error('getUserMedia is not supported'));
+                }
+                
+                return new Promise((resolve, reject) => {
+                    getUserMedia.call(navigator, constraints, resolve, reject);
+                });
+            };
+        }
+        
+        console.log('Browser polyfills added');
+    }
+    
+    checkBrowserCompatibility() {
+        const issues = [];
+        let supported = true;
+        
+        // Check for required APIs
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            issues.push('Camera access (getUserMedia) not supported');
+            supported = false;
+        }
+        
+        if (!window.WebGLRenderingContext && !window.WebGL2RenderingContext) {
+            issues.push('WebGL not supported');
+            supported = false;
+        }
+        
+        if (!window.Worker) {
+            issues.push('Web Workers not supported');
+            // Not critical, but log it
+            console.warn('Web Workers not supported - some features may be slower');
+        }
+        
+        // Check browser version compatibility
+        const userAgent = navigator.userAgent;
+        const browserInfo = this.getBrowserInfo(userAgent);
+        
+        if (browserInfo.name === 'Internet Explorer') {
+            issues.push('Internet Explorer is not supported');
+            supported = false;
+        }
+        
+        if (browserInfo.name === 'Chrome' && browserInfo.version < 60) {
+            issues.push('Chrome version too old (minimum: 60)');
+            supported = false;
+        }
+        
+        if (browserInfo.name === 'Firefox' && browserInfo.version < 55) {
+            issues.push('Firefox version too old (minimum: 55)');
+            supported = false;
+        }
+        
+        if (browserInfo.name === 'Safari' && browserInfo.version < 11) {
+            issues.push('Safari version too old (minimum: 11)');
+            supported = false;
+        }
+        
+        return { supported, issues, browserInfo };
+    }
+    
+    getBrowserInfo(userAgent) {
+        let name = 'Unknown';
+        let version = 0;
+        
+        if (userAgent.indexOf('Chrome') > -1) {
+            name = 'Chrome';
+            const match = userAgent.match(/Chrome\/(\d+)/);
+            version = match ? parseInt(match[1]) : 0;
+        } else if (userAgent.indexOf('Firefox') > -1) {
+            name = 'Firefox';
+            const match = userAgent.match(/Firefox\/(\d+)/);
+            version = match ? parseInt(match[1]) : 0;
+        } else if (userAgent.indexOf('Safari') > -1) {
+            name = 'Safari';
+            const match = userAgent.match(/Version\/(\d+)/);
+            version = match ? parseInt(match[1]) : 0;
+        } else if (userAgent.indexOf('Edge') > -1) {
+            name = 'Edge';
+            const match = userAgent.match(/Edge\/(\d+)/);
+            version = match ? parseInt(match[1]) : 0;
+        } else if (userAgent.indexOf('MSIE') > -1 || userAgent.indexOf('Trident') > -1) {
+            name = 'Internet Explorer';
+        }
+        
+        return { name, version };
+    }
+    
+    showBrowserCompatibilityError(issues) {
+        const errorContainer = document.createElement('div');
+        errorContainer.className = 'browser-compatibility-error';
+        errorContainer.innerHTML = `
+            <div class="error-content">
+                <h3>Browser Compatibility Issues</h3>
+                <p>Your browser doesn't support some required features:</p>
+                <ul>
+                    ${issues.map(issue => `<li>${issue}</li>`).join('')}
+                </ul>
+                <p>Please try using a modern browser like:</p>
+                <ul>
+                    <li>Chrome 60+</li>
+                    <li>Firefox 55+</li>
+                    <li>Safari 11+</li>
+                    <li>Edge 79+</li>
+                </ul>
+            </div>
+        `;
+        
+        // Add styles
+        errorContainer.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            font-family: 'Poppins', sans-serif;
+        `;
+        
+        errorContainer.querySelector('.error-content').style.cssText = `
+            background: #1a1a1a;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 500px;
+            text-align: center;
+        `;
+        
+        document.body.appendChild(errorContainer);
     }
     
     async init() {
         try {
+            // Check WebGL support first
+            if (!this.webglSupported) {
+                this.showWebGLError();
+                return;
+            }
+            
             await this.setupCamera();
             await this.setupFaceDetection();
-            this.setupThreeJS();
-            this.setupControls();
-            this.enhanceControls(); // Add enhanced controls with face detection toggle
             
-            // Automatically load the assigned GLB model
-            await this.loadAssignedGLBModel();
+            // Only setup 3D if Three.js is ready
+            if (this.threeJSReady) {
+                this.setupThreeJS();
+                await this.loadAssignedGLBModelWithRetry();
+            } else {
+                this.show3DModelError('3D rendering unavailable - Three.js failed to load');
+            }
+            
+            this.setupControls();
+            this.enhanceControls();
             
             this.hideLoading();
             
@@ -82,8 +341,24 @@ class VirtualTryOn {
             this.startDetection();
         } catch (error) {
             console.error('Initialization error:', error);
-            this.showError('Failed to initialize virtual try-on. Please check camera permissions.');
+            this.showError('Failed to initialize virtual try-on. Please check camera permissions and refresh the page.');
         }
+    }
+    
+    showWebGLError() {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'webgl-error';
+        errorDiv.innerHTML = `
+            <h3>WebGL Not Supported</h3>
+            <p>Your browser doesn't support WebGL, which is required for 3D model rendering.</p>
+            <p>Please try:</p>
+            <ul style="text-align: left; margin: 10px 0;">
+                <li>Updating your browser</li>
+                <li>Enabling hardware acceleration</li>
+                <li>Using a different browser (Chrome, Firefox, Safari)</li>
+            </ul>
+        `;
+        document.body.appendChild(errorDiv);
     }
     
     async setupCamera() {
@@ -462,36 +737,100 @@ class VirtualTryOn {
                 return;
             }
             
+            // Get quality settings for current performance mode
+            const quality = this.qualitySettings[this.performanceMode];
+            console.log(`Setting up Three.js with ${this.performanceMode} quality mode:`, quality);
+            
             // Create Three.js scene
             this.scene = new THREE.Scene();
             
-            // Create camera
+            // Ensure canvas has proper dimensions
+            const rect = this.canvas.getBoundingClientRect();
+            this.canvas.width = rect.width;
+            this.canvas.height = rect.height;
+            
+            // Create camera with adaptive FOV
+            const fov = this.deviceCapabilities.isMobile ? 70 : 75;
             this.camera = new THREE.PerspectiveCamera(
-                75,
+                fov,
                 this.canvas.width / this.canvas.height,
                 0.1,
                 1000
             );
-            this.camera.position.z = 5;
+            this.camera.position.set(0, 0, 5);
             
-            // Create renderer
-            this.renderer = new THREE.WebGLRenderer({
+            // Create renderer with adaptive settings
+            const rendererOptions = {
                 canvas: this.canvas,
                 alpha: true,
-                antialias: true
-            });
-            this.renderer.setSize(this.canvas.width, this.canvas.height);
+                antialias: quality.antialias,
+                precision: quality.precision,
+                powerPreference: this.deviceCapabilities.isMobile ? 'low-power' : 'high-performance',
+                preserveDrawingBuffer: true // Important for capturing screenshots
+            };
+            
+            // Use optimal WebGL context if available
+            if (this.threeJSConfig.contextType) {
+                rendererOptions.context = this.threeJSConfig.contextType;
+            }
+            
+            this.renderer = new THREE.WebGLRenderer(rendererOptions);
+            
+            // Set proper render size
+            this.renderer.setSize(this.canvas.width, this.canvas.height, false);
             this.renderer.setClearColor(0x000000, 0); // Transparent background
+            this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio for performance
             
-            // Add lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            this.scene.add(ambientLight);
+            // Configure shadow mapping if supported
+            if (quality.shadowMapSize > 0 && !this.deviceCapabilities.isMobile) {
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                this.renderer.shadowMap.setSize(quality.shadowMapSize, quality.shadowMapSize);
+            }
             
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(0, 1, 1);
-            this.scene.add(directionalLight);
+            // Enhanced AR-realistic lighting setup
+            const ambientIntensity = this.deviceCapabilities.isMobile ? 0.4 : 0.3;
+            this.ambientLight = new THREE.AmbientLight(0xffffff, ambientIntensity);
+            this.scene.add(this.ambientLight);
             
-            console.log('Three.js initialized successfully');
+            // Main directional light (simulates room lighting)
+            this.mainLight = new THREE.DirectionalLight(0xffffff, 0.6);
+            this.mainLight.position.set(0, 1, 0.5);
+            this.scene.add(this.mainLight);
+            
+            // Secondary fill light (reduces harsh shadows)
+            this.fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+            this.fillLight.position.set(-0.5, 0.5, 1);
+            this.scene.add(this.fillLight);
+            
+            // Rim light for depth and realism
+            this.rimLight = new THREE.DirectionalLight(0xffffff, 0.2);
+            this.rimLight.position.set(0, -0.5, -1);
+            this.scene.add(this.rimLight);
+            
+            // Enable shadows for main light on higher quality settings
+            if (quality.shadowMapSize > 0 && !this.deviceCapabilities.isMobile) {
+                this.mainLight.castShadow = true;
+                this.mainLight.shadow.mapSize.width = quality.shadowMapSize;
+                this.mainLight.shadow.mapSize.height = quality.shadowMapSize;
+                this.mainLight.shadow.camera.near = 0.1;
+                this.mainLight.shadow.camera.far = 10;
+                this.mainLight.shadow.camera.left = -2;
+                this.mainLight.shadow.camera.right = 2;
+                this.mainLight.shadow.camera.top = 2;
+                this.mainLight.shadow.camera.bottom = -2;
+                this.mainLight.shadow.bias = -0.0001;
+            }
+            
+            // Add environment mapping for realistic reflections
+            this.setupEnvironmentMapping();
+            
+            // Add debug helpers (can be removed in production)
+            this.addDebugHelpers();
+            
+            console.log(`Three.js initialized successfully with ${this.performanceMode} quality settings`);
+            console.log('Render size:', this.canvas.width, 'x', this.canvas.height);
+            console.log('Device capabilities:', this.deviceCapabilities);
         } catch (error) {
             console.warn('Three.js setup failed:', error);
             // Don't throw error - allow the app to continue without 3D rendering
@@ -509,8 +848,90 @@ class VirtualTryOn {
         });
     }
     
-    async loadAssignedGLBModel() {
-        console.log('🔍 Loading assigned GLB model...');
+    setupEnvironmentMapping() {
+        try {
+            // Create a simple environment map for realistic reflections
+            const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+            
+            // Create a simple gradient environment
+            const envMapSize = this.deviceCapabilities.isMobile ? 64 : 128;
+            const envMapTexture = new THREE.DataTexture(
+                new Uint8Array(envMapSize * envMapSize * 4),
+                envMapSize,
+                envMapSize,
+                THREE.RGBAFormat
+            );
+            
+            // Fill with gradient data for realistic environment lighting
+            const data = envMapTexture.image.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const y = Math.floor((i / 4) / envMapSize) / envMapSize;
+                const intensity = Math.max(0.2, 1.0 - y); // Brighter at top
+                
+                data[i] = intensity * 255;     // R
+                data[i + 1] = intensity * 255; // G
+                data[i + 2] = intensity * 255; // B
+                data[i + 3] = 255;             // A
+            }
+            
+            envMapTexture.needsUpdate = true;
+            this.envMap = pmremGenerator.fromEquirectangular(envMapTexture).texture;
+            
+            // Set scene environment for realistic lighting
+            this.scene.environment = this.envMap;
+            
+            pmremGenerator.dispose();
+            console.log('Environment mapping setup complete');
+        } catch (error) {
+            console.warn('Environment mapping setup failed:', error);
+        }
+    }
+    
+    updateDynamicLighting() {
+        if (!this.faceLandmarks || !this.mainLight || !this.fillLight) return;
+        
+        // Calculate face orientation for dynamic lighting
+        const faceAngle = this.calculateFaceAngle();
+        const headPitch = this.calculateHeadPitch();
+        
+        // Adjust main light position based on face orientation
+        const lightOffset = 0.3;
+        this.mainLight.position.x = Math.sin(faceAngle) * lightOffset;
+        this.mainLight.position.y = 1 + Math.sin(headPitch) * lightOffset;
+        this.mainLight.position.z = 0.5 + Math.cos(faceAngle) * lightOffset;
+        
+        // Adjust fill light to complement main light
+        this.fillLight.position.x = -this.mainLight.position.x * 0.5;
+        this.fillLight.position.y = this.mainLight.position.y * 0.8;
+        
+        // Adjust ambient light intensity based on face visibility
+        const faceVisibility = Math.cos(faceAngle) * Math.cos(headPitch);
+        const ambientIntensity = Math.max(0.2, Math.min(0.5, 0.3 + faceVisibility * 0.2));
+        this.ambientLight.intensity = ambientIntensity;
+    }
+    
+    addDebugHelpers() {
+        // Add a simple wireframe cube to verify 3D rendering is working
+        const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+        const material = new THREE.MeshBasicMaterial({ 
+            color: 0x00ff00, 
+            wireframe: true,
+            transparent: true,
+            opacity: 0.3
+        });
+        this.debugCube = new THREE.Mesh(geometry, material);
+        this.debugCube.position.set(1, 1, 0);
+        this.scene.add(this.debugCube);
+        
+        // Add coordinate axes helper
+        const axesHelper = new THREE.AxesHelper(1);
+        this.scene.add(axesHelper);
+        
+        console.log('Debug helpers added: wireframe cube and axes');
+    }
+    
+    async loadAssignedGLBModelWithRetry() {
+        console.log('🔍 Loading assigned GLB model with retry mechanism...');
         console.log('🔍 Frame ID:', this.frameId);
         console.log('🔍 Product Name:', this.productName);
         console.log('🔍 Assigned GLB Model:', this.assignedGLBModel);
@@ -520,24 +941,105 @@ class VirtualTryOn {
             this.updateHeaderTitle(`Virtual Try-On - ${this.productName}`);
         }
         
-        // Load the assigned GLB model if available
-        if (this.assignedGLBModel) {
-            console.log('Loading assigned GLB model:', this.assignedGLBModel);
-            this.currentGLBModel = this.assignedGLBModel;
-            await this.loadGlassesModel(this.assignedGLBModel.path);
-            
-            // Show model controls
-            this.showModelControls();
-            
-            this.showTemporaryMessage(`✅ Loaded ${this.assignedGLBModel.name} for ${this.productName || 'product'}`, 3000);
-        } else {
-            // No frame ID provided or invalid frame ID
+        if (!this.assignedGLBModel) {
             const message = this.frameId ? 
                 `❌ No GLB model found for frame: ${this.frameId}` : 
                 '⚠️ No frame specified in URL parameters';
             console.warn(message);
-            this.showTemporaryMessage(message, 5000);
+            await this.loadFallbackModel();
+            return;
         }
+        
+        // Try to load the assigned model with retry mechanism
+        for (let attempt = 1; attempt <= this.maxLoadAttempts; attempt++) {
+            try {
+                this.modelLoadAttempts = attempt;
+                this.show3DModelLoading(`Loading 3D model (attempt ${attempt}/${this.maxLoadAttempts})...`);
+                
+                const success = await this.loadGlassesModel(this.assignedGLBModel.path);
+                if (success) {
+                    this.currentGLBModel = this.assignedGLBModel;
+                    this.showModelControls();
+                    this.show3DModelSuccess(`✅ Loaded ${this.assignedGLBModel.name} for ${this.productName || 'product'}`);
+                    return;
+                }
+            } catch (error) {
+                console.error(`Model loading attempt ${attempt} failed:`, error);
+                if (attempt === this.maxLoadAttempts) {
+                    console.log('All attempts failed, trying fallback models...');
+                    await this.loadFallbackModel();
+                    return;
+                }
+                // Wait before retry
+                await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+            }
+        }
+    }
+    
+    async loadFallbackModel() {
+        console.log('Loading fallback model...');
+        this.fallbackModelUsed = true;
+        
+        for (const fallbackPath of this.fallbackModels) {
+            try {
+                this.show3DModelLoading('Loading fallback 3D model...');
+                const success = await this.loadGlassesModel(fallbackPath);
+                if (success) {
+                    this.showFallbackNotice();
+                    this.showModelControls();
+                    return;
+                }
+            } catch (error) {
+                console.error('Fallback model failed:', fallbackPath, error);
+            }
+        }
+        
+        // If all fallbacks fail, show error with retry option
+        this.showModelLoadError();
+    }
+    
+    showFallbackNotice() {
+        const notice = document.createElement('div');
+        notice.className = 'fallback-model';
+        notice.innerHTML = '⚠️ Using fallback 3D model - original model unavailable';
+        document.querySelector('.controls-panel').prepend(notice);
+        
+        setTimeout(() => {
+            if (notice.parentNode) {
+                notice.parentNode.removeChild(notice);
+            }
+        }, 5000);
+    }
+    
+    showModelLoadError() {
+        const errorOverlay = document.createElement('div');
+        errorOverlay.className = 'model-error-overlay';
+        errorOverlay.innerHTML = `
+            <h3>3D Model Loading Failed</h3>
+            <p>Unable to load the 3D glasses model.</p>
+            <p>This might be due to:</p>
+            <ul style="text-align: left; margin: 10px 0;">
+                <li>Network connectivity issues</li>
+                <li>Server problems</li>
+                <li>Browser compatibility</li>
+            </ul>
+            <button class="retry-button" onclick="virtualTryOn.retryModelLoading()">Retry Loading</button>
+            <button class="retry-button" onclick="virtualTryOn.hideModelError()" style="background: #666; margin-left: 10px;">Continue Without 3D</button>
+        `;
+        document.querySelector('.camera-container').appendChild(errorOverlay);
+    }
+    
+    hideModelError() {
+        const errorOverlay = document.querySelector('.model-error-overlay');
+        if (errorOverlay) {
+            errorOverlay.remove();
+        }
+    }
+    
+    async retryModelLoading() {
+        this.hideModelError();
+        this.modelLoadAttempts = 0;
+        await this.loadAssignedGLBModelWithRetry();
     }
     
 
@@ -603,193 +1105,266 @@ class VirtualTryOn {
 
     
     async loadGlassesModel(modelPath) {
-        return new Promise((resolve, reject) => {
+        console.log('🔄 Loading glasses model with modern implementation:', modelPath);
+        
+        // Comprehensive Three.js availability check
+        if (!this.validateThreeJSEnvironment()) {
+            return false;
+        }
+        
+        try {
+            // Remove existing glasses model
+            if (this.glassesModel) {
+                console.log('🗑️ Removing existing glasses model');
+                this.scene.remove(this.glassesModel);
+                this.glassesModel = null;
+            }
+            
+            // Show loading state
+            this.show3DModelLoading();
+            
+            // Load the model with enhanced retry logic
+            const gltf = await this.loadGLTFWithRetry(modelPath, 3);
+            
+            // Process and configure the loaded model
+            await this.processLoadedGLTF(gltf, modelPath);
+            
+            console.log('🎉 Glasses model loading completed successfully!');
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Critical error loading glasses model:', error);
+            this.handleGLTFLoadingError(error, modelPath);
+            return false;
+        }
+    }
+    
+    validateThreeJSEnvironment() {
+        // Check if THREE is available
+        if (typeof THREE === 'undefined') {
+            console.error('❌ THREE.js not available');
+            this.show3DModelError('3D model viewer not available - THREE.js missing');
+            return false;
+        }
+        
+        // Check if GLTFLoader is available
+        if (typeof THREE.GLTFLoader === 'undefined') {
+            console.error('❌ GLTFLoader not available');
+            console.log('Available THREE properties:', Object.keys(THREE));
+            this.show3DModelError('3D model viewer not available - GLTFLoader missing');
+            return false;
+        }
+        
+        // Check if Three.js scene is set up
+        if (!this.scene || !this.camera || !this.renderer) {
+            console.error('❌ Three.js scene not properly initialized:', {
+                scene: !!this.scene,
+                camera: !!this.camera,
+                renderer: !!this.renderer
+            });
+            this.show3DModelError('3D scene not initialized');
+            return false;
+        }
+        
+        console.log('✅ Three.js environment validation passed');
+        return true;
+    }
+    
+    async loadGLTFWithRetry(modelPath, maxRetries = 3) {
+        let lastError;
+        
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-                console.log('🔄 Starting 3D model loading process...');
-                console.log('📁 Model path:', modelPath);
-                console.log('📍 Call stack:', new Error().stack);
-                
-                // Check if THREE is available
-                if (typeof THREE === 'undefined') {
-                    console.warn('❌ THREE.js not available');
-                    this.show3DModelError('3D model viewer not available - THREE.js missing');
-                    resolve();
-                    return;
-                }
-                console.log('✅ THREE.js is available');
-                
-                // Check if GLTFLoader is available
-                if (typeof THREE.GLTFLoader === 'undefined') {
-                    console.warn('❌ GLTFLoader not available, 3D models will not be loaded');
-                    console.log('Available THREE properties:', Object.keys(THREE));
-                    this.show3DModelError('3D model viewer not available - GLTFLoader missing');
-                    resolve(); // Don't reject, just continue without 3D models
-                    return;
-                }
-                console.log('✅ GLTFLoader is available');
-                
-                // Check if Three.js scene is set up
-                if (!this.scene || !this.camera || !this.renderer) {
-                    console.error('❌ Three.js scene not properly initialized:', {
-                        scene: !!this.scene,
-                        camera: !!this.camera,
-                        renderer: !!this.renderer
-                    });
-                    this.show3DModelError('3D viewer not initialized');
-                    resolve();
-                    return;
-                }
-                console.log('✅ Three.js scene is initialized');
-                
-                // Show loading indicator
-                this.show3DModelLoading();
-                
-                // Validate model path
-                if (!modelPath || typeof modelPath !== 'string') {
-                    console.error('❌ Invalid model path:', modelPath);
-                    this.show3DModelError('Invalid 3D model path');
-                    resolve();
-                    return;
-                }
-                console.log('✅ Model path is valid');
+                console.log(`🔄 GLTF loading attempt ${attempt}/${maxRetries}`);
                 
                 const loader = new THREE.GLTFLoader();
                 
-                // Set a timeout for loading
-                const loadingTimeout = setTimeout(() => {
-                    console.error('3D model loading timeout for:', modelPath);
-                    this.show3DModelError('3D model loading timeout');
-                    resolve();
-                }, 15000); // 15 second timeout
+                const gltf = await new Promise((resolve, reject) => {
+                    const timeoutId = setTimeout(() => {
+                        reject(new Error(`Loading timeout after 30 seconds (attempt ${attempt})`));
+                    }, 30000);
+                    
+                    loader.load(
+                        modelPath,
+                        (gltf) => {
+                            clearTimeout(timeoutId);
+                            console.log(`✅ GLTF loaded successfully on attempt ${attempt}:`, gltf);
+                            resolve(gltf);
+                        },
+                        (progress) => {
+                            if (progress.total > 0) {
+                                const percent = (progress.loaded / progress.total * 100).toFixed(1);
+                                console.log(`📊 Loading progress (attempt ${attempt}): ${percent}%`);
+                                this.update3DModelLoadingProgress(Math.round(percent));
+                            }
+                        },
+                        (error) => {
+                            clearTimeout(timeoutId);
+                            console.error(`❌ GLTF loading error on attempt ${attempt}:`, error);
+                            reject(error);
+                        }
+                    );
+                });
                 
-                console.log('🚀 Starting GLTFLoader.load...');
+                return gltf; // Success!
                 
-                loader.load(
-                    modelPath,
-                    (gltf) => {
-                        console.log('✅ 3D model loaded successfully!', gltf);
-                        clearTimeout(loadingTimeout);
-                        
-                        try {
-                            // Validate the loaded model
-                            if (!gltf || !gltf.scene) {
-                                console.error('❌ Invalid 3D model structure:', gltf);
-                                this.show3DModelError('Invalid 3D model format');
-                                resolve();
-                                return;
-                            }
-                            console.log('✅ GLTF structure is valid');
-                            
-                            // Remove previous model
-                            if (this.glassesModel) {
-                                console.log('🗑️ Removing previous model');
-                                this.scene.remove(this.glassesModel);
-                            }
-                            
-                            this.glassesModel = gltf.scene;
-                            console.log('📦 Model assigned to glassesModel:', this.glassesModel);
-                            
-                            // Validate model has geometry
-                            let hasGeometry = false;
-                            let meshCount = 0;
-                            this.glassesModel.traverse((child) => {
-                                if (child.isMesh && child.geometry) {
-                                    hasGeometry = true;
-                                    meshCount++;
-                                }
-                            });
-                            
-                            console.log(`🔍 Model analysis: ${meshCount} meshes found, hasGeometry: ${hasGeometry}`);
-                            
-                            if (!hasGeometry) {
-                                console.error('❌ 3D model has no valid geometry');
-                                this.show3DModelError('3D model contains no geometry');
-                                resolve();
-                                return;
-                            }
-                            
-                            // Configure model
-                            this.glassesModel.scale.set(0.1, 0.1, 0.1); // Adjust scale as needed
-                            this.glassesModel.visible = true; // Ensure model is visible
-                            
-                            // Set default position if face detection is not working
-                            if (!this.faceDetectionEnabled || !this.faceDetected) {
-                                this.glassesModel.position.set(0, 0.2, 0);
-                                this.glassesModel.rotation.set(0, 0, 0);
-                            }
-                            
-                            this.scene.add(this.glassesModel);
-                            console.log('3D model loaded successfully:', modelPath);
-                            
-                            // Apply any existing adjustments
-                            this.updateGlassesTransform();
-                            
-                            // Hide loading indicator and show success
-                            this.hide3DModelMessage();
-                            this.show3DModelSuccess('3D model loaded successfully');
-                            
-                            resolve();
-                        } catch (processingError) {
-                            console.error('Error processing loaded 3D model:', processingError);
-                            this.show3DModelError('Error processing 3D model');
-                            resolve();
-                        }
-                    },
-                    (progress) => {
-                        // Loading progress
-                        console.log('📊 Loading progress event:', {
-                            loaded: progress.loaded,
-                            total: progress.total,
-                            lengthComputable: progress.lengthComputable
-                        });
-                        
-                        if (progress.total > 0) {
-                            const percentage = Math.round((progress.loaded / progress.total) * 100);
-                            console.log('📈 Loading progress:', percentage + '%');
-                            this.update3DModelLoadingProgress(percentage);
-                        } else {
-                            console.log('⏳ Loading in progress (size unknown)');
-                        }
-                    },
-                    (error) => {
-                        clearTimeout(loadingTimeout);
-                        console.error('❌ Failed to load 3D model:', error);
-                        console.log('🔍 Error details:', {
-                            message: error.message,
-                            type: error.type,
-                            stack: error.stack,
-                            modelPath: modelPath
-                        });
-                        
-                        // Determine error type and show appropriate message
-                        let errorMessage = '3D model not available';
-                        
-                        if (error.message && error.message.includes('404')) {
-                            errorMessage = '3D model file not found';
-                            console.log('📁 File not found error - check if file exists at:', modelPath);
-                        } else if (error.message && error.message.includes('network')) {
-                            errorMessage = 'Network error loading 3D model';
-                            console.log('🌐 Network error - check internet connection');
-                        } else if (error.message && error.message.includes('parse')) {
-                            errorMessage = '3D model file is corrupted';
-                            console.log('💥 Parse error - file may be corrupted or invalid format');
-                        } else if (error.message && error.message.includes('CORS')) {
-                            errorMessage = '3D model access blocked by security policy';
-                            console.log('🚫 CORS error - check server configuration');
-                        } else {
-                            console.log('❓ Unknown error type:', error.message);
-                        }
-                        
-                        this.show3DModelError(errorMessage);
-                        resolve(); // Don't reject, continue without the model
-                    }
-                );
             } catch (error) {
-                console.error('GLTFLoader initialization failed:', error);
-                this.show3DModelError('3D model loader initialization failed');
-                resolve(); // Don't reject, continue without 3D models
+                lastError = error;
+                console.warn(`⚠️ Attempt ${attempt} failed:`, error.message);
+                
+                if (attempt < maxRetries) {
+                    const delay = attempt * 1000; // Exponential backoff
+                    console.log(`⏳ Retrying in ${delay}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+        
+        throw new Error(`Failed to load GLTF after ${maxRetries} attempts. Last error: ${lastError.message}`);
+    }
+    
+    async processLoadedGLTF(gltf, modelPath) {
+        console.log('🔧 Processing loaded GLTF...');
+        
+        // Validate the loaded model
+        if (!gltf || !gltf.scene) {
+            throw new Error('Invalid GLTF structure - no scene found');
+        }
+        
+        // Extract the scene from GLTF
+        this.glassesModel = gltf.scene;
+        
+        // Log detailed model information
+        console.log('Model structure analysis:', {
+            scene: this.glassesModel,
+            children: this.glassesModel.children.length,
+            animations: gltf.animations?.length || 0,
+            cameras: gltf.cameras?.length || 0,
+            scenes: gltf.scenes?.length || 0
+        });
+        
+        // Validate model has geometry
+        let meshCount = 0;
+        let hasGeometry = false;
+        this.glassesModel.traverse((child) => {
+            if (child.isMesh && child.geometry) {
+                hasGeometry = true;
+                meshCount++;
             }
         });
+        
+        if (!hasGeometry) {
+            throw new Error('3D model contains no valid geometry');
+        }
+        
+        console.log(`✅ Found ${meshCount} meshes with valid geometry`);
+        
+        // Configure model transform
+        this.glassesModel.scale.set(1.0, 1.0, 1.0);
+        this.glassesModel.position.set(0, 0, 0);
+        this.glassesModel.rotation.set(0, 0, 0);
+        this.glassesModel.visible = true;
+        
+        // Process all meshes in the model
+        this.glassesModel.traverse((child) => {
+            if (child.isMesh) {
+                console.log(`🔧 Configuring mesh:`, {
+                    name: child.name || 'unnamed',
+                    geometry: child.geometry?.type,
+                    material: child.material?.type,
+                    visible: child.visible
+                });
+                
+                // Ensure mesh visibility and properties
+                child.visible = true;
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.frustumCulled = false; // Prevent culling issues
+                
+                // Configure materials
+                this.configureMeshMaterial(child);
+            }
+        });
+        
+        // Add to scene
+        this.scene.add(this.glassesModel);
+        console.log('✅ Glasses model added to scene');
+        console.log('Scene children count:', this.scene.children.length);
+        
+        // Store model info
+        this.currentModelPath = modelPath;
+        
+        // Apply any existing adjustments
+        this.updateGlassesTransform();
+        
+        // Hide loading state and force render
+        this.hide3DModelMessage();
+        this.show3DModelSuccess('3D model loaded successfully');
+        this.render3D();
+        
+        // Log final scene state
+        console.log('Final scene state:', {
+            children: this.scene.children.length,
+            glassesModel: !!this.glassesModel,
+            modelVisible: this.glassesModel?.visible
+        });
+    }
+    
+    configureMeshMaterial(mesh) {
+        if (!mesh.material) return;
+        
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        
+        materials.forEach((material, index) => {
+            console.log(`🎨 Configuring material ${index}:`, material.type);
+            
+            // Ensure proper material properties
+            material.transparent = true;
+            material.opacity = 1.0;
+            material.side = THREE.DoubleSide;
+            material.alphaTest = 0.1;
+            material.depthWrite = true;
+            material.depthTest = true;
+            
+            // Force material update
+            material.needsUpdate = true;
+        });
+    }
+    
+    handleGLTFLoadingError(error, modelPath) {
+        console.error('❌ GLTF loading error details:', {
+            message: error.message,
+            stack: error.stack,
+            modelPath: modelPath,
+            threeJSAvailable: typeof THREE !== 'undefined',
+            gltfLoaderAvailable: typeof THREE?.GLTFLoader !== 'undefined',
+            sceneInitialized: !!this.scene
+        });
+        
+        this.hide3DModelMessage();
+        
+        // Determine error type and show appropriate message
+        let errorMessage = 'Failed to load 3D model';
+        
+        if (error.message.includes('404') || error.message.includes('not found')) {
+            errorMessage = '3D model file not found';
+        } else if (error.message.includes('timeout')) {
+            errorMessage = '3D model loading timeout';
+        } else if (error.message.includes('network')) {
+            errorMessage = 'Network error loading 3D model';
+        } else if (error.message.includes('parse') || error.message.includes('Invalid')) {
+            errorMessage = '3D model file is corrupted or invalid';
+        } else if (error.message.includes('CORS')) {
+            errorMessage = '3D model access blocked by security policy';
+        }
+        
+        this.show3DModelError(errorMessage);
+        
+        // Clean up on error
+        if (this.glassesModel) {
+            this.scene.remove(this.glassesModel);
+            this.glassesModel = null;
+        }
     }
     
     updateHeaderTitle(productName) {
@@ -917,6 +1492,7 @@ class VirtualTryOn {
         const noseBridge = this.faceLandmarks[168];    // Nose bridge
         const noseTop = this.faceLandmarks[6];         // Nose top
         const foreheadCenter = this.faceLandmarks[9];  // Forehead center
+        const chinCenter = this.faceLandmarks[175];    // Chin center
         
         // Calculate eye centers for more accurate positioning
         const leftEyeCenter = {
@@ -931,71 +1507,86 @@ class VirtualTryOn {
             z: (rightEyeOuter.z + rightEyeInner.z) / 2
         };
         
-        // Calculate inter-pupillary distance for scaling
-        const eyeDistance = Math.sqrt(
-            Math.pow(rightEyeCenter.x - leftEyeCenter.x, 2) + 
-            Math.pow(rightEyeCenter.y - leftEyeCenter.y, 2)
-        );
+        // Calculate face dimensions for better depth perception
+        const faceHeight = Math.abs(foreheadCenter.y - chinCenter.y);
+        const faceWidth = Math.abs(rightEyeOuter.x - leftEyeOuter.x);
+        const faceDepth = Math.abs(noseBridge.z - foreheadCenter.z);
         
-        // Calculate glasses center position (slightly above eye line)
+        // Estimate distance from camera based on face size
+        const normalizedFaceWidth = faceWidth * this.canvas.width;
+        const estimatedDistance = Math.max(0.3, Math.min(3.0, 150 / normalizedFaceWidth));
+        
+        // Calculate glasses center position with improved depth calculation
         const glassesCenter = {
             x: (leftEyeCenter.x + rightEyeCenter.x) / 2,
-            y: (leftEyeCenter.y + rightEyeCenter.y) / 2 - 0.01, // Slightly above eyes
-            z: (leftEyeCenter.z + rightEyeCenter.z) / 2
+            y: (leftEyeCenter.y + rightEyeCenter.y) / 2 - (faceHeight * 0.05), // Slightly above eyes, proportional to face
+            z: (leftEyeCenter.z + rightEyeCenter.z) / 2 + (faceDepth * 0.1) // Slightly forward from face
         };
         
-        // Convert to Three.js coordinates
+        // Convert to Three.js coordinates with perspective correction
         const ndcX = (glassesCenter.x * 2 - 1);
         const ndcY = -(glassesCenter.y * 2 - 1);
-        const ndcZ = glassesCenter.z * 2;
+        const ndcZ = glassesCenter.z * estimatedDistance;
         
-        // Enhanced positioning for GLB models
+        // Enhanced positioning for GLB models with AR-like depth
         const isGLBModel = this.currentGLBModel !== null;
-        const positionMultiplier = isGLBModel ? 2.0 : 1.5; // GLB models may need different positioning
-        const depthMultiplier = isGLBModel ? 0.3 : 0.5;   // GLB models closer to face
+        const positionMultiplier = isGLBModel ? 1.8 : 1.5;
+        const depthOffset = isGLBModel ? -0.15 : -0.1; // Glasses sit slightly in front of face
         
-        // Position the glasses with depth consideration
-        this.glassesModel.position.x = ndcX * positionMultiplier;
-        this.glassesModel.position.y = ndcY * positionMultiplier;
-        this.glassesModel.position.z = ndcZ * depthMultiplier;
+        // Smooth interpolation for natural movement (reduce jitter)
+        const smoothingFactor = 0.15;
+        const targetPosition = {
+            x: ndcX * positionMultiplier,
+            y: ndcY * positionMultiplier,
+            z: ndcZ + depthOffset
+        };
         
-        // Enhanced scaling based on face size and distance
-        const faceWidth = Math.abs(rightEyeOuter.x - leftEyeOuter.x);
+        // Apply smooth interpolation
+        this.glassesModel.position.x += (targetPosition.x - this.glassesModel.position.x) * smoothingFactor;
+        this.glassesModel.position.y += (targetPosition.y - this.glassesModel.position.y) * smoothingFactor;
+        this.glassesModel.position.z += (targetPosition.z - this.glassesModel.position.z) * smoothingFactor;
+        
+        // Enhanced scaling with distance-based adjustment
         let baseScale;
-        
         if (isGLBModel) {
-            // GLB models often need different scaling
-            baseScale = Math.max(0.1, Math.min(1.5, faceWidth * 2.5));
+            baseScale = Math.max(0.08, Math.min(0.25, faceWidth * 1.8 * estimatedDistance));
         } else {
-            baseScale = Math.max(0.3, Math.min(2.0, faceWidth * 3.5));
+            baseScale = Math.max(0.2, Math.min(1.5, faceWidth * 2.5 * estimatedDistance));
         }
         
-        this.glassesModel.scale.set(baseScale, baseScale, baseScale);
+        // Smooth scale interpolation
+        const targetScale = baseScale;
+        const currentScale = this.glassesModel.scale.x;
+        const newScale = currentScale + (targetScale - currentScale) * smoothingFactor;
+        this.glassesModel.scale.set(newScale, newScale, newScale);
         
-        // Calculate rotation based on eye alignment and face orientation
+        // Enhanced rotation calculations for realistic 3D tracking
         const eyeAngle = Math.atan2(
             rightEyeCenter.y - leftEyeCenter.y, 
             rightEyeCenter.x - leftEyeCenter.x
         );
         
-        // Add slight head tilt compensation
+        // Calculate head pose angles
         const headTilt = this.calculateHeadTilt();
-        this.glassesModel.rotation.z = eyeAngle + headTilt;
-        
-        // Add subtle Y-axis rotation for face angle
         const faceAngle = this.calculateFaceAngle();
-        this.glassesModel.rotation.y = faceAngle * 0.3; // Subtle rotation
+        const headPitch = this.calculateHeadPitch();
         
-        // Additional X-axis rotation for GLB models to better align with face
-        if (isGLBModel) {
-            const noseToForehead = {
-                x: foreheadCenter.x - noseBridge.x,
-                y: foreheadCenter.y - noseBridge.y,
-                z: foreheadCenter.z - noseBridge.z
-            };
-            const faceNormalAngle = Math.atan2(noseToForehead.y, noseToForehead.z);
-            this.glassesModel.rotation.x = faceNormalAngle * 0.2; // Subtle face normal alignment
-        }
+        // Smooth rotation interpolation
+        const targetRotation = {
+            x: headPitch * 0.4, // Up/down head movement
+            y: faceAngle * 0.5,  // Left/right head turn
+            z: eyeAngle + headTilt * 0.3 // Head tilt
+        };
+        
+        this.glassesModel.rotation.x += (targetRotation.x - this.glassesModel.rotation.x) * smoothingFactor;
+        this.glassesModel.rotation.y += (targetRotation.y - this.glassesModel.rotation.y) * smoothingFactor;
+        this.glassesModel.rotation.z += (targetRotation.z - this.glassesModel.rotation.z) * smoothingFactor;
+        
+        // Apply realistic lighting based on face orientation
+        this.updateGlassesLighting(faceAngle, headPitch);
+        
+        // Add subtle physics-based movement for realism
+        this.applyGlassesPhysics();
         
         this.glassesModel.visible = true;
         this.updateGlassesTransform();
@@ -1035,6 +1626,111 @@ class VirtualTryOn {
         }
         
         return 0;
+    }
+    
+    calculateHeadPitch() {
+        if (!this.faceLandmarks) return 0;
+        
+        // Use forehead and chin to calculate up/down head movement
+        const foreheadCenter = this.faceLandmarks[9];
+        const chinCenter = this.faceLandmarks[175];
+        const noseBridge = this.faceLandmarks[168];
+        
+        if (foreheadCenter && chinCenter && noseBridge) {
+            // Calculate the angle between nose bridge and the forehead-chin line
+            const faceVertical = {
+                y: chinCenter.y - foreheadCenter.y,
+                z: chinCenter.z - foreheadCenter.z
+            };
+            
+            return Math.atan2(faceVertical.z, faceVertical.y) * 0.3; // Subtle pitch adjustment
+        }
+        
+        return 0;
+    }
+    
+    updateGlassesLighting(faceAngle, headPitch) {
+        if (!this.glassesModel) return;
+        
+        // Adjust material properties based on face orientation for realistic lighting
+        this.glassesModel.traverse((child) => {
+            if (child.isMesh && child.material) {
+                // Calculate lighting intensity based on face angle
+                const lightIntensity = Math.cos(faceAngle) * Math.cos(headPitch);
+                const normalizedIntensity = Math.max(0.3, Math.min(1.0, lightIntensity + 0.5));
+                
+                // Store original material properties if not already stored
+                if (!child.userData.originalMaterial) {
+                    child.userData.originalMaterial = {
+                        color: child.material.color ? child.material.color.clone() : null,
+                        metalness: child.material.metalness || 0,
+                        roughness: child.material.roughness || 0.5
+                    };
+                }
+                
+                // Apply lighting adjustments
+                if (child.material.color && child.userData.originalMaterial.color) {
+                    child.material.color.copy(child.userData.originalMaterial.color);
+                    child.material.color.multiplyScalar(normalizedIntensity);
+                }
+                
+                // Add subtle metalness variation for glasses frames
+                if (child.material.metalness !== undefined) {
+                    child.material.metalness = Math.max(0.1, Math.min(0.8, 
+                        child.userData.originalMaterial.metalness + normalizedIntensity * 0.3));
+                }
+                
+                // Adjust roughness for realistic reflections
+                if (child.material.roughness !== undefined) {
+                    child.material.roughness = Math.max(0.2, Math.min(0.9, 
+                        child.userData.originalMaterial.roughness + (1.0 - normalizedIntensity) * 0.3));
+                }
+            }
+        });
+    }
+    
+    applyGlassesPhysics() {
+        if (!this.glassesModel || !this.faceLandmarks) return;
+        
+        // Initialize physics properties if not exists
+        if (!this.glassesPhysics) {
+            this.glassesPhysics = {
+                velocity: { x: 0, y: 0, z: 0 },
+                lastPosition: { 
+                    x: this.glassesModel.position.x, 
+                    y: this.glassesModel.position.y, 
+                    z: this.glassesModel.position.z 
+                },
+                damping: 0.85,
+                springStrength: 0.1
+            };
+        }
+        
+        // Calculate velocity based on position change
+        const deltaX = this.glassesModel.position.x - this.glassesPhysics.lastPosition.x;
+        const deltaY = this.glassesModel.position.y - this.glassesPhysics.lastPosition.y;
+        const deltaZ = this.glassesModel.position.z - this.glassesPhysics.lastPosition.z;
+        
+        // Update velocity with damping
+        this.glassesPhysics.velocity.x = (this.glassesPhysics.velocity.x + deltaX) * this.glassesPhysics.damping;
+        this.glassesPhysics.velocity.y = (this.glassesPhysics.velocity.y + deltaY) * this.glassesPhysics.damping;
+        this.glassesPhysics.velocity.z = (this.glassesPhysics.velocity.z + deltaZ) * this.glassesPhysics.damping;
+        
+        // Apply subtle physics-based movement for natural feel
+        const physicsInfluence = 0.02;
+        this.glassesModel.position.x += this.glassesPhysics.velocity.x * physicsInfluence;
+        this.glassesModel.position.y += this.glassesPhysics.velocity.y * physicsInfluence;
+        this.glassesModel.position.z += this.glassesPhysics.velocity.z * physicsInfluence;
+        
+        // Update last position
+        this.glassesPhysics.lastPosition.x = this.glassesModel.position.x;
+        this.glassesPhysics.lastPosition.y = this.glassesModel.position.y;
+        this.glassesPhysics.lastPosition.z = this.glassesModel.position.z;
+        
+        // Add subtle breathing effect for ultra-realism
+        const time = Date.now() * 0.001;
+        const breathingOffset = Math.sin(time * 0.5) * 0.002;
+        this.glassesModel.position.y += breathingOffset;
     }
     
     updateGlassesTransform() {
@@ -1168,21 +1864,31 @@ class VirtualTryOn {
         
         this.lastRenderTime = now;
         
-        // Only render if there's a model to show
+        // Animate debug cube for visual feedback
+        if (this.debugCube) {
+            this.debugCube.rotation.x += 0.01;
+            this.debugCube.rotation.y += 0.01;
+        }
+        
+        // Handle glasses model if it exists
         if (this.glassesModel) {
             // Ensure glasses model is visible if it exists
             if (!this.glassesModel.visible) {
                 this.glassesModel.visible = true;
             }
             
+            // Update dynamic lighting for realistic AR appearance
+            this.updateDynamicLighting();
+            
             // Frustum culling optimization
             this.glassesModel.frustumCulled = true;
-            
-            this.renderer.render(this.scene, this.camera);
-            
-            // Update performance stats
-            this.updatePerformanceStats(deltaTime);
         }
+        
+        // Always render the scene (for debug helpers and glasses model)
+        this.renderer.render(this.scene, this.camera);
+        
+        // Update performance stats
+        this.updatePerformanceStats(deltaTime);
     }
     
     updatePerformanceStats(deltaTime) {
@@ -1482,13 +2188,49 @@ class VirtualTryOn {
     
     // Adjust performance based on device capabilities
     adjustPerformance() {
-        // Monitor frame rate and adjust detection frequency
+        // Monitor frame rate and adjust detection frequency and quality
         const now = performance.now();
         if (this.lastFrameTime) {
             const frameTime = now - this.lastFrameTime;
             const fps = 1000 / frameTime;
+            const targetFPS = this.qualitySettings[this.performanceMode].targetFPS;
             
-            // If FPS is low, reduce detection frequency
+            // Track performance over time
+            if (!this.performanceHistory) {
+                this.performanceHistory = [];
+            }
+            this.performanceHistory.push(fps);
+            
+            // Keep only last 30 frames for averaging
+            if (this.performanceHistory.length > 30) {
+                this.performanceHistory.shift();
+            }
+            
+            // Calculate average FPS
+            const avgFPS = this.performanceHistory.reduce((a, b) => a + b, 0) / this.performanceHistory.length;
+            
+            // Dynamic quality adjustment based on performance
+            if (avgFPS < targetFPS * 0.7 && this.performanceMode !== 'low') {
+                // Performance is poor, downgrade quality
+                const modes = ['high', 'medium', 'low'];
+                const currentIndex = modes.indexOf(this.performanceMode);
+                if (currentIndex < modes.length - 1) {
+                    this.performanceMode = modes[currentIndex + 1];
+                    console.log(`Performance downgrade to ${this.performanceMode} mode (avg FPS: ${avgFPS.toFixed(1)})`);
+                    this.applyQualitySettings();
+                }
+            } else if (avgFPS > targetFPS * 1.2 && this.performanceMode !== 'high') {
+                // Performance is good, upgrade quality
+                const modes = ['low', 'medium', 'high'];
+                const currentIndex = modes.indexOf(this.performanceMode);
+                if (currentIndex < modes.length - 1) {
+                    this.performanceMode = modes[currentIndex + 1];
+                    console.log(`Performance upgrade to ${this.performanceMode} mode (avg FPS: ${avgFPS.toFixed(1)})`);
+                    this.applyQualitySettings();
+                }
+            }
+            
+            // Adjust detection frequency based on current FPS
             if (fps < 20) {
                 this.detectionInterval = Math.min(100, this.detectionInterval + 10);
             } else if (fps > 45) {
@@ -1496,6 +2238,28 @@ class VirtualTryOn {
             }
         }
         this.lastFrameTime = now;
+    }
+    
+    applyQualitySettings() {
+        // Apply new quality settings to renderer if available
+        if (this.renderer && this.scene) {
+            const quality = this.qualitySettings[this.performanceMode];
+            
+            // Update render size
+            const renderWidth = Math.floor(this.canvas.width * quality.renderScale);
+            const renderHeight = Math.floor(this.canvas.height * quality.renderScale);
+            this.renderer.setSize(renderWidth, renderHeight);
+            
+            // Update shadow mapping
+            if (quality.shadowMapSize > 0 && !this.deviceCapabilities.isMobile) {
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.setSize(quality.shadowMapSize, quality.shadowMapSize);
+            } else {
+                this.renderer.shadowMap.enabled = false;
+            }
+            
+            console.log(`Applied ${this.performanceMode} quality settings - Render size: ${renderWidth}x${renderHeight}`);
+        }
     }
     
     resizeCanvas() {
