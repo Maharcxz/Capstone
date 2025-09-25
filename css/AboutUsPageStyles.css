@@ -25,7 +25,6 @@
     color: white;
     line-height: 1.8;
     text-align: left;
-    text-indent: 2em;
 }
 
 .about-paragraph:last-child {
@@ -48,4 +47,4 @@
         font-size: 16px;
         margin-bottom: 25px;
     }
-}   
+}
