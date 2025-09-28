@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Virtual Try-On - Trinity Optimum Vision Center</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    
+    <!-- CSS -->
+    
+    <!-- A-Frame and MindAR -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+	const list = ["glasses1", "glasses2"];
+	const visibles = [true, false];
+	const setVisible = (button, entities, visible) => {
+	  if (button) {
+	    if (visible) {
+	      button.classList.add("selected");
+	    } else {
+	      button.classList.remove("selected");
+	    }
+	  }
+	  entities.forEach((entity) => {
+	    if (entity) {
+	      entity.setAttribute("visible", visible);
+	    }
+	  });
+	}
+	list.forEach((item, index) => {
+	  const button = document.querySelector("#" + item);
+	  const entities = document.querySelectorAll("." + item + "-entity");
+	  if (button && entities.length > 0) {
+	    setVisible(button, entities, visibles[index]);
+	    button.addEventListener('click', () => {
+	      visibles[index] = !visibles[index];
+	      setVisible(button, entities, visibles[index]);
+	    });
+	  }
+	});
+      })
+    </script>
+  <link rel="stylesheet" crossorigin href="/assets/try-on-RPm7EFeI.css">
+  <link rel="stylesheet" crossorigin href="/assets/HeaderStyles-BGGMSg_O.css">
+</head>
+<body>
+    <div class="virtual-try-on-container">
+        <header class="try-on-header">
+            <h1 class="try-on-title" onclick="navigateToHome()">Trinity Optimum Vision Center</h1>
+        </header>
+        
+        <main class="try-on-main">
+            <div class="camera-container">
+                <!-- Loading overlay -->
+                <div class="loading-overlay" id="loadingOverlay">
+                    <div class="loading-spinner"></div>
+                    <p>Initializing AR Camera...</p>
+                </div>
+                
+                <a-scene mindar-face embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" style="height: 100vh; width: 100vw;">
+                     <a-assets>
+                         <a-asset-item id="glassesModel1" src="SampleDropdownAssets/3dglasses.glb"></a-asset-item>
+                         <a-asset-item id="glassesModel2" src="SampleDropdownAssets/glasses1.glb"></a-asset-item>
+                         <a-asset-item id="headOccluder" src="Assets/headOccluder.glb"></a-asset-item>
+                     </a-assets>
+                     
+                     <a-camera 
+                         id="camera"
+                         position="0 0 0" 
+                         look-controls="enabled: false" 
+                         wasd-controls="enabled: false"
+                         cursor="rayOrigin: mouse">
+                     </a-camera>
+                     
+                     <!-- Head occluder for better AR effect -->
+                     <a-entity mindar-face-target="anchorIndex: 168">
+                         <a-gltf-model 
+                             mindar-face-occluder 
+                             position="0 -0.3 0.15"
+                             rotation="0 0 0" 
+                             scale="0.065 0.065 0.065" 
+                             src="#headOccluder">
+                         </a-gltf-model>
+                     </a-entity>
+                     
+                     <!-- Glasses Model 1 - 3D Glasses -->
+                     <a-entity mindar-face-target="anchorIndex: 168">
+                         <a-gltf-model 
+                             rotation="0 0 0" 
+                             position="0 0 0" 
+                             scale="0.010 0.010 0.010" 
+                             src="#glassesModel1" 
+                             class="glasses1-entity" 
+                             visible="true">
+                         </a-gltf-model>
+                     </a-entity>
+                     
+                     <!-- Glasses Model 2 - Glasses1 -->
+                     <a-entity mindar-face-target="anchorIndex: 168">
+                         <a-gltf-model 
+                             rotation="0 0 0" 
+                             position="0 0 0" 
+                             scale="0.010 0.010 0.010" 
+                             src="#glassesModel2" 
+                             class="glasses2-entity" 
+                             visible="false">
+                         </a-gltf-model>
+                     </a-entity>
+                 </a-scene>
+                 
+                 <!-- Controls Panel -->
+                 <div class="controls-panel">
+                 <div class="control-section">
+                     <h3 class="control-title">Navigation</h3>
+                     <a href="index.html" class="back-button-control">
+                         ← Back to Products
+                     </a>
+                 </div>
+                 
+                 <div class="control-section">
+                     <h3 class="control-title">Select Glasses</h3>
+                     <div class="dropdown-container">
+                         <button class="dropdown-btn" onclick="toggleDropdown()">
+                             <span id="selected-glasses">3D Glasses</span>
+                             <span class="dropdown-arrow">▼</span>
+                         </button>
+                         <div class="dropdown-menu" id="glassesDropdown">
+                             <button class="dropdown-item selected" data-model="glasses1" onclick="selectGlasses('glasses1', '3D Glasses')">
+                                 3D Glasses
+                             </button>
+                             <button class="dropdown-item" data-model="glasses2" onclick="selectGlasses('glasses2', 'Glasses1')">
+                                 Glasses1
+                             </button>
+                         </div>
+                     </div>
+                 </div>
+                 
+                 <div class="control-section">
+                     <h3 class="control-title">Actions</h3>
+                     <div class="action-buttons">
+                         <button class="action-btn" onclick="capturePhoto()">
+                             📸 Capture Photo
+                         </button>
+                         <button class="action-btn secondary" onclick="switchCamera()">
+                             🔄 Switch Camera
+                         </button>
+                     </div>
+                 </div>
+             </div>
+         </div>
+         </main>
+         
+         <!-- Status message -->
+         <div class="status-message" id="statusMessage"></div>
+     </div>
+     
+     <script>
+         // Navigation function
+         function navigateToHome() {
+             window.location.href = 'index.html';
+         }
+         
+         // Glasses selection functions
+         function selectGlasses(model, name) {
+             // Update selected glasses display
+             document.getElementById('selected-glasses').textContent = name;
+             
+             // Update selected state
+             document.querySelectorAll('.dropdown-item').forEach(item => {
+                 item.classList.remove('selected');
+             });
+             document.querySelector(`[data-model="${model}"]`).classList.add('selected');
+             
+             // Hide/show glasses models
+             const glasses1Entity = document.querySelector('.glasses1-entity');
+             const glasses2Entity = document.querySelector('.glasses2-entity');
+             
+             if (model === 'glasses1') {
+                 if (glasses1Entity) glasses1Entity.setAttribute('visible', true);
+                 if (glasses2Entity) glasses2Entity.setAttribute('visible', false);
+             } else if (model === 'glasses2') {
+                 if (glasses1Entity) glasses1Entity.setAttribute('visible', false);
+                 if (glasses2Entity) glasses2Entity.setAttribute('visible', true);
+             }
+             
+             // Close dropdown
+             document.getElementById('glassesDropdown').classList.remove('show');
+         }
+         
+         // Toggle dropdown function
+         function toggleDropdown() {
+             const dropdown = document.getElementById('glassesDropdown');
+             dropdown.classList.toggle('show');
+         }
+         
+         // Close dropdown when clicking outside
+         window.onclick = function(event) {
+             if (!event.target.matches('.dropdown-btn') && !event.target.matches('.dropdown-arrow')) {
+                 const dropdown = document.getElementById('glassesDropdown');
+                 if (dropdown.classList.contains('show')) {
+                     dropdown.classList.remove('show');
+                 }
+             }
+         }
+         
+         // Capture photo function
+         function capturePhoto() {
+             // Implementation for photo capture
+             console.log('Capturing photo...');
+         }
+         
+         // Switch camera function
+         function switchCamera() {
+             // Implementation for camera switching
+             console.log('Switching camera...');
+         }
+         
+         // Status message function
+         function showStatus(message, type = 'info') {
+             const statusElement = document.getElementById('statusMessage');
+             statusElement.textContent = message;
+             statusElement.className = `status-message ${type}`;
+             statusElement.style.display = 'block';
+             
+             setTimeout(() => {
+                 statusElement.style.display = 'none';
+             }, 3000);
+         }
+         
+         // Hide loading overlay when AR is ready
+         document.addEventListener('DOMContentLoaded', function() {
+             const loadingOverlay = document.getElementById('loadingOverlay');
+             
+             // Simulate AR initialization
+             setTimeout(() => {
+                 loadingOverlay.style.display = 'none';
+             }, 2000);
+         });
+     </script>
+ </body>
+ </html>

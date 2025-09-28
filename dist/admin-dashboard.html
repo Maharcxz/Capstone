@@ -19,7 +19,7 @@
     <script src="JS/AuthHandlers.js"></script>
 
 
-  <link rel="stylesheet" crossorigin href="/assets/admin-dashboard-SIaftd2t.css">
+  <link rel="stylesheet" crossorigin href="/assets/admin-dashboard-CUcon34c.css">
   <link rel="stylesheet" crossorigin href="/assets/HeaderStyles-BGGMSg_O.css">
   <link rel="stylesheet" crossorigin href="/assets/SidebarStyles-Bk2AS0AO.css">
 </head>
@@ -290,7 +290,16 @@
                     <div class="glb-preview-container" id="glbPreviewContainer">
                         <div class="preview-header">
                             <span class="preview-title">Selected 3D Models</span>
-                            <button type="button" class="clear-all-btn" onclick="clearAllGlbFiles()">Clear All</button>
+                            <div class="preview-actions">
+                                <button type="button" class="export-btn" onclick="exportAllPositioningData()" title="Export Positioning Data">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                                <input type="file" id="importPositioningFile" accept=".json" style="display: none;" onchange="handlePositioningImport(event)">
+                                <button type="button" class="import-btn" onclick="document.getElementById('importPositioningFile').click()" title="Import Positioning Data">
+                                    <i class="fas fa-upload"></i> Import
+                                </button>
+                                <button type="button" class="clear-all-btn" onclick="clearAllGlbFiles()">Clear All</button>
+                            </div>
                         </div>
                         <div class="glb-preview-grid" id="glbPreviewGrid">
                             <!-- GLB file previews will be added here -->
@@ -305,6 +314,173 @@
                 <button type="button" class="modal-btn cancel-btn" onclick="closeProductModal()">Cancel</button>
                 <button type="submit" class="modal-btn save-btn" form="productForm">Save Product</button>
             </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLB Positioning Modal -->
+    <div id="glbPositioningModal" class="modal positioning-modal" style="display: none;">
+        <div class="modal-content positioning-modal-content">
+            <div class="modal-header">
+                <h2>Position 3D Model on Face</h2>
+                <button type="button" class="close-btn" onclick="closePositioningModal()">&times;</button>
+            </div>
+            
+            <div class="positioning-workspace">
+                <!-- Face Preview Area -->
+                <div class="face-preview-section">
+                    <div class="face-preview-container">
+                        <div class="face-wireframe">
+                            <!-- SVG Face Wireframe -->
+                            <svg viewBox="0 0 300 400" class="face-svg">
+                                <!-- Face outline -->
+                                <ellipse cx="150" cy="200" rx="100" ry="130" fill="none" stroke="#540000" stroke-width="2" opacity="0.3"/>
+                                
+                                <!-- Eyes -->
+                                <circle cx="120" cy="170" r="8" fill="none" stroke="#540000" stroke-width="1.5" opacity="0.5"/>
+                                <circle cx="180" cy="170" r="8" fill="none" stroke="#540000" stroke-width="1.5" opacity="0.5"/>
+                                
+                                <!-- Nose -->
+                                <path d="M150 180 L145 200 L150 205 L155 200 Z" fill="none" stroke="#540000" stroke-width="1.5" opacity="0.5"/>
+                                
+                                <!-- Mouth -->
+                                <path d="M130 230 Q150 240 170 230" fill="none" stroke="#540000" stroke-width="1.5" opacity="0.5"/>
+                                
+                                <!-- Ears -->
+                                <ellipse cx="80" cy="180" rx="15" ry="25" fill="none" stroke="#540000" stroke-width="1.5" opacity="0.3"/>
+                                <ellipse cx="220" cy="180" rx="15" ry="25" fill="none" stroke="#540000" stroke-width="1.5" opacity="0.3"/>
+                                
+                                <!-- Forehead -->
+                                <path d="M100 120 Q150 110 200 120" fill="none" stroke="#540000" stroke-width="1.5" opacity="0.3"/>
+                                
+                                <!-- Anchor Points -->
+                                <g class="anchor-points">
+                                    <circle cx="150" cy="120" r="6" class="anchor-point" data-anchor="forehead" data-index="10"/>
+                                    <circle cx="150" cy="190" r="6" class="anchor-point" data-anchor="nose" data-index="6"/>
+                                    <circle cx="150" cy="280" r="6" class="anchor-point" data-anchor="chin" data-index="175"/>
+                                    <circle cx="80" cy="180" r="6" class="anchor-point" data-anchor="left-ear" data-index="127"/>
+                                    <circle cx="220" cy="180" r="6" class="anchor-point" data-anchor="right-ear" data-index="356"/>
+                                    <circle cx="150" cy="168" r="6" class="anchor-point selected" data-anchor="face-center" data-index="168"/>
+                                </g>
+                                
+                                <!-- GLB Model Preview -->
+                                <g class="glb-model-preview" transform="translate(150, 168) scale(1)">
+                                    <rect x="-20" y="-10" width="40" height="20" fill="rgba(84, 0, 0, 0.7)" stroke="#540000" stroke-width="2" rx="5"/>
+                                    <text x="0" y="5" text-anchor="middle" fill="white" font-size="10" font-weight="bold">GLB</text>
+                                </g>
+                            </svg>
+                        </div>
+                        
+                        <div class="model-info">
+                            <h4 id="currentModelName">No model selected</h4>
+                            <p class="anchor-info">Anchor: <span id="currentAnchor">Face Center (168)</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Controls Section -->
+                <div class="positioning-controls">
+                    <div class="control-section">
+                        <h3>Quick Anchor Points</h3>
+                        <div class="anchor-buttons">
+                            <button class="anchor-btn active" data-anchor="face-center" data-index="168">
+                                <i class="fas fa-dot-circle"></i>
+                                Face Center
+                            </button>
+                            <button class="anchor-btn" data-anchor="nose" data-index="6">
+                                <i class="fas fa-circle"></i>
+                                Nose Bridge
+                            </button>
+                            <button class="anchor-btn" data-anchor="forehead" data-index="10">
+                                <i class="fas fa-circle"></i>
+                                Forehead
+                            </button>
+                            <button class="anchor-btn" data-anchor="left-ear" data-index="127">
+                                <i class="fas fa-circle"></i>
+                                Left Ear
+                            </button>
+                            <button class="anchor-btn" data-anchor="right-ear" data-index="356">
+                                <i class="fas fa-circle"></i>
+                                Right Ear
+                            </button>
+                            <button class="anchor-btn" data-anchor="chin" data-index="175">
+                                <i class="fas fa-circle"></i>
+                                Chin
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-section">
+                        <h3>Position & Scale</h3>
+                        <div class="control-group">
+                            <label>Position X:</label>
+                            <input type="range" id="positionX" min="-2" max="2" step="0.1" value="0" class="control-slider">
+                            <span class="value-display" id="positionXValue">0</span>
+                        </div>
+                        <div class="control-group">
+                            <label>Position Y:</label>
+                            <input type="range" id="positionY" min="-2" max="2" step="0.1" value="0" class="control-slider">
+                            <span class="value-display" id="positionYValue">0</span>
+                        </div>
+                        <div class="control-group">
+                            <label>Position Z:</label>
+                            <input type="range" id="positionZ" min="-1" max="1" step="0.1" value="0" class="control-slider">
+                            <span class="value-display" id="positionZValue">0</span>
+                        </div>
+                        <div class="control-group">
+                            <label>Scale:</label>
+                            <input type="range" id="modelScale" min="0.1" max="3" step="0.1" value="1" class="control-slider">
+                            <span class="value-display" id="modelScaleValue">1</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-section">
+                        <h3>Rotation</h3>
+                        <div class="control-group">
+                            <label>Rotate X:</label>
+                            <input type="range" id="rotationX" min="-180" max="180" step="5" value="0" class="control-slider">
+                            <span class="value-display" id="rotationXValue">0°</span>
+                        </div>
+                        <div class="control-group">
+                            <label>Rotate Y:</label>
+                            <input type="range" id="rotationY" min="-180" max="180" step="5" value="0" class="control-slider">
+                            <span class="value-display" id="rotationYValue">0°</span>
+                        </div>
+                        <div class="control-group">
+                            <label>Rotate Z:</label>
+                            <input type="range" id="rotationZ" min="-180" max="180" step="5" value="0" class="control-slider">
+                            <span class="value-display" id="rotationZValue">0°</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-section">
+                        <h3>Presets</h3>
+                        <div class="preset-buttons">
+                            <button class="preset-btn" onclick="applyPreset('glasses')">
+                                <i class="fas fa-glasses"></i>
+                                Glasses
+                            </button>
+                            <button class="preset-btn" onclick="applyPreset('hat')">
+                                <i class="fas fa-hat-cowboy"></i>
+                                Hat
+                            </button>
+                            <button class="preset-btn" onclick="applyPreset('earrings')">
+                                <i class="fas fa-gem"></i>
+                                Earrings
+                            </button>
+                            <button class="preset-btn" onclick="applyPreset('mask')">
+                                <i class="fas fa-mask"></i>
+                                Face Mask
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="modal-btn cancel-btn" onclick="closePositioningModal()">Cancel</button>
+                <button type="button" class="modal-btn reset-btn" onclick="resetPositioning()">Reset</button>
+                <button type="button" class="modal-btn save-btn" onclick="savePositioning()">Apply Positioning</button>
             </div>
         </div>
     </div>
@@ -346,5 +522,6 @@
     <script src="JS/SeachFunc.js"></script>
     <script src="JS/SidebarFunc.js"></script>
     <script src="JS/admin-dashboard.js"></script>
+    <script src="JS/glb-positioning.js"></script>
 </body>
 </html>

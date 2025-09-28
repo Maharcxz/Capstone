@@ -24,7 +24,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: 'index.html',
-        'virtual-try-on': 'virtual-try-on.html',
+        'try-on': 'try-on.html',
         'admin-dashboard': 'admin-dashboard.html',
         about: 'about.html',
         contact: 'contact.html',
