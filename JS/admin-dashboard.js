@@ -7,6 +7,84 @@ let editingProductId = null;
 let sidebarCategories = [];
 let currentCategory = 'all';
 
+// Load GLB data from localStorage
+function loadGlbData(glbId) {
+    try {
+        const savedData = localStorage.getItem('glbData');
+        if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            return parsedData[glbId] || null;
+        }
+    } catch (error) {
+        console.warn('Error loading GLB data:', error);
+    }
+    return null;
+}
+
+// Save GLB data to localStorage
+function saveGlbData(glbId, data) {
+    try {
+        let savedData = {};
+        const existing = localStorage.getItem('glbData');
+        if (existing) {
+            savedData = JSON.parse(existing);
+        }
+        
+        savedData[glbId] = data;
+        localStorage.setItem('glbData', JSON.stringify(savedData));
+        
+        console.log('✅ GLB data saved:', glbId, data);
+        return true;
+    } catch (error) {
+        console.error('❌ Error saving GLB data:', error);
+        return false;
+    }
+}
+
+// Export all GLB data
+function exportAllGlbData() {
+    try {
+        const savedData = localStorage.getItem('glbData');
+        if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            const dataStr = JSON.stringify(parsedData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = 'glb-data.json';
+            link.click();
+            
+            showNotification('GLB data exported successfully!', 'success');
+        } else {
+            showNotification('No GLB data to export', 'warning');
+        }
+    } catch (error) {
+        console.error('❌ Error exporting GLB data:', error);
+        showNotification('Error exporting GLB data', 'error');
+    }
+}
+
+// Import GLB data
+function importGlbData(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            localStorage.setItem('glbData', JSON.stringify(importedData));
+            
+            // Refresh GLB previews
+            renderGlbPreview();
+            
+            showNotification('GLB data imported successfully!', 'success');
+        } catch (error) {
+            console.error('❌ Error importing GLB data:', error);
+            showNotification('Error importing GLB data', 'error');
+        }
+    };
+    reader.readAsText(file);
+}
+
 // Initialize dashboard when page loads
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Admin dashboard initializing...');
@@ -965,13 +1043,17 @@ function addGlbFileToPreview(src, name) {
     const glbId = 'glb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     const fileSize = src instanceof File ? formatFileSize(src.size) : 'Unknown size';
     
-    productGlbFiles.push({
+    const glbFile = {
         id: glbId,
         src: src instanceof File ? URL.createObjectURL(src) : src,
         name: name,
         size: fileSize,
         file: src instanceof File ? src : null
-    });
+    };
+    
+
+    
+    productGlbFiles.push(glbFile);
     
     renderGlbPreview();
 }
@@ -1007,7 +1089,7 @@ function renderGlbPreview() {
     }
     
     container.innerHTML = productGlbFiles.map((glb, index) => `
-        <div class="glb-preview-item" data-glb-id="${glb.id}">
+        <div class="glb-preview-item ${glb.positioning ? 'positioned' : ''}" data-glb-id="${glb.id}">
             <div class="glb-file-icon">
                 <div class="glb-icon-background">
                     <i class="fas fa-cube glb-main-icon"></i>
@@ -1016,10 +1098,12 @@ function renderGlbPreview() {
                 <div class="glb-3d-indicator">
                     <i class="fas fa-expand-arrows-alt"></i>
                 </div>
+                ${glb.positioning ? '' : ''}
             </div>
             <div class="glb-file-info">
                 <div class="glb-file-name" title="${glb.name}">${glb.name}</div>
                 <div class="glb-file-size">${glb.size}</div>
+                ${glb.positioning ? '' : ''}
             </div>
             <div class="glb-preview-controls">
                 <button type="button" class="control-btn move-up" onclick="moveGlbFileUp('${glb.id}')" 
@@ -1036,6 +1120,19 @@ function renderGlbPreview() {
             </div>
         </div>
     `).join('');
+}
+
+// Get face anchor name from index
+function getFaceAnchorName(anchorIndex) {
+    const anchors = {
+        168: 'Face Center',
+        9: 'Forehead',
+        1: 'Nose Tip',
+        175: 'Chin',
+        234: 'Left Ear',
+        454: 'Right Ear'
+    };
+    return anchors[anchorIndex] || `Anchor ${anchorIndex}`;
 }
 
 function clearAllGlbFiles() {
@@ -1073,3 +1170,5 @@ window.removeGlbFile = removeGlbFile;
 window.moveGlbFileUp = moveGlbFileUp;
 window.moveGlbFileDown = moveGlbFileDown;
 window.clearAllGlbFiles = clearAllGlbFiles;
+window.exportAllGlbData = exportAllGlbData;
+window.importGlbData = importGlbData;

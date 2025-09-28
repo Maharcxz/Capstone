@@ -1189,6 +1189,104 @@
     letter-spacing: 0.3px;
 }
 
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.preview-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.export-btn, .import-btn {
+    background: #2196F3;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+.export-btn:hover {
+    background: #1976D2;
+}
+
+.import-btn {
+    background: #FF9800;
+}
+
+.import-btn:hover {
+    background: #F57C00;
+}
+
+
+
+.preset-label {
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* Modal Actions */
+.modal-actions {
+    background: #2a2a2a;
+    border-top: 1px solid #404040;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.modal-btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.cancel-btn {
+    background: #555555;
+    color: #ffffff;
+}
+
+.cancel-btn:hover {
+    background: #666666;
+}
+
+.reset-btn {
+    background: #ff6b6b;
+    color: #ffffff;
+}
+
+.reset-btn:hover {
+    background: #ff5252;
+}
+
+.save-btn {
+    background: #4CAF50;
+    color: #ffffff;
+}
+
+.save-btn:hover {
+    background: #5CBF60;
+}
+
+
+
 .clear-all-btn {
     background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
     color: white;
@@ -1366,13 +1464,40 @@
     gap: 4px;
 }
 
-/* GLB File Upload Styles */
-.glb-upload-section {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-bottom: 20px;
+/* Positioning indicator styles */
+.glb-preview-item.positioned {
+    border: 2px solid #4CAF50;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e8f5e8 100%);
 }
+
+.positioning-indicator {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #4CAF50;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+}
+
+.positioning-indicator i {
+    font-size: 8px;
+}
+
+.positioning-info {
+    font-size: 11px;
+    color: #4CAF50;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+
 
 .glb-preview-container {
     margin-top: 16px;

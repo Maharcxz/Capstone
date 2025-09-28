@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-Order Confirmation - Trinity Optimum Vision Center</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    
+    <!-- Firebase Configuration (must be loaded first) -->
+    <script src="JS/FirebaseConfig.js"></script>
+    
+    <!-- Application Scripts (loaded after Firebase is initialized) -->
+    <script src="JS/AuthHandlers.js"></script>
+    <script src="JS/ContentEditingFunc.js"></script>
+    <script src="JS/EventListenerFunc.js"></script>
+    <script src="JS/FrameCategoryFunc.js"></script>
+    <script src="JS/FrameEditingModal.js"></script>
+    <script src="JS/NotificationFunc.js"></script>
+    <script src="JS/PassToggleFunc.js"></script>
+    <script src="JS/Script.js"></script>
+    <script src="JS/SeachFunc.js"></script>
+    <script src="JS/SidebarFunc.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/HeaderStyles-BGGMSg_O.css">
+  <link rel="stylesheet" crossorigin href="/assets/ResponsiveNotifStyles-RGjjPZn2.css">
+  <link rel="stylesheet" crossorigin href="/assets/SidebarStyles-Bk2AS0AO.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1 class="maintitle">T R I N I T Y</h1>
+                <p class="subtitle">OPTIMUM VISION CENTER</p>
+            </div>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="index.html" class="nav-link">
+                        Home
+                    </a>
+                    <a href="contact.html" class="nav-link">
+                        <span>Contact Us</span>
+                    </a>
+                    <a href="about.html" class="nav-link">
+                        <span>About Us</span>
+                    </a>
+
+                    <a href="preorders.html" class="nav-link admin-only" id="preOrdersNav" style="display: none;">
+                        <span>Pre-Orders</span>
+                    </a>
+                    <a href="admin-dashboard.html" class="nav-link admin-only" id="productManagementNav" style="display: none;">
+                        <span>Product Management</span>
+                    </a>
+                </div>
+                <div class="nav-right">
+                    <div class="nav-icons">
+                    </div>
+                    <div class="auth-section">
+                        <a href="#" class="login-btn" id="authButton" onclick="handleAuthClick()">
+                            <span id="authButtonText">Log In</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Login Modal -->
+        <div class="login-modal-overlay" id="loginModalOverlay" onclick="hideLoginModal()">
+            <div class="login-modal" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h2 class="modal-title">W E L C O M E</h2>
+                </div>
+                
+                <form class="login-form">
+                    <div class="input-group">
+                        <input type="email" placeholder="Email Address" class="login-input" id="modalEmailInput" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <input type="password" placeholder="Password" class="login-input" id="modalPasswordInput" required>
+                    </div>
+                    
+                    <div class="remember-me-group">
+                        <label class="remember-me-label">
+                            <input type="checkbox" id="rememberMeCheckbox" class="remember-me-checkbox">
+                            <span class="checkmark"></span>
+                            Remember me
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="modal-login-btn">Log In</button>
+                    
+                    <div class="guest-option">
+                        <span class="continue-text">Or continue as</span>
+                        <button type="button" class="guest-btn" onclick="hideLoginModal()">Guest</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Confirmation Content -->
+        <main class="confirmation-content">
+            <h2 class="confirmation-page-title">PRE-ORDERING</h2>
+            
+            <div class="confirmation-container">
+                <div class="confirmation-message">
+                    <p class="thank-you-message" id="thankYouMessage">
+                        THANK YOU FOR YOUR INTEREST IN OUR FRAMES.
+                    </p>
+                    
+                    <p class="confirmation-details">
+                        WE'VE RECEIVED YOUR PRE-ORDER REQUEST. OUR TEAM WILL CONTACT YOU ONCE THE ITEM BECOMES AVAILABLE OR TO CONFIRM DELIVERY/PICK-UP DETAILS.
+                    </p>
+                    
+                    <div class="notification-info">
+                        <p class="notification-text">
+                            YOU'LL RECEIVE UPDATES VIA THE EMAIL OR PHONE NUMBER YOU PROVIDED.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="cancel-btn" onclick="window.location.href='index.html'">Return to Home</button>
+                <button type="button" class="submit-btn" onclick="window.location.href='preorder.html'">New Pre-Order</button>
+            </div>
+        </main>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const frameName = urlParams.get('frameName');
+            
+            // Update thank you message if frame name is provided
+            if (frameName) {
+                const thankYouMessage = document.getElementById('thankYouMessage');
+                if (thankYouMessage) {
+                    thankYouMessage.textContent = `THANK YOU FOR YOUR INTEREST IN THE "${frameName.toUpperCase()}".`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

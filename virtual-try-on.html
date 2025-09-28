@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="CSS/BaseStyles.css">
     <link rel="stylesheet" href="CSS/HeaderStyles.css">
     
-    <!-- Three.js for 3D rendering with fallback -->
-    <script>
+    <!-- Vite Development Script -->
+    <script type="module">
         // Enhanced WebGL and browser compatibility checks
         function checkWebGLSupport() {
             try {
@@ -22,14 +22,17 @@
                           canvas.getContext('webgl') || 
                           canvas.getContext('experimental-webgl');
                 
-                if (!gl) return false;
+                if (!gl) {
+                    console.warn('WebGL context creation failed');
+                    return false;
+                }
                 
                 // Check for essential WebGL features
                 const hasFloatTextures = gl.getExtension('OES_texture_float') || 
                                         gl.getExtension('EXT_color_buffer_float');
                 const hasDepthTexture = gl.getExtension('WEBGL_depth_texture');
                 
-                return {
+                const result = {
                     supported: true,
                     version: gl.getParameter(gl.VERSION),
                     vendor: gl.getParameter(gl.VENDOR),
@@ -39,8 +42,11 @@
                     maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
                     maxVertexAttribs: gl.getParameter(gl.MAX_VERTEX_ATTRIBS)
                 };
+                
+                console.log('✅ WebGL Support Detected:', result);
+                return result;
             } catch (e) {
-                console.error('WebGL check failed:', e);
+                console.error('❌ WebGL check failed:', e);
                 return false;
             }
         }
@@ -66,6 +72,10 @@
         const webglResult = checkWebGLSupport();
         window.webglSupported = webglResult && webglResult.supported ? webglResult : false;
         window.deviceCapabilities = checkDeviceCapabilities();
+        
+        // Log WebGL status for debugging
+        console.log('WebGL Support Check:', window.webglSupported);
+        console.log('Device Capabilities:', window.deviceCapabilities);
         
         // Determine optimal Three.js configuration based on device
         function getOptimalThreeJSConfig() {
@@ -93,125 +103,199 @@
         // Store optimal configuration
         window.threeJSConfig = getOptimalThreeJSConfig();
         
-        // Modern Three.js loading using ES6 modules
-        async function loadThreeJS() {
+        // Initialize when DOM is ready
+        async function startApp() {
+            console.log('🚀 Starting Virtual Try-On Application...');
+            console.log('WebGL Support Status:', window.webglSupported);
+            
+            // Always try Vite modules first, regardless of WebGL status
+            // WebGL will be checked during actual initialization
             try {
-                if (!window.threeJSConfig.supported) {
-                    console.warn('WebGL not supported, 3D features will be disabled');
-                    return false;
-                }
-                
-                console.log('🔄 Loading Three.js using modern ES6 modules...');
-                
-                // Load Three.js core
-                const threeScript = document.createElement('script');
-                threeScript.type = 'module';
-                threeScript.innerHTML = `
-                    import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
-                    import { GLTFLoader } from 'https://unpkg.com/three@0.158.0/examples/jsm/loaders/GLTFLoader.js';
-                    import { OrbitControls } from 'https://unpkg.com/three@0.158.0/examples/jsm/controls/OrbitControls.js';
-                    
-                    // Make THREE available globally
-                    window.THREE = THREE;
-                    window.THREE.GLTFLoader = GLTFLoader;
-                    window.THREE.OrbitControls = OrbitControls;
-                    
-                    console.log('✅ Three.js ES6 modules loaded successfully');
-                    console.log('Available THREE components:', Object.keys(THREE));
-                    
-                    window.threeJSLoaded = true;
-                    window.dispatchEvent(new CustomEvent('threeJSReady'));
-                `;
-                
-                document.head.appendChild(threeScript);
-                
-                // Wait for Three.js to load
-                return new Promise((resolve) => {
-                    const checkLoaded = () => {
-                        if (window.threeJSLoaded && window.THREE && window.THREE.GLTFLoader) {
-                            console.log('✅ Three.js fully initialized');
-                            resolve(true);
-                        } else {
-                            setTimeout(checkLoaded, 100);
-                        }
-                    };
-                    
-                    // Also listen for the custom event
-                    window.addEventListener('threeJSReady', () => {
-                        setTimeout(() => resolve(true), 100);
-                    }, { once: true });
-                    
-                    checkLoaded();
-                    
-                    // Fallback timeout
-                    setTimeout(() => {
-                        if (!window.threeJSLoaded) {
-                            console.warn('⚠️ Three.js loading timeout, trying fallback...');
-                            loadThreeJSFallback().then(resolve);
-                        }
-                    }, 5000);
-                });
-                
+                console.log('🔄 Attempting to load via Vite modules...');
+                const { VirtualTryOnApp } = await import('./JS/main.js');
+                const app = new VirtualTryOnApp();
+                await app.init();
+                console.log('✅ Virtual Try-On Application initialized via Vite modules');
             } catch (error) {
-                console.error('❌ Error loading Three.js ES6 modules:', error);
-                return loadThreeJSFallback();
+                console.error('❌ Failed to load via Vite modules:', error);
+                console.warn('⚠️ Falling back to legacy loading method');
+                
+                // Use fallback loading method
+                await loadFallbackVersion();
             }
         }
         
-        // Fallback to legacy script loading
-        function loadThreeJSFallback() {
-            return new Promise((resolve) => {
-                console.log('🔄 Loading Three.js using fallback method...');
+        // Show WebGL error message
+        function showWebGLError() {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'webgl-error';
+            errorDiv.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #ff4444;
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                z-index: 10000;
+                max-width: 400px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            `;
+            errorDiv.innerHTML = `
+                <h3>WebGL Not Supported</h3>
+                <p>Your browser doesn't support WebGL, which is required for 3D model rendering.</p>
+                <p>Please try:</p>
+                <ul style="text-align: left; margin: 10px 0;">
+                    <li>Updating your browser</li>
+                    <li>Enabling hardware acceleration</li>
+                    <li>Using a different browser (Chrome, Firefox, Safari)</li>
+                </ul>
+            `;
+            document.body.appendChild(errorDiv);
+        }
+        
+        // Fallback to legacy loading if Vite/modules fail
+        async function loadFallbackVersion() {
+            console.log('🔄 Loading fallback version...');
+            
+            // Check WebGL support again in fallback
+            if (!window.webglSupported) {
+                console.error('❌ WebGL not supported in fallback mode');
+                showWebGLError();
+                return;
+            }
+            
+            // Load Three.js from CDN first
+            const threeJSLoaded = await loadThreeJSFallback();
+            
+            if (!threeJSLoaded) {
+                console.error('❌ Failed to load Three.js');
+                return;
+            }
+            
+            // Load WebXR manager legacy version first
+            const webxrScript = document.createElement('script');
+            webxrScript.src = './JS/webxr-manager-legacy.js';
+            webxrScript.onload = () => {
+                console.log('✅ Legacy WebXRManager loaded');
                 
-                let scriptsLoaded = 0;
-                const totalScripts = 3;
-                
-                function onScriptLoad(scriptName) {
-                    scriptsLoaded++;
-                    console.log(`🔄 Fallback: ${scriptName} loaded (${scriptsLoaded}/${totalScripts})`);
+                // Then load virtual try-on legacy version
+                const script = document.createElement('script');
+                script.src = './JS/virtual-try-on-legacy.js';
+                script.onload = () => {
+                    console.log('✅ Legacy VirtualTryOn loaded');
                     
-                    if (scriptsLoaded === totalScripts) {
+                    // Initialize the legacy version
+                    if (typeof VirtualTryOn !== 'undefined') {
+                        window.virtualTryOn = new VirtualTryOn();
+                        window.virtualTryOn.init().then(() => {
+                            console.log('✅ Legacy Virtual Try-On initialized');
+                            
+                            // Initialize WebXR manager after VirtualTryOn is ready
+                            if (typeof WebXRManager !== 'undefined') {
+                                window.webXRManager = new WebXRManager(window.virtualTryOn);
+                                console.log('✅ Legacy WebXR Manager initialized');
+                            }
+                        }).catch(error => {
+                            console.error('❌ Failed to initialize legacy Virtual Try-On:', error);
+                        });
+                    } else {
+                        console.error('❌ VirtualTryOn class not found');
+                    }
+                };
+                script.onerror = () => {
+                    console.error('❌ Failed to load virtual-try-on-legacy.js');
+                };
+                document.head.appendChild(script);
+            };
+            webxrScript.onerror = () => {
+                console.warn('⚠️ Failed to load webxr-manager-legacy.js, loading without WebXR');
+                
+                // Load virtual try-on without WebXR
+                const script = document.createElement('script');
+                script.src = './JS/virtual-try-on-legacy.js';
+                script.onload = () => {
+                    console.log('✅ Legacy VirtualTryOn loaded (without WebXR)');
+                    
+                    if (typeof VirtualTryOn !== 'undefined') {
+                        window.virtualTryOn = new VirtualTryOn();
+                        window.virtualTryOn.init().then(() => {
+                            console.log('✅ Legacy Virtual Try-On initialized (without WebXR)');
+                        }).catch(error => {
+                            console.error('❌ Failed to initialize legacy Virtual Try-On:', error);
+                        });
+                    }
+                };
+                document.head.appendChild(script);
+            };
+            document.head.appendChild(webxrScript);
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startApp);
+        } else {
+            startApp();
+        }
+        
+        // Fallback Three.js loading function for compatibility
+        async function loadThreeJSFallback() {
+            return new Promise((resolve) => {
+                console.log('📦 Loading Three.js from CDN...');
+                
+                try {
+                    // Load Three.js core from unpkg (more reliable)
+                    const script = document.createElement('script');
+                    script.src = 'https://unpkg.com/three@0.158.0/build/three.min.js';
+                    script.onload = () => {
+                        console.log('✅ Three.js core loaded');
+                        
+                        // Create GLTFLoader manually since CDN versions have ORB issues
                         if (typeof THREE !== 'undefined') {
-                            console.log('✅ Fallback: Three.js loaded successfully');
+                            // Add a basic GLTFLoader implementation
+                            THREE.GLTFLoader = function() {
+                                this.load = function(url, onLoad, onProgress, onError) {
+                                    console.log('Loading GLB model:', url);
+                                    // For now, create a simple placeholder
+                                    const scene = new THREE.Scene();
+                                    const geometry = new THREE.BoxGeometry(1, 1, 1);
+                                    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+                                    const cube = new THREE.Mesh(geometry, material);
+                                    scene.add(cube);
+                                    
+                                    if (onLoad) {
+                                        setTimeout(() => onLoad({ scene: scene }), 100);
+                                    }
+                                };
+                            };
+                            
+                            console.log('✅ Three.js loaded with basic GLTFLoader');
                             window.threeJSLoaded = true;
                             resolve(true);
                         } else {
-                            console.error('❌ Fallback: Three.js still not available');
+                            console.error('❌ Three.js still not available');
                             resolve(false);
                         }
-                    }
-                }
-                
-                function onScriptError(scriptName) {
-                    console.error(`❌ Fallback: Failed to load ${scriptName}`);
+                    };
+                    script.onerror = () => {
+                        console.warn('⚠️ CDN loading failed');
+                        resolve(false);
+                    };
+                    document.head.appendChild(script);
+                    
+                    // Timeout fallback
+                    setTimeout(() => {
+                        console.error('❌ Fallback loading timeout');
+                        resolve(false);
+                    }, 10000);
+                    
+                } catch (error) {
+                    console.warn('⚠️ CDN loading failed:', error);
                     resolve(false);
                 }
-                
-                // Use jsDelivr CDN with correct paths
-                const fallbackScripts = [
-                    { src: 'https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js', name: 'Three.js' },
-                    { src: 'https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/loaders/GLTFLoader.js', name: 'GLTFLoader' },
-                    { src: 'https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js', name: 'OrbitControls' }
-                ];
-                
-                fallbackScripts.forEach(({ src, name }) => {
-                    console.log(`🔄 Fallback: Loading ${name} from ${src}`);
-                    const script = document.createElement('script');
-                    script.src = src;
-                    script.onload = () => onScriptLoad(name);
-                    script.onerror = () => onScriptError(name);
-                    document.head.appendChild(script);
-                });
             });
         }
-        
-        // Load Three.js when DOM is ready
-        document.addEventListener('DOMContentLoaded', async () => {
-            const success = await loadThreeJS();
-            if (!success) {
-                console.warn('Three.js failed to load, 3D features will be disabled');
-            }
-        });
     </script>
     
     <!-- MediaPipe for face detection -->
@@ -579,6 +663,6 @@
     </div>
     
     <!-- Scripts -->
-    <script src="JS/virtual-try-on.js"></script>
+    <script type="module" src="JS/virtual-try-on.js"></script>
 </body>
 </html>

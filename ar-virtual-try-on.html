@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Virtual Try-On - Trinity Optimum Vision Center</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/BaseStyles.css">
+    <link rel="stylesheet" href="css/HeaderStyles.css">
+    
+    <link rel="stylesheet" href="css/ARVirtualTryOnStyles.css">
+    <!-- A-Frame and MindAR -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js" crossorigin="anonymous"></script>
+    
+    <script>
+    </script>
+</head>
+<body>
+    <div class="virtual-try-on-container">
+        <header class="try-on-header">
+            <h1 class="try-on-title" onclick="navigateToHome()">Trinity Optimum Vision Center</h1>
+        </header>
+        
+        <main class="try-on-main">
+            <div class="camera-container">
+                <!-- Loading overlay -->
+                <div class="loading-overlay" id="loadingOverlay">
+                <div class="loading-spinner"></div>
+                <p>Initializing AR Camera...</p>
+            </div>
+                
+                <a-scene 
+                    mindar-face 
+                    embedded 
+                    color-space="sRGB" 
+                    renderer="colorManagement: true, physicallyCorrectLights" 
+                    vr-mode-ui="enabled: false" 
+                    device-orientation-permission-ui="enabled: false"
+                    style="height: 100vh; width: 100vw;">
+                    <a-assets>
+                        <a-asset-item id="glassesModel1" src="Assets/glasses.glb"></a-asset-item>
+                        <a-asset-item id="glassesModel2" src="Assets/glasses-12.glb"></a-asset-item>
+                        <a-asset-item id="headOccluder" src="Assets/headOccluder.glb"></a-asset-item>
+                    </a-assets>
+                    
+                    <a-camera 
+                        id="camera"
+                        position="0 0 0" 
+                        look-controls="enabled: false" 
+                        wasd-controls="enabled: false"
+                        cursor="rayOrigin: mouse">
+                    </a-camera>
+                    
+                    <!-- Head occluder for better AR effect -->
+                    <a-entity mindar-face-target="anchorIndex: 168">
+                        <a-gltf-model 
+                            mindar-face-occluder 
+                            position="0 -0.3 0.15"
+                            rotation="0 0 0" 
+                            scale="0.065 0.065 0.065" 
+                            src="#headOccluder">
+                        </a-gltf-model>
+                    </a-entity>
+                    
+                    <!-- Glasses Model 1 -->
+                    <a-entity mindar-face-target="anchorIndex: 168">
+                        <a-gltf-model 
+                            rotation="0 0 0" 
+                            position="0 0 0" 
+                            scale="0.6 0.6 0.6" 
+                            src="#glassesModel1" 
+                            class="glasses1-entity" 
+                            visible="true">
+                        </a-gltf-model>
+                    </a-entity>
+                    
+                    <!-- Glasses Model 2 -->
+                    <a-entity mindar-face-target="anchorIndex: 168">
+                        <a-gltf-model 
+                            rotation="0 0 0" 
+                            position="0 0 0" 
+                            scale="0.06 0.06 0.06" 
+                            src="#glassesModel2" 
+                            class="glasses2-entity" 
+                            visible="false">
+                        </a-gltf-model>
+                    </a-entity>
+                </a-scene>
+            </div>
+            
+            <div class="controls-panel">
+                <div class="control-section">
+                    <h3 class="control-title">Navigation</h3>
+                    <a href="index.html" class="back-button-control">
+                        ← Back to Products
+                    </a>
+                </div>
+                
+                <div class="control-section">
+                    <h3 class="control-title">Select Glasses</h3>
+                    <div class="model-selector">
+                        <button id="glasses1" class="model-btn selected" data-model="glasses1">
+                            <img src="Assets/glasses.glb" alt="Glasses 1" onerror="this.style.display='none'">
+                            <span>Classic Glasses</span>
+                        </button>
+                        <button id="glasses2" class="model-btn" data-model="glasses2">
+                            <img src="Assets/glasses-12.glb" alt="Glasses 2" onerror="this.style.display='none'">
+                            <span>Modern Glasses</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="control-section">
+                    <h3 class="control-title">Actions</h3>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="capturePhoto()">
+                            📸 Capture Photo
+                        </button>
+                        <button class="action-btn secondary" onclick="switchCamera()">
+                            🔄 Switch Camera
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let arScene;
+        let currentGlasses = 'glasses1';
+
+        // Initialize AR when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            arScene = document.querySelector('a-scene');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            
+            // Initialize glasses selection
+            initializeGlassesSelection();
+            
+            // Wait for MindAR to initialize
+            arScene.addEventListener('renderstart', function() {
+                console.log('A-Frame scene started rendering');
+                setTimeout(() => {
+                    if (loadingOverlay) {
+                        loadingOverlay.style.display = 'none';
+                    }
+                }, 3000);
+            });
+            
+            // Handle MindAR events
+            arScene.addEventListener('mindar-face-found', function() {
+                console.log('Face detected');
+                showStatusMessage('Face detected! Try-on active.', 'success');
+            });
+            
+            arScene.addEventListener('mindar-face-lost', function() {
+                console.log('Face lost');
+                showStatusMessage('Face lost. Please position your face in view.', 'error');
+            });
+            
+            arScene.addEventListener('mindar-ready', function() {
+                console.log('MindAR is ready');
+                showStatusMessage('AR Camera ready!', 'success');
+            });
+            
+            arScene.addEventListener('mindar-error', function(event) {
+                console.error('MindAR error:', event.detail);
+                if (loadingOverlay) {
+                    loadingOverlay.innerHTML = '<div class="loading-spinner"></div><p>AR initialization failed. Please refresh and allow camera access.</p>';
+                }
+            });
+        });
+
+        function initializeGlassesSelection() {
+            const glassesButtons = document.querySelectorAll('.model-btn[data-model]');
+            
+            glassesButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const modelType = this.getAttribute('data-model');
+                    selectGlasses(modelType);
+                    
+                    // Update button states
+                    glassesButtons.forEach(btn => btn.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+            });
+        }
+
+        function selectGlasses(glassesType) {
+            console.log('Selecting glasses:', glassesType);
+            currentGlasses = glassesType;
+            
+            // Hide all glasses models
+            const allGlasses = document.querySelectorAll('.glasses1-entity, .glasses2-entity');
+            allGlasses.forEach(glasses => {
+                glasses.setAttribute('visible', false);
+            });
+            
+            // Show selected glasses
+            const selectedGlasses = document.querySelectorAll(`.${glassesType}-entity`);
+            selectedGlasses.forEach(glasses => {
+                glasses.setAttribute('visible', true);
+            });
+            
+            showStatusMessage(`Switched to ${glassesType === 'glasses1' ? 'Classic' : 'Modern'} glasses`, 'success');
+        }
+
+        function capturePhoto() {
+            // Create a canvas to capture the AR scene
+            const canvas = document.createElement('canvas');
+            const scene = document.querySelector('a-scene').canvas;
+            
+            if (!scene) {
+                alert('AR scene not ready. Please wait for initialization.');
+                return;
+            }
+            
+            canvas.width = scene.width;
+            canvas.height = scene.height;
+            const context = canvas.getContext('2d');
+            
+            // Draw the AR scene to canvas
+            context.drawImage(scene, 0, 0);
+            
+            // Convert to blob and download
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `ar_glasses_photo_${new Date().getTime()}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showStatusMessage('Photo captured successfully!', 'success');
+            });
+        }
+
+        function switchCamera() {
+            // MindAR handles camera switching internally
+            showStatusMessage('Camera switching not available in AR mode', 'error');
+        }
+
+        function showStatusMessage(message, type) {
+            // Create or update status message
+            let statusDiv = document.querySelector('.status-message');
+            if (!statusDiv) {
+                statusDiv = document.createElement('div');
+                statusDiv.className = 'status-message';
+                document.body.appendChild(statusDiv);
+            }
+            
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.style.display = 'block';
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function navigateToHome() {
+            window.location.href = 'index.html';
+        }
+    </script>
+    
+    <!-- AR Positioning Integration -->
+    <script src="js/ar-positioning-integration.js"></script>
+</body>
+</html>

@@ -293,7 +293,16 @@
                     <div class="glb-preview-container" id="glbPreviewContainer">
                         <div class="preview-header">
                             <span class="preview-title">Selected 3D Models</span>
-                            <button type="button" class="clear-all-btn" onclick="clearAllGlbFiles()">Clear All</button>
+                            <div class="preview-actions">
+                                <button type="button" class="export-btn" onclick="exportAllGlbData()" title="Export GLB Data">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                                <input type="file" id="importGlbFile" accept=".json" style="display: none;" onchange="importGlbData(this.files[0])">
+                                <button type="button" class="import-btn" onclick="document.getElementById('importGlbFile').click()" title="Import GLB Data">
+                                    <i class="fas fa-upload"></i> Import
+                                </button>
+                                <button type="button" class="clear-all-btn" onclick="clearAllGlbFiles()">Clear All</button>
+                            </div>
                         </div>
                         <div class="glb-preview-grid" id="glbPreviewGrid">
                             <!-- GLB file previews will be added here -->
@@ -311,6 +320,8 @@
             </div>
         </div>
     </div>
+
+
 
     <!-- Sidebar Manager Modal -->
     <div id="sidebarManagerModal" class="modal" style="display: none;">
@@ -340,6 +351,11 @@
         </div>
     </div>
 
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
     <script src="JS/ContentEditingFunc.js"></script>
     <script src="JS/EventListenerFunc.js"></script>
     <script src="JS/FrameEditingModal.js"></script>

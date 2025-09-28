@@ -350,7 +350,7 @@ function openProductDetailModal(productId) {
             };
             
             const frameId = frameMapping[product.id] || 'glasses-6'; // Default frame
-            window.location.href = `virtual-try-on.html?frame=${frameId}&productName=${encodeURIComponent(product.title)}`;
+            window.location.href = `ar-virtual-try-on.html?frame=${frameId}&productName=${encodeURIComponent(product.title)}`;
         };
     }
 

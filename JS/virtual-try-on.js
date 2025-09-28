@@ -1,7 +1,7 @@
-// Virtual Try-On System
+// Virtual Try-On System with WebXR Support
 // Handles camera access, face detection, and 3D glasses overlay
 
-class VirtualTryOn {
+export class VirtualTryOn {
     constructor() {
         this.video = null;
         this.canvas = null;
@@ -2452,28 +2452,31 @@ class VirtualTryOn {
     }
 }
 
-// Initialize virtual try-on when page loads
-let virtualTryOn;
+// Legacy global initialization for fallback compatibility
+if (typeof window !== 'undefined' && !window.virtualTryOn) {
+    let virtualTryOn;
 
-document.addEventListener('DOMContentLoaded', () => {
-    virtualTryOn = new VirtualTryOn();
-});
+    // Only initialize if not using module system
+    if (!document.querySelector('script[type="module"]')) {
+        document.addEventListener('DOMContentLoaded', () => {
+            virtualTryOn = new VirtualTryOn();
+        });
 
-// Handle page unload
-window.addEventListener('beforeunload', () => {
-    if (virtualTryOn) {
-        virtualTryOn.destroy();
+        // Handle page unload
+        window.addEventListener('beforeunload', () => {
+            if (virtualTryOn) {
+                virtualTryOn.destroy();
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (virtualTryOn) {
+                virtualTryOn.resizeCanvas();
+            }
+        });
     }
-});
-
-// Handle window resize
-window.addEventListener('resize', () => {
-    if (virtualTryOn) {
-        virtualTryOn.resizeCanvas();
-    }
-});
-
-
+}
 
 // Function to navigate to home page when header title is clicked
 function navigateToHome() {
