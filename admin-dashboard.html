@@ -260,7 +260,9 @@
                     <div class="image-preview-container" id="imagePreviewContainer">
                         <div class="preview-header">
                             <span class="preview-title">Selected Images</span>
-                            <button type="button" class="clear-all-btn" onclick="clearAllImages()">Clear All</button>
+                            <div class="preview-actions">
+                                <button type="button" class="clear-all-btn" onclick="clearAllImages()">Clear All</button>
+                            </div>
                         </div>
                         <div class="image-preview-grid" id="imagePreviewGrid">
                             <!-- Image previews will be added here -->
@@ -292,15 +294,8 @@
                     <!-- GLB Preview Area -->
                     <div class="glb-preview-container" id="glbPreviewContainer">
                         <div class="preview-header">
-                            <span class="preview-title">Selected 3D Models</span>
+                            <span class="preview-title">3D Models</span>
                             <div class="preview-actions">
-                                <button type="button" class="export-btn" onclick="exportAllPositioningData()" title="Export Positioning Data">
-                                    <i class="fas fa-download"></i> Export
-                                </button>
-                                <input type="file" id="importPositioningFile" accept=".json" style="display: none;" onchange="handlePositioningImport(event)">
-                                <button type="button" class="import-btn" onclick="document.getElementById('importPositioningFile').click()" title="Import Positioning Data">
-                                    <i class="fas fa-upload"></i> Import
-                                </button>
                                 <button type="button" class="clear-all-btn" onclick="clearAllGlbFiles()">Clear All</button>
                             </div>
                         </div>
