@@ -31,9 +31,26 @@ const productsRef = db.ref('products');
 // Reference to categories collection in the database
 const categoriesRef = db.ref('categories');
 
-// Function to save pre-order to Firebase
+// Reference to notifications collection in the database
+const notificationsRef = db.ref('notifications');
+
+// Function to save pre-order to Firebase and attach confirmation details on the same record
 function savePreOrderToFirebase(preOrder) {
-    return preOrdersRef.push(preOrder);
+    // First write only the customer-provided pre-order data
+    return preOrdersRef.push(preOrder).then((result) => {
+        // Then attach confirmation details to the SAME document (no separate entry)
+        const confirmationAttachment = {
+            confirmationDetails: {
+                message: 'Pre-order submitted successfully!',
+                status: 'submitted',
+                timestamp: new Date().toISOString()
+            }
+        };
+
+        return preOrdersRef.child(result.key).update(confirmationAttachment).then(() => {
+            return { key: result.key };
+        });
+    });
 }
 
 // Function to get all pre-orders from Firebase
@@ -200,6 +217,19 @@ window.firebaseServices = {
     getAllCategories,
     deleteCategoryFromFirebase,
     listenForCategoryChanges,
+    // Notifications
+    notificationsRef,
+    saveNotificationToFirebase: (notification) => notificationsRef.push(notification),
+    getAllNotifications: async () => {
+        const snapshot = await notificationsRef.once('value');
+        const notifications = [];
+        snapshot.forEach(childSnapshot => {
+            const n = childSnapshot.val();
+            n.id = childSnapshot.key;
+            notifications.push(n);
+        });
+        return notifications;
+    },
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged

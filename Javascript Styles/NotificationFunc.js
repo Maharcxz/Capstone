@@ -58,8 +58,8 @@ function addPreOrderNotification(frameName, customerName, orderDetails) {
         status: 'confirmed'
     };
     
-    // Save to Firebase
-    firebaseServices.savePreOrderToFirebase(notification)
+    // Save to notifications collection (not preOrders) to avoid duplicates
+    firebaseServices.saveNotificationToFirebase(notification)
         .then(() => {
             // Update UI
             updateNotificationBadge();
@@ -73,8 +73,8 @@ function addPreOrderNotification(frameName, customerName, orderDetails) {
 function updateNotificationBadge() {
     const badge = document.getElementById('notificationBadge');
     
-    // Get count from Firebase
-    firebaseServices.getAllPreOrders()
+    // Get count from Firebase notifications
+    firebaseServices.getAllNotifications()
         .then(preOrders => {
             const count = preOrders.length;
             
@@ -103,8 +103,8 @@ function updateNotificationsList() {
     // Show loading state
     list.innerHTML = '<div class="loading-notifications"><p>Loading...</p></div>';
     
-    // Get notifications from Firebase
-    firebaseServices.getAllPreOrders()
+    // Get notifications from Firebase notifications collection
+    firebaseServices.getAllNotifications()
         .then(preOrders => {
             if (preOrders.length === 0) {
                 list.innerHTML = '<div class="empty-notifications"><p>No pre-orders yet</p></div>';
@@ -126,8 +126,8 @@ function updateNotificationsList() {
 }
 
 function showNotificationDetails(notificationId) {
-    // Get notification details from Firebase
-    firebaseServices.db.ref('preOrders/' + notificationId).once('value')
+    // Get notification details from Firebase notifications collection
+    firebaseServices.db.ref('notifications/' + notificationId).once('value')
         .then(snapshot => {
             const notification = snapshot.val();
             if (notification) {

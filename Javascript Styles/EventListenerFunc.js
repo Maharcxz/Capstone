@@ -71,21 +71,8 @@ function initializeEventListeners() {
         });
     }
 
-    // Handle pre-order form submission if on preorder page
-    const preorderPageForm = document.querySelector('.preorder-page-form');
-    if (preorderPageForm) {
-        preorderPageForm.addEventListener('submit', function(event) {
-            event.preventDefault();
-            
-            const formData = new FormData(preorderPageForm);
-            const firstName = formData.get('firstName') || preorderPageForm.querySelector('input[placeholder="First Name"]')?.value || '';
-            const lastName = formData.get('lastName') || preorderPageForm.querySelector('input[placeholder="Last Name"]')?.value || '';
-            const customerName = `${firstName} ${lastName}`.trim() || 'Customer';
-            
-            addPreOrderNotification('Titanium Slim Frame', customerName);
-            window.location.href = 'preorder-confirmation.html';
-        });
-    }
+    // Pre-order form submit is handled in preorder.html with unified save logic
+    // Intentionally not binding here to prevent duplicate submissions/redirects
 
     // Admin button handlers
     document.addEventListener('click', function(event) {

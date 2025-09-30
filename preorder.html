@@ -299,8 +299,48 @@
                         status: 'pending'
                     };
                     
-                    // Save to Firebase
-                    savePreOrderToFirebase(preOrder);
+                    // Save to Firebase using centralized service and show messages
+                    const formMessage = document.getElementById('formMessage');
+                    if (formMessage) {
+                        formMessage.textContent = 'Submitting your pre-order...';
+                        formMessage.className = 'form-message info';
+                    }
+
+                    firebaseServices.savePreOrderToFirebase(preOrder)
+                        .then(({ key }) => {
+                            console.log('Pre-order saved successfully with ID:', key);
+
+                            if (formMessage) {
+                                formMessage.textContent = 'Pre-order submitted successfully!';
+                                formMessage.className = 'form-message success';
+                            }
+
+                            // Create a notification entry (stored in notifications collection)
+                            try {
+                                if (typeof addPreOrderNotification === 'function') {
+                                    const customerName = `${firstName} ${lastName}`.trim();
+                                    addPreOrderNotification(preOrder.frameName || 'Titanium Slim Frame', customerName);
+                                }
+                            } catch (err) {
+                                console.warn('Notification creation failed:', err);
+                            }
+
+                            // Reset form
+                            document.getElementById('preorderForm').reset();
+
+                            // Redirect to confirmation page after a short delay
+                            setTimeout(() => {
+                                window.location.href = `preorder-confirmation.html?frameName=${encodeURIComponent(preOrder.frameName)}`;
+                            }, 500);
+                        })
+                        .catch((error) => {
+                            console.error('Error saving pre-order:', error);
+
+                            if (formMessage) {
+                                formMessage.textContent = 'Error submitting pre-order. Please try again.';
+                                formMessage.className = 'form-message error';
+                            }
+                        });
                 });
             }
         });
@@ -486,39 +526,6 @@
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
         
-        // Function to save pre-order to Firebase
-        function savePreOrderToFirebase(preOrder) {
-            const preOrdersRef = firebase.database().ref('preOrders');
-            const formMessage = document.getElementById('formMessage');
-            
-            // Show loading message
-            formMessage.textContent = 'Submitting your pre-order...';
-            formMessage.className = 'form-message info';
-            
-            // Push data to Firebase
-            preOrdersRef.push(preOrder)
-                .then((result) => {
-                    console.log('Pre-order saved successfully with ID:', result.key);
-                    
-                    // Show success message
-                    formMessage.textContent = 'Pre-order submitted successfully!';
-                    formMessage.className = 'form-message success';
-                    
-                    // Reset form
-                    document.getElementById('preorderForm').reset();
-                    
-                    // Redirect to confirmation page after a short delay
-                    setTimeout(() => {
-                        window.location.href = `preorder-confirmation.html?frameName=${encodeURIComponent(preOrder.frameName)}`;
-                    }, 500);
-                })
-                .catch((error) => {
-                    console.error('Error saving pre-order:', error);
-                    
-                    // Show error message
-                    formMessage.textContent = 'Error submitting pre-order. Please try again.';
-                    formMessage.className = 'form-message error';
-                });
-        }
+        // Using centralized firebaseServices.savePreOrderToFirebase; local duplicate removed
     </script>
 </html>
