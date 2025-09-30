@@ -8,32 +8,38 @@
     background-color: rgba(0, 0, 0, 0.5);
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s ease;
-    z-index: 999;
+    pointer-events: none; /* Prevent clicks when hidden */
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    will-change: opacity, visibility;
+    z-index: 9999; /* Below sidebar but above other UI */
 }
 
 .sidebar-overlay.active {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto; /* Block background clicks when visible */
 }
 
 /* Sidebar Styles */
 .sidebar {
     position: fixed;
     top: 0;
-    left: -300px;
+    left: 0; /* Anchor to left edge */
     width: 300px;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.9);
     backdrop-filter: blur(10px);
-    transition: left 0.3s ease;
-    z-index: 1000;
+    transform: translateX(-100%); /* Hidden off-screen */
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+    z-index: 10000; /* Ensure above overlay and all UI */
     padding-top: 100px;
     overflow-y: auto;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35); /* Subtle drop shadow */
 }
 
 .sidebar.active {
-    left: 0;
+    transform: translateX(0); /* Slide in from left */
 }
 
 .sidebar-content {
