@@ -10,7 +10,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 2500;
+    z-index: 9999;
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -25,7 +25,7 @@
     padding: 30px;
     width: 90%;
     max-width: 500px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     border: 2px solid rgba(255, 255, 255, 0.2);
     transform: translateY(-20px);
     transition: transform 0.3s ease;

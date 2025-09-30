@@ -22,20 +22,6 @@ let sidebarCategories = [];
 function loadSidebarCategories() {
     const saved = localStorage.getItem('sidebarCategories');
     sidebarCategories = saved ? JSON.parse(saved) : [];
-    
-    // If no categories exist, create some default ones
-    if (sidebarCategories.length === 0) {
-        sidebarCategories = [
-            { id: 'metal-frames', name: 'Metal Frames', icon: '🏷️', createdAt: new Date().toISOString() },
-            { id: 'plastic-frames', name: 'Plastic Frames', icon: '🏷️', createdAt: new Date().toISOString() },
-            { id: 'titanium-frames', name: 'Titanium Frames', icon: '🏷️', createdAt: new Date().toISOString() },
-            { id: 'alloy-frames', name: 'Alloy Frames', icon: '🏷️', createdAt: new Date().toISOString() }
-        ];
-        // Save the default categories
-        localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
-        console.log('Created default categories');
-    }
-    
     console.log('Loaded sidebar categories:', sidebarCategories);
     return sidebarCategories;
 }

@@ -28,6 +28,9 @@ const preOrdersRef = db.ref('preOrders');
 // Reference to products collection in the database
 const productsRef = db.ref('products');
 
+// Reference to categories collection in the database
+const categoriesRef = db.ref('categories');
+
 // Function to save pre-order to Firebase
 function savePreOrderToFirebase(preOrder) {
     return preOrdersRef.push(preOrder);
@@ -105,6 +108,46 @@ function listenForProductChanges(callback) {
     });
 }
 
+// Category Management Functions
+function saveCategoryToFirebase(category) {
+    if (category.id) {
+        // Use deterministic id for categories
+        return categoriesRef.child(category.id).set(category);
+    } else {
+        // Fallback to auto key if no id provided
+        const newRef = categoriesRef.push();
+        const catWithId = { ...category, id: newRef.key };
+        return newRef.set(catWithId);
+    }
+}
+
+async function getAllCategories() {
+    const snapshot = await categoriesRef.once('value');
+    const categories = [];
+    snapshot.forEach(childSnapshot => {
+        const category = childSnapshot.val();
+        category.id = childSnapshot.key;
+        categories.push(category);
+    });
+    return categories;
+}
+
+function deleteCategoryFromFirebase(categoryId) {
+    return categoriesRef.child(categoryId).remove();
+}
+
+function listenForCategoryChanges(callback) {
+    categoriesRef.on('value', snapshot => {
+        const categories = [];
+        snapshot.forEach(childSnapshot => {
+            const category = childSnapshot.val();
+            category.id = childSnapshot.key;
+            categories.push(category);
+        });
+        callback(categories);
+    });
+}
+
 // Function to stop listening for new pre-orders
 function stopListeningForNewPreOrders() {
     preOrdersRef.off('child_added');
@@ -151,6 +194,12 @@ window.firebaseServices = {
     getProductById,
     deleteProductFromFirebase,
     listenForProductChanges,
+    // Categories
+    categoriesRef,
+    saveCategoryToFirebase,
+    getAllCategories,
+    deleteCategoryFromFirebase,
+    listenForCategoryChanges,
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged

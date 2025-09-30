@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set up file upload event listener
     document.getElementById('productImages').addEventListener('change', handleFileUpload);
     
-    // Initialize sidebar categories
+    // Initialize sidebar categories (Firebase-backed with local cache fallback)
     loadSidebarCategories();
     console.log('After loading sidebarCategories:', sidebarCategories);
     
@@ -521,12 +521,49 @@ document.addEventListener('keydown', function(event) {
 
 // ===== DYNAMIC SIDEBAR MANAGEMENT =====
 
-// Load sidebar categories from localStorage
+// Load sidebar categories (Firebase-backed with local cache fallback)
 function loadSidebarCategories() {
-    const saved = localStorage.getItem('sidebarCategories');
-    sidebarCategories = saved ? JSON.parse(saved) : [];
-    renderSidebar();
-    populateCategoryDropdowns();
+    const fallbackLocal = () => {
+        const saved = localStorage.getItem('sidebarCategories');
+        sidebarCategories = saved ? JSON.parse(saved) : [];
+        renderSidebar();
+        populateCategoryDropdowns();
+    };
+
+    try {
+        if (typeof getAllCategories === 'function') {
+            // Initial load from Firebase
+            getAllCategories()
+                .then(categories => {
+                    sidebarCategories = Array.isArray(categories) ? categories : [];
+                    // Cache to localStorage for other pages and quick access
+                    localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
+                    renderSidebar();
+                    populateCategoryDropdowns();
+                    renderExistingCategories();
+                })
+                .catch(err => {
+                    console.warn('Failed to load categories from Firebase, using local cache.', err);
+                    fallbackLocal();
+                });
+
+            // Listen for real-time changes so UI stays in sync
+            if (typeof listenForCategoryChanges === 'function') {
+                listenForCategoryChanges(categories => {
+                    sidebarCategories = Array.isArray(categories) ? categories : [];
+                    localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
+                    renderSidebar();
+                    populateCategoryDropdowns();
+                    renderExistingCategories();
+                });
+            }
+        } else {
+            fallbackLocal();
+        }
+    } catch (e) {
+        console.warn('Error initializing categories, using local cache.', e);
+        fallbackLocal();
+    }
 }
 
 // Populate category dropdowns with available categories
@@ -631,7 +668,7 @@ function setupSidebarManagement() {
 }
 
 // Add category from form (called by button click)
-function addCategoryFromForm() {
+async function addCategoryFromForm() {
     console.log('addCategoryFromForm called');
     const categoryNameInput = document.getElementById('categoryName');
     const categoryName = categoryNameInput.value.trim();
@@ -660,13 +697,20 @@ function addCategoryFromForm() {
         createdAt: new Date().toISOString()
     };
     
-    sidebarCategories.push(newCategory);
-    console.log('Categories after push:', sidebarCategories);
-    saveSidebarCategories();
-    console.log('Categories saved to localStorage');
-    renderSidebar();
-    renderExistingCategories();
-    populateCategoryDropdowns();
+    try {
+        await saveCategoryToFirebase(newCategory);
+        // Optimistically update local cache/UI
+        sidebarCategories.push(newCategory);
+        localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
+        renderSidebar();
+        renderExistingCategories();
+        populateCategoryDropdowns();
+        console.log('Category saved to Firebase');
+    } catch (error) {
+        console.error('Error saving category to Firebase:', error);
+        alert('Failed to save category. Please try again.');
+        return;
+    }
     
     // Clear input
     categoryNameInput.value = '';
@@ -745,7 +789,7 @@ function closeSidebarManagerModal() {
 }
 
 // Handle add category form submission
-function handleAddCategory(event) {
+async function handleAddCategory(event) {
     event.preventDefault();
     console.log('handleAddCategory called');
     
@@ -776,13 +820,20 @@ function handleAddCategory(event) {
         createdAt: new Date().toISOString()
     };
     
-    sidebarCategories.push(newCategory);
-    console.log('Categories after push:', sidebarCategories);
-    saveSidebarCategories();
-    console.log('Categories saved to localStorage');
-    renderSidebar();
-    renderExistingCategories();
-    populateCategoryDropdowns(); // Refresh dropdowns with new category
+    try {
+        await saveCategoryToFirebase(newCategory);
+        // Optimistically update local cache/UI
+        sidebarCategories.push(newCategory);
+        localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
+        renderSidebar();
+        renderExistingCategories();
+        populateCategoryDropdowns(); // Refresh dropdowns with new category
+        console.log('Category saved to Firebase');
+    } catch (error) {
+        console.error('Error saving category to Firebase:', error);
+        alert('Failed to save category. Please try again.');
+        return;
+    }
     
     // Reset form
     event.target.reset();
@@ -830,27 +881,42 @@ function renderExistingCategories() {
 }
 
 // Edit category (placeholder for future enhancement)
-function editCategory(categoryId) {
+async function editCategory(categoryId) {
     const category = sidebarCategories.find(cat => cat.id === categoryId);
     if (category) {
         const newName = prompt('Enter new category name:', category.name);
         if (newName && newName.trim() && newName.trim() !== category.name) {
             category.name = newName.trim();
             category.id = generateCategoryId(newName.trim());
-            saveSidebarCategories();
-            renderSidebar();
-            renderExistingCategories();
-            showNotification(`Category updated successfully!`, 'success');
+            try {
+                await saveCategoryToFirebase(category);
+                localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
+                renderSidebar();
+                renderExistingCategories();
+                showNotification(`Category updated successfully!`, 'success');
+            } catch (error) {
+                console.error('Error updating category in Firebase:', error);
+                alert('Failed to update category. Please try again.');
+            }
         }
     }
 }
 
 // Delete category
-function deleteCategory(categoryId) {
+async function deleteCategory(categoryId) {
     const category = sidebarCategories.find(cat => cat.id === categoryId);
     if (category && confirm(`Are you sure you want to delete "${category.name}"?`)) {
+        try {
+            await deleteCategoryFromFirebase(categoryId);
+        } catch (error) {
+            console.error('Error deleting category from Firebase:', error);
+            alert('Failed to delete category. Please try again.');
+            return;
+        }
+
+        // Update local cache/UI after successful deletion
         sidebarCategories = sidebarCategories.filter(cat => cat.id !== categoryId);
-        saveSidebarCategories();
+        localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
         
         // If currently viewing this category, switch to all products
         if (currentCategory === categoryId) {

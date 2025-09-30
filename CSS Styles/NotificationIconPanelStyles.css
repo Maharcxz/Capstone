@@ -100,15 +100,21 @@
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 15px;
     backdrop-filter: blur(10px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     display: none;
-    z-index: 1500;
+    z-index: 9999;
     overflow: hidden;
+    will-change: opacity, transform;
 }
 
 .notifications-panel.active {
     display: block;
-    animation: slideDown 0.3s ease;
+    animation: fadeIn 0.25s ease, slideDown 0.25s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 @keyframes slideDown {
