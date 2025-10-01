@@ -203,7 +203,7 @@
                             
                             <div class="form-field">
                                 <label class="field-label">Phone Number</label>
-                                <input type="tel" placeholder="+63" class="full-input" name="phone" id="phone" required>
+                                <input type="tel" placeholder="+63" class="full-input" name="phone" id="phone" required inputmode="numeric" autocomplete="tel" maxlength="12" pattern="^(?:639\d{9}|09\d{9})$" title="Enter a valid PH mobile number: 09XXXXXXXXX or 639XXXXXXXXX">
                             </div>
                             
                             <div class="form-field">
@@ -261,6 +261,15 @@
         
         document.addEventListener('DOMContentLoaded', function() {
             const preorderForm = document.getElementById('preorderForm');
+            const phoneInput = document.getElementById('phone');
+            
+            // Enforce digits-only input for phone field
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function(e) {
+                    const digitsOnly = e.target.value.replace(/\D/g, '');
+                    e.target.value = digitsOnly;
+                });
+            }
             
             // Load frame names from database
             loadFrameNames();
@@ -285,12 +294,24 @@
                     const prescription = document.getElementById('prescription').value;
                     const notes = document.getElementById('notes').value;
                     
+                    // Validate PH mobile number: allow formats 09XXXXXXXXX or 639XXXXXXXXX
+                    const normalizedPhone = phone.replace(/\D/g, '');
+                    const isValidPHMobile = /^(?:639\d{9}|09\d{9})$/.test(normalizedPhone);
+                    if (!isValidPHMobile) {
+                        const fm = document.getElementById('formMessage');
+                        if (fm) {
+                            fm.textContent = 'Please enter a valid Philippine mobile number (09XXXXXXXXX or 639XXXXXXXXX).';
+                            fm.className = 'form-message error';
+                        }
+                        return;
+                    }
+
                     // Create pre-order object
                     const preOrder = {
                         firstName: firstName,
                         lastName: lastName,
                         email: email,
-                        phone: phone,
+                        phone: normalizedPhone,
                         frameName: frameName,
                         quantity: quantity,
                         prescription: prescription,
