@@ -74,3 +74,22 @@
 .main-content.shifted {
     margin-left: 300px;
 }
+
+/* Responsive Sidebar — phones */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        padding-top: 80px;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    }
+    .sidebar-content {
+        padding: 16px;
+    }
+    .frame-category {
+        font-size: 17px;
+        padding: 14px 18px;
+    }
+    .main-content.shifted {
+        margin-left: 0; /* No horizontal shift on small screens */
+    }
+}

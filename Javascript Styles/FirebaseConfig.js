@@ -125,6 +125,38 @@ function listenForProductChanges(callback) {
     });
 }
 
+// Inventory helpers
+async function decrementProductStock(productId, qty = 1) {
+    const amount = parseInt(qty, 10);
+    const safeAmount = Number.isFinite(amount) && amount > 0 ? amount : 1;
+    const stockRef = productsRef.child(productId).child('stock');
+    // Use a transaction to avoid race conditions and prevent negative stock
+    const result = await stockRef.transaction(current => {
+        const currentVal = parseInt(current || 0, 10);
+        const nextVal = Math.max(currentVal - safeAmount, 0);
+        return nextVal;
+    });
+    return { productId, committed: result.committed, newStock: result.snapshot && result.snapshot.val() };
+}
+
+async function decrementProductStockByTitle(title, qty = 1) {
+    if (!title) throw new Error('Product title is required');
+    // Find product by exact title match
+    const snap = await productsRef.orderByChild('title').equalTo(title).once('value');
+    if (!snap.exists()) {
+        throw new Error('Product not found for title: ' + title);
+    }
+
+    // If multiple match, take the first
+    let targetId = null;
+    snap.forEach(child => {
+        if (!targetId) targetId = child.key;
+    });
+
+    if (!targetId) throw new Error('Unable to resolve product id');
+    return decrementProductStock(targetId, qty);
+}
+
 // Category Management Functions
 function saveCategoryToFirebase(category) {
     if (category.id) {
@@ -211,6 +243,8 @@ window.firebaseServices = {
     getProductById,
     deleteProductFromFirebase,
     listenForProductChanges,
+    decrementProductStock,
+    decrementProductStockByTitle,
     // Categories
     categoriesRef,
     saveCategoryToFirebase,

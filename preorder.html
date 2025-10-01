@@ -313,6 +313,7 @@
                         email: email,
                         phone: normalizedPhone,
                         frameName: frameName,
+                        productId: (new URLSearchParams(window.location.search)).get('productId') || null,
                         quantity: quantity,
                         prescription: prescription,
                         notes: notes,
@@ -344,6 +345,32 @@
                                 }
                             } catch (err) {
                                 console.warn('Notification creation failed:', err);
+                            }
+
+                            // Decrement product stock based on the pre-ordered quantity
+                            try {
+                                const qtyNum = parseInt(preOrder.quantity, 10) || 1;
+                                if (window.firebaseServices) {
+                                    if (preOrder.productId && typeof window.firebaseServices.decrementProductStock === 'function') {
+                                        window.firebaseServices.decrementProductStock(preOrder.productId, qtyNum)
+                                            .then(res => {
+                                                console.log('Stock decremented by ID for', preOrder.frameName, '->', res);
+                                            })
+                                            .catch(err => {
+                                                console.warn('Failed to decrement stock by ID:', err);
+                                            });
+                                    } else if (typeof window.firebaseServices.decrementProductStockByTitle === 'function') {
+                                        window.firebaseServices.decrementProductStockByTitle(preOrder.frameName, qtyNum)
+                                            .then(res => {
+                                                console.log('Stock decremented by title for', preOrder.frameName, '->', res);
+                                            })
+                                            .catch(err => {
+                                                console.warn('Failed to decrement stock by title:', err);
+                                            });
+                                    }
+                                }
+                            } catch (err) {
+                                console.warn('Unexpected error while decrementing stock:', err);
                             }
 
                             // Reset form

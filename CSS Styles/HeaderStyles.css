@@ -186,6 +186,97 @@
     font-size: 18px;
 }
 
+/* Responsive Navigation — phones */
+@media (max-width: 768px) {
+    .logo h1 {
+        font-size: 28px;
+        letter-spacing: 6px;
+    }
+    .logo p {
+        font-size: 12px;
+        letter-spacing: 2px;
+    }
+
+    .nav {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 14px;
+        margin: 0;
+    }
+
+    .nav-left {
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+        align-items: stretch; /* make links fill width */
+    }
+
+    .nav-link {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 12px;
+        font-size: 15px;
+        text-align: center; /* center text inside link */
+    }
+
+    .nav-link span {
+        width: 100%;
+        text-align: center;
+    }
+
+    .nav-right {
+        width: 100%;
+        justify-content: center; /* keep right controls centered below links */
+    }
+
+    .login-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .nav-icons {
+        gap: 10px;
+        font-size: 16px;
+    }
+}
+
+/* Extra small phones */
+@media (max-width: 420px) {
+    .nav {
+        padding: 10px 12px;
+        gap: 10px;
+    }
+    .nav-link {
+        font-size: 14px;
+        padding: 9px 10px;
+    }
+    .login-btn {
+        padding: 10px;
+        font-size: 13px;
+    }
+}
+
+/* Disable aggressive hover effects on touch devices to avoid sticky states */
+@media (hover: none) and (pointer: coarse) {
+    .nav-link:hover,
+    .login-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+        transform: none;
+        box-shadow: none;
+        border-color: rgba(255, 255, 255, 0.18);
+    }
+    .nav-link:active,
+    .login-btn:active {
+        background: rgba(255, 255, 255, 0.18);
+        transform: scale(0.99);
+        box-shadow: none;
+    }
+}
+
 /* Admin Navigation Area Styles */
 .admin-nav-area {
     background: 
@@ -314,4 +405,82 @@
 /* Hide admin nav area by default */
 body:not(.admin-mode) .admin-nav-area {
     display: none !important;
+}
+
+/* Responsive Nav Hover Fixes and Focus Styling */
+.nav-link:focus,
+.login-btn:focus {
+    outline: none;
+}
+
+.nav-link:focus-visible,
+.login-btn:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.25);
+    outline-offset: 2px;
+}
+
+/* Softer interactions on mobile-sized viewports */
+@media (max-width: 768px) {
+    .nav-link:hover {
+        background: rgba(255, 255, 255, 0.12);
+        transform: none;
+        box-shadow: none;
+        border-color: rgba(255, 255, 255, 0.18);
+    }
+    .nav-link::before { display: none; }
+
+    .login-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        transform: none;
+        box-shadow: none;
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    .login-btn::before { display: none; }
+}
+
+/* Disable hover-only effects on touch devices */
+@media (hover: none) {
+    .nav-link:hover {
+        background: rgba(255, 255, 255, 0.12);
+        transform: none;
+        box-shadow: none;
+        border-color: rgba(255, 255, 255, 0.18);
+    }
+    .login-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        transform: none;
+        box-shadow: none;
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    .nav-link::before,
+    .login-btn::before {
+        display: none;
+    }
+}
+/* Mobile centering and left padding for nav */
+@media (max-width: 768px) {
+    .nav {
+        max-width: 420px;
+        margin: 0 auto;
+        padding: 0 12px; /* add side padding so hover bg isn’t flush */
+    }
+    .nav-left,
+    .nav-right {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .nav-link,
+    .login-btn {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding-left: 16px;
+        padding-right: 16px;
+        box-sizing: border-box; /* ensure padding doesn’t overflow width */
+    }
+    .nav-link { margin: 8px 0; }
 }

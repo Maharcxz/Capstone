@@ -111,7 +111,7 @@ function renderProductGrid() {
                 <div class="product-buttons">
                     <button class="virtual-try-btn">Virtual Try - On</button>
                     <button class="virtual-try-btn preorder-btn guest-only ${(product.stock || 0) === 0 ? 'disabled' : ''}" 
-                            onclick="${(product.stock || 0) === 0 ? 'return false;' : `window.location.href='preorder.html?frameName=${encodeURIComponent(product.title)}'`}">
+                            onclick="${(product.stock || 0) === 0 ? 'return false;' : `window.location.href='preorder.html?productId=${encodeURIComponent(product.id)}&frameName=${encodeURIComponent(product.title)}'`}">
                         ${(product.stock || 0) === 0 ? 'Out of Stock' : 'Pre-Order'}
                     </button>
                 </div>
@@ -331,7 +331,7 @@ function openProductDetailModal(productId) {
     const preorderBtn = document.querySelector('#productDetailModal .preorder-btn');
     if (preorderBtn) {
         preorderBtn.onclick = function() {
-            window.location.href = `preorder.html?frameName=${encodeURIComponent(product.title)}`;
+            window.location.href = `preorder.html?productId=${encodeURIComponent(product.id)}&frameName=${encodeURIComponent(product.title)}`;
         };
     }
 
@@ -466,7 +466,7 @@ function handlePreOrder() {
     sessionStorage.setItem('preorderProductId', currentProductId);
     
     // Redirect to pre-order page (quantity will be selected on the pre-order page)
-    window.location.href = `preorder.html?frameName=${encodeURIComponent(product.title)}`;
+    window.location.href = `preorder.html?productId=${encodeURIComponent(product.id)}&frameName=${encodeURIComponent(product.title)}`;
 }
 
 // Update product stock (Admin function)
