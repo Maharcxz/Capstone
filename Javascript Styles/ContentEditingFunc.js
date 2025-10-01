@@ -498,13 +498,13 @@ async function processBatchedContentUpdates(contentUpdates) {
             
             // Check if there's saved content in localStorage first
             const savedRaw = localStorage.getItem(`content_${contentType}`);
-            console.log(`localStorage content for ${contentType}:`, savedRaw ? 'exists' : 'not found');
+            console.log(`localStorage content for ${contentType}:`, savedRaw !== null ? 'exists' : 'not found');
             
             // Only update if the content element exists
             const contentElement = document.getElementById(contentType + 'Content');
             if (contentElement) {
                 // Prefer localStorage content if available; otherwise use Firebase content
-                if (savedRaw && !contentCache.has(contentType)) {
+                if (savedRaw !== null && !contentCache.has(contentType)) {
                     console.log(`Using localStorage content for ${contentType} instead of Firebase`);
                     let parsed = null;
                     try {
@@ -651,9 +651,9 @@ function loadContentFromLocalStorage() {
         const contentType = content.id.replace('Content', '');
         const savedRaw = localStorage.getItem(`content_${contentType}`);
         
-        console.log(`Checking localStorage for ${contentType}:`, savedRaw ? 'found' : 'not found');
+        console.log(`Checking localStorage for ${contentType}:`, savedRaw !== null ? 'found' : 'not found');
         
-        if (savedRaw) {
+        if (savedRaw !== null) {
             console.log(`Loading ${contentType} content from localStorage`);
             let parsed = null;
             try {
