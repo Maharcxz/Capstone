@@ -54,9 +54,15 @@ function showCachedContentImmediately() {
         const contentElement = document.getElementById(contentType + 'Content');
         if (contentElement) {
             // Check localStorage first
-            const savedContent = localStorage.getItem(`content_${contentType}`);
-            if (savedContent) {
-                contentElement.innerHTML = savedContent;
+            const savedRaw = localStorage.getItem(`content_${contentType}`);
+            if (savedRaw !== null) {
+                let savedContent = null;
+                try {
+                    savedContent = JSON.parse(savedRaw);
+                } catch (e) {
+                    savedContent = savedRaw;
+                }
+                updateContentElementOptimized(contentType, savedContent);
                 contentCache.set(contentType, savedContent);
             }
         }
@@ -291,8 +297,19 @@ function saveContactEditedContent() {
     
     console.log('Form values:', { description, phone, email, address, mondayFriday, saturday, sunday, footer });
     
-    // Build structured HTML content without indentation
-    const structuredContent = `<p class="contact-description">${description}</p><div class="contact-info"><h3>Contact Information:</h3><ul><li>Phone: ${phone}</li><li>Email: ${email}</li><li>Address: ${address}</li></ul></div><div class="business-hours"><h3>Business Hours:</h3><p class="hours-line">Monday to Friday — ${mondayFriday}</p><p class="hours-line">Saturday — ${saturday}</p><p class="hours-line">Sunday — ${sunday}</p></div><p class="contact-footer">${footer}</p>`;
+    // Build structured JSON content for storage (no HTML tags/classes)
+    const structuredContent = {
+        description,
+        phone,
+        email,
+        address,
+        hours: {
+            mondayFriday,
+            saturday,
+            sunday
+        },
+        footer
+    };
     
     const contentElement = document.getElementById(currentEditTarget + 'Content');
     
@@ -300,14 +317,12 @@ function saveContactEditedContent() {
     console.log('Structured content to save:', structuredContent);
     
     if (contentElement) {
-        // Save the structured HTML content
-        console.log('Setting innerHTML to content element');
-        contentElement.innerHTML = structuredContent;
+        // Update DOM by reconstructing HTML from JSON content
+        console.log('Updating DOM via updateContentElementOptimized');
+        updateContentElementOptimized(currentEditTarget, structuredContent);
         
-        console.log('Content element innerHTML after update:', contentElement.innerHTML);
-        
-        // Save to Firebase
-        console.log('Calling saveContentToFirebase');
+        // Save to Firebase/localStorage
+        console.log('Calling saveContentToFirebase with JSON content');
         saveContentToFirebase(currentEditTarget, structuredContent);
         
         // Show success notification
@@ -370,28 +385,14 @@ function saveAboutEditedContent() {
     if (!currentEditTarget) return;
     
     const content = document.getElementById('aboutTextarea').value;
-    
-    // Split content by double line breaks and create paragraphs
-    const paragraphs = content.split('\n\n').filter(p => p.trim());
-    
-    // Build structured HTML content
-    let structuredContent = '';
-    paragraphs.forEach(paragraph => {
-        structuredContent += `        <p class="about-paragraph">
-            ${paragraph.trim()}
-        </p>
-
-`;
-    });
-    
     const contentElement = document.getElementById(currentEditTarget + 'Content');
     
     if (contentElement) {
-        // Save the structured HTML content
-        contentElement.innerHTML = structuredContent;
+        // Update DOM by reconstructing structured HTML from plain text
+        updateContentElementOptimized(currentEditTarget, content);
         
-        // Save to Firebase
-        saveContentToFirebase(currentEditTarget, structuredContent);
+        // Save plain text to Firebase/localStorage
+        saveContentToFirebase(currentEditTarget, content);
         
         // Show success notification
         showNotification('About content updated successfully!', 'success');
@@ -405,7 +406,15 @@ function saveContentToFirebase(contentType, content) {
     console.log('saveContentToFirebase called with:', { contentType, content });
     
     // Always save to localStorage first for immediate persistence
-    localStorage.setItem(`content_${contentType}`, content);
+    try {
+        if (typeof content === 'string') {
+            localStorage.setItem(`content_${contentType}`, content);
+        } else {
+            localStorage.setItem(`content_${contentType}`, JSON.stringify(content));
+        }
+    } catch (e) {
+        console.warn('Failed to cache content in localStorage:', e);
+    }
     console.log('Content saved to localStorage:', localStorage.getItem(`content_${contentType}`));
     
     // Check if Firebase is initialized
@@ -488,40 +497,36 @@ async function processBatchedContentUpdates(contentUpdates) {
             console.log(`Processing ${contentType} content from Firebase`);
             
             // Check if there's saved content in localStorage first
-            const savedContent = localStorage.getItem(`content_${contentType}`);
-            console.log(`localStorage content for ${contentType}:`, savedContent ? 'exists' : 'not found');
+            const savedRaw = localStorage.getItem(`content_${contentType}`);
+            console.log(`localStorage content for ${contentType}:`, savedRaw ? 'exists' : 'not found');
             
             // Only update if the content element exists
             const contentElement = document.getElementById(contentType + 'Content');
             if (contentElement) {
-                // If there's saved content in localStorage, use that instead of Firebase
-                if (savedContent && !contentCache.has(contentType)) {
+                // Prefer localStorage content if available; otherwise use Firebase content
+                if (savedRaw && !contentCache.has(contentType)) {
                     console.log(`Using localStorage content for ${contentType} instead of Firebase`);
-                    updateContentElementOptimized(contentType, savedContent);
+                    let parsed = null;
+                    try {
+                        parsed = JSON.parse(savedRaw);
+                    } catch (e) {
+                        parsed = savedRaw;
+                    }
+                    updateContentElementOptimized(contentType, parsed);
                 } else if (!contentCache.has(contentType)) {
-                    // No localStorage content, proceed with Firebase content
-                    const currentContent = contentElement.innerHTML.trim();
-                    const hasStructuredContent = currentContent.includes('<') && currentContent.includes('>');
-                    
-                    console.log(`${contentType} - hasStructuredContent:`, hasStructuredContent);
-                    console.log(`${contentType} - current content length:`, currentContent.length);
-                    
-                    // For contact content, only load from Firebase if there's no structured content
-                    if (contentType === 'contact') {
-                        if (!hasStructuredContent) {
-                            console.log(`Loading ${contentType} content from Firebase (no structured content)`);
-                            updateContentElementOptimized(contentType, data.text);
-                        } else {
-                            console.log(`Skipping ${contentType} content load - structured content exists`);
+                    if (data && (typeof data.text === 'string' || typeof data.text === 'object')) {
+                        console.log(`Loading ${contentType} content from Firebase`);
+                        updateContentElementOptimized(contentType, data.text);
+                        // Cache the content in memory and localStorage
+                        contentCache.set(contentType, data.text);
+                        try {
+                            const toStore = typeof data.text === 'string' ? data.text : JSON.stringify(data.text);
+                            localStorage.setItem(`content_${contentType}`, toStore);
+                        } catch (e) {
+                            console.warn('Failed to cache Firebase content to localStorage:', e);
                         }
                     } else {
-                        // For other content types, use the original logic
-                        if (!hasStructuredContent || (isAdminMode && data.text.includes('<'))) {
-                            console.log(`Loading ${contentType} content from Firebase`);
-                            updateContentElementOptimized(contentType, data.text);
-                        } else {
-                            console.log(`Skipping ${contentType} content load`);
-                        }
+                        console.log(`No Firebase text found for ${contentType}`);
                     }
                 }
             } else {
@@ -539,14 +544,94 @@ async function processBatchedContentUpdates(contentUpdates) {
 // Optimized version of updateContentElement
 function updateContentElementOptimized(contentType, content) {
     const contentElement = document.getElementById(contentType + 'Content');
-    if (contentElement && content) {
-        // Only update if content is different to avoid unnecessary DOM manipulation
-        if (contentElement.innerHTML !== content) {
-            contentElement.innerHTML = content;
+    if (contentElement) {
+        // Compute HTML to render based on storage format
+        let htmlToRender = '';
+        const placeholders = {
+            about: '<p class="empty-state">No About Us content yet.</p>',
+            contact: '<p class="empty-state">No Contact information yet.</p>'
+        };
+        if (contentType === 'about') {
+            if (typeof content === 'string') {
+                const hasHTML = /<[^>]+>/.test(content);
+                if (hasHTML) {
+                    const sanitized = sanitizeHTML(content);
+                    htmlToRender = sanitized && sanitized.trim() ? sanitized : placeholders.about;
+                } else {
+                    // Plain text: split by double newlines into paragraphs
+                    const normalized = (content || '').trim();
+                    const paragraphs = normalized ? normalized.split(/\n\s*\n/).filter(p => p.trim()) : [];
+                    htmlToRender = paragraphs.length
+                        ? paragraphs.map(p => `<p class="about-paragraph">${p.trim()}</p>`).join('')
+                        : placeholders.about;
+                }
+            }
+        } else if (contentType === 'contact') {
+            if (typeof content === 'object' && content !== null) {
+                const desc = content.description || '';
+                const phone = content.phone || '';
+                const email = content.email || '';
+                const address = content.address || '';
+                const hours = content.hours || {};
+                const mondayFriday = hours.mondayFriday || '';
+                const saturday = hours.saturday || '';
+                const sunday = hours.sunday || '';
+                const footer = content.footer || '';
+                const allEmpty = [desc, phone, email, address, mondayFriday, saturday, sunday, footer]
+                    .every(v => !String(v || '').trim());
+                htmlToRender = allEmpty
+                    ? placeholders.contact
+                    : `<p class="contact-description">${desc}</p><div class="contact-info"><h3>Contact Information:</h3><ul><li>Phone: ${phone}</li><li>Email: ${email}</li><li>Address: ${address}</li></ul></div><div class="business-hours"><h3>Business Hours:</h3><p class="hours-line">Monday to Friday — ${mondayFriday}</p><p class="hours-line">Saturday — ${saturday}</p><p class="hours-line">Sunday — ${sunday}</p></div><p class="contact-footer">${footer}</p>`;
+            } else if (typeof content === 'string') {
+                const hasHTML = /<[^>]+>/.test(content);
+                if (hasHTML) {
+                    const sanitized = sanitizeHTML(content);
+                    htmlToRender = sanitized && sanitized.trim() ? sanitized : placeholders.contact;
+                } else {
+                    htmlToRender = content && content.trim() ? content : placeholders.contact;
+                }
+            }
+        } else {
+            const hasHTML = typeof content === 'string' && /<[^>]+>/.test(content);
+            const sanitized = hasHTML ? sanitizeHTML(content) : content;
+            htmlToRender = sanitized && String(sanitized).trim() ? sanitized : `<p class="empty-state">No ${contentType} content yet.</p>`;
+        }
+        
+        if (htmlToRender && contentElement.innerHTML !== htmlToRender) {
+            contentElement.innerHTML = htmlToRender;
             contentCache.set(contentType, content);
             console.log(`Updated ${contentType} content in DOM`);
         }
     }
+}
+
+// Basic HTML sanitizer (removes scripts, dangerous attributes, and javascript: URLs)
+function sanitizeHTML(html) {
+    try {
+        if (typeof DOMPurify !== 'undefined') {
+            return DOMPurify.sanitize(html);
+        }
+    } catch (e) {
+        // Ignore DOMPurify errors and fallback
+    }
+    if (typeof html !== 'string') return html;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    // Remove risky elements
+    doc.querySelectorAll('script, style, iframe, object, embed, link[rel="import"]').forEach(el => el.remove());
+    // Clean attributes
+    doc.body.querySelectorAll('*').forEach(el => {
+        [...el.attributes].forEach(attr => {
+            const name = attr.name.toLowerCase();
+            const value = (attr.value || '').toLowerCase();
+            if (name.startsWith('on') || name === 'srcdoc') {
+                el.removeAttribute(attr.name);
+            } else if ((name === 'href' || name === 'src') && /^\s*javascript:/i.test(value)) {
+                el.removeAttribute(attr.name);
+            }
+        });
+    });
+    return doc.body.innerHTML;
 }
 
 // Keep the original function for backward compatibility
@@ -564,13 +649,19 @@ function loadContentFromLocalStorage() {
     
     editableContents.forEach(content => {
         const contentType = content.id.replace('Content', '');
-        const savedContent = localStorage.getItem(`content_${contentType}`);
+        const savedRaw = localStorage.getItem(`content_${contentType}`);
         
-        console.log(`Checking localStorage for ${contentType}:`, savedContent ? 'found' : 'not found');
+        console.log(`Checking localStorage for ${contentType}:`, savedRaw ? 'found' : 'not found');
         
-        if (savedContent) {
+        if (savedRaw) {
             console.log(`Loading ${contentType} content from localStorage`);
-            updateContentElement(contentType, savedContent);
+            let parsed = null;
+            try {
+                parsed = JSON.parse(savedRaw);
+            } catch (e) {
+                parsed = savedRaw;
+            }
+            updateContentElementOptimized(contentType, parsed);
         } else {
             console.log(`No saved content found in localStorage for ${contentType}`);
         }
@@ -593,6 +684,10 @@ function updateContentElement(contentType, content) {
         if (typeof content === 'string') {
             // Remove excessive whitespace between HTML tags while preserving content
             cleanedContent = content.replace(/>\s+</g, '><').trim();
+            // Sanitize if HTML-like content
+            if (/<[^>]+>/.test(cleanedContent)) {
+                cleanedContent = sanitizeHTML(cleanedContent);
+            }
         }
         
         // Set the cleaned HTML content

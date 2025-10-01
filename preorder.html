@@ -315,11 +315,11 @@
                                 formMessage.className = 'form-message success';
                             }
 
-                            // Create a notification entry (stored in notifications collection)
+                            // Create a notification entry (stored in notifications collection) and link to this pre-order
                             try {
                                 if (typeof addPreOrderNotification === 'function') {
                                     const customerName = `${firstName} ${lastName}`.trim();
-                                    addPreOrderNotification(preOrder.frameName || 'Titanium Slim Frame', customerName);
+                                    addPreOrderNotification(preOrder.frameName || 'Titanium Slim Frame', customerName, key);
                                 }
                             } catch (err) {
                                 console.warn('Notification creation failed:', err);
