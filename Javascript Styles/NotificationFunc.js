@@ -54,7 +54,8 @@ function addPreOrderNotification(frameName, customerName, preOrderId) {
         frameName: frameName || 'Titanium Slim Frame',
         customerName: customerName || 'Customer',
         timestamp: new Date().toISOString(),
-        status: 'pending'
+        status: 'pending',
+        read: false
     };
 
     // Save to notifications collection (not preOrders) to avoid duplicates
@@ -75,7 +76,7 @@ function updateNotificationBadge() {
     // Get count from Firebase notifications
     firebaseServices.getAllNotifications()
         .then(preOrders => {
-            const count = preOrders.length;
+            const count = preOrders.filter(n => !n.read).length;
             
             if (badge) {
                 badge.textContent = count;
@@ -105,22 +106,40 @@ function updateNotificationsList() {
     // Get notifications from Firebase notifications collection
     firebaseServices.getAllNotifications()
         .then(preOrders => {
-            if (preOrders.length === 0) {
+            const unread = preOrders.filter(n => !n.read);
+            if (unread.length === 0) {
                 list.innerHTML = '<div class="empty-notifications"><p>No pre-orders yet</p></div>';
                 return;
             }
             
-            list.innerHTML = preOrders.map(notification => `
+            list.innerHTML = unread.map(notification => `
                 <div class="notification-item" onclick="showNotificationDetails('${notification.id}')">
                     <div class="notification-title">${notification.frameName || 'Pre-Order'}</div>
                     <div class="notification-message">Status: ${notification.status || 'Pending'}</div>
                     <div class="notification-time">${formatNotificationTime(notification.timestamp)}</div>
+                    <button class="mark-read-btn" onclick="markNotificationAsRead('${notification.id}', event)">Mark as read</button>
                 </div>
             `).join('');
         })
         .catch(error => {
             console.error('Error getting pre-orders:', error);
             list.innerHTML = '<div class="error-notifications"><p>Error loading notifications</p></div>';
+        });
+}
+
+function markNotificationAsRead(notificationId, evt) {
+    if (evt) evt.stopPropagation();
+    if (!notificationId) return;
+    // Set read flag in Firebase and refresh UI
+    firebaseServices.notificationsRef.child(notificationId).update({ read: true })
+        .then(() => {
+            updateNotificationBadge();
+            updateNotificationsList();
+            // If a details modal is open for this notification, close it
+            hideConfirmationModal();
+        })
+        .catch(err => {
+            console.error('Failed to mark notification as read:', err);
         });
 }
 
@@ -193,6 +212,9 @@ function showConfirmationModal(notification, preOrder) {
                         <span class="detail-label">Order ID:</span>
                         <span>${orderId}</span>
                     </div>` : ''}
+                </div>
+                <div class="modal-actions">
+                    <button class="admin-btn" onclick="markNotificationAsRead('${notification.id}')">Mark as read</button>
                 </div>
             </div>
         </div>
