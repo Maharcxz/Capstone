@@ -548,8 +548,8 @@ function updateContentElementOptimized(contentType, content) {
         // Compute HTML to render based on storage format
         let htmlToRender = '';
         const placeholders = {
-            about: '<p class="empty-state">No About Us content yet.</p>',
-            contact: '<p class="empty-state">No Contact information yet.</p>'
+            about: '<div class="empty-state"><h3>About Us</h3><p>Information is not available yet. Please check back soon.</p></div>',
+            contact: '<div class="empty-state"><h3>Contact Information</h3><p>Details are not available yet. Please check back soon.</p></div>'
         };
         if (contentType === 'about') {
             if (typeof content === 'string') {
@@ -594,7 +594,7 @@ function updateContentElementOptimized(contentType, content) {
         } else {
             const hasHTML = typeof content === 'string' && /<[^>]+>/.test(content);
             const sanitized = hasHTML ? sanitizeHTML(content) : content;
-            htmlToRender = sanitized && String(sanitized).trim() ? sanitized : `<p class="empty-state">No ${contentType} content yet.</p>`;
+            htmlToRender = sanitized && String(sanitized).trim() ? sanitized : `<div class="empty-state"><h3>${contentType.charAt(0).toUpperCase() + contentType.slice(1)}</h3><p>Content is not available yet. Please check back soon.</p></div>`;
         }
         
         if (htmlToRender && contentElement.innerHTML !== htmlToRender) {
