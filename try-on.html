@@ -65,9 +65,10 @@
 </head>
 <body>
     <div class="virtual-try-on-container">
-        <header class="try-on-header">
-            <h1 class="try-on-title" onclick="navigateToHome()">Trinity Optimum Vision Center</h1>
-        </header>
+        <header class="try-on-header" id="tryOnHeader">
+              <h1 class="try-on-title" id="tryOnTitle">Virtual Try-On</h1>
+              <a href="index.html" class="back-button-header">↩ Back to Products</a>
+          </header>
         
         <main class="try-on-main">
             <div class="camera-container">
@@ -128,45 +129,7 @@
                      </a-entity>
                  </a-scene>
                  
-                 <!-- Controls Panel -->
-                 <div class="controls-panel">
-                 <div class="control-section">
-                     <h3 class="control-title">Navigation</h3>
-                     <a href="index.html" class="back-button-control">
-                         ← Back to Products
-                     </a>
-                 </div>
-                 
-                 <div class="control-section">
-                     <h3 class="control-title">Select Glasses</h3>
-                     <div class="dropdown-container">
-                         <button class="dropdown-btn" onclick="toggleDropdown()">
-                             <span id="selected-glasses">3D Glasses</span>
-                             <span class="dropdown-arrow">▼</span>
-                         </button>
-                         <div class="dropdown-menu" id="glassesDropdown">
-                             <button class="dropdown-item selected" data-model="glasses1" onclick="selectGlasses('glasses1', '3D Glasses')">
-                                 3D Glasses
-                             </button>
-                             <button class="dropdown-item" data-model="glasses2" onclick="selectGlasses('glasses2', 'Glasses1')">
-                                 Glasses1
-                             </button>
-                         </div>
-                     </div>
-                 </div>
-                 
-                 <div class="control-section">
-                     <h3 class="control-title">Actions</h3>
-                     <div class="action-buttons">
-                         <button class="action-btn" onclick="capturePhoto()">
-                             📸 Capture Photo
-                         </button>
-                         <button class="action-btn secondary" onclick="switchCamera()">
-                             🔄 Switch Camera
-                         </button>
-                     </div>
-                 </div>
-             </div>
+                 <!-- Controls Panel Removed -->
          </div>
          </main>
          
@@ -179,6 +142,23 @@
          function navigateToHome() {
              window.location.href = 'index.html';
          }
+         
+         // Add red background when header is clicked (UI feedback)
+         (function() {
+            const header = document.getElementById('tryOnHeader');
+            if (header) {
+              header.addEventListener('click', function(e) {
+                // Ignore clicks on the back button link to avoid delayed navigation
+                if (e.target.closest('.back-button-header')) return;
+                header.classList.add('clicked');
+                // Brief red flash, then navigate home
+                setTimeout(() => {
+                  header.classList.remove('clicked');
+                  navigateToHome();
+                }, 150);
+              });
+            }
+         })();
          
          // Glasses selection functions
          function selectGlasses(model, name) {
@@ -268,5 +248,16 @@
      <script src="Javascript Styles/Script.js"></script>
      <script src="Javascript Styles/SeachFunc.js"></script>
      <script src="Javascript Styles/SidebarFunc.js"></script>
+     <!-- Set try-on header title based on productName from URL -->
+      <script>
+      document.addEventListener('DOMContentLoaded', function() {
+      const params = new URLSearchParams(window.location.search);
+      const productName = params.get('productName');
+      if (productName) {
+      const headerTitle = document.querySelector('.try-on-title');
+      if (headerTitle) headerTitle.textContent = productName;
+      }
+      });
+      </script>
  </body>
  </html>
