@@ -65,8 +65,8 @@
 </head>
 <body>
     <div class="virtual-try-on-container">
-        <header class="try-on-header" id="tryOnHeader">
-              <h1 class="try-on-title" id="tryOnTitle">Virtual Try-On</h1>
+        <header class="try-on-header">
+              <h1 class="try-on-title" onclick="navigateToHome()">Virtual Try-On</h1>
               <a href="index.html" class="back-button-header">↩ Back to Products</a>
           </header>
         
@@ -142,23 +142,6 @@
          function navigateToHome() {
              window.location.href = 'index.html';
          }
-         
-         // Add red background when header is clicked (UI feedback)
-         (function() {
-            const header = document.getElementById('tryOnHeader');
-            if (header) {
-              header.addEventListener('click', function(e) {
-                // Ignore clicks on the back button link to avoid delayed navigation
-                if (e.target.closest('.back-button-header')) return;
-                header.classList.add('clicked');
-                // Brief red flash, then navigate home
-                setTimeout(() => {
-                  header.classList.remove('clicked');
-                  navigateToHome();
-                }, 150);
-              });
-            }
-         })();
          
          // Glasses selection functions
          function selectGlasses(model, name) {
@@ -237,10 +220,6 @@
              }, 2000);
          });
      </script>
-     <!-- Firebase SDK (compat) -->
-     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
      <script src="Javascript Styles/FirebaseConfig.js"></script>
      <script src="Javascript Styles/AuthHandlers.js"></script>
      <script src="Javascript Styles/ContentEditingFunc.js"></script>
