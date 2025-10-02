@@ -936,18 +936,29 @@ let productImages = [];
 
 function handleFileUpload(event) {
     const files = event.target.files;
+    let invalidCount = 0;
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        if (file.type.startsWith('image/')) {
+        const isImageType = file.type && file.type.startsWith('image/');
+        const isImageExt = /\.(jpg|jpeg|png|gif|bmp|webp|svg)(\?.*)?$/i.test(file.name);
+        if (isImageType || isImageExt) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 addImageToPreview(e.target.result, file.name);
             };
             reader.readAsDataURL(file);
+        } else {
+            invalidCount++;
+            showNotification(`ERROR!Only image files are allowed!`);
         }
     }
     // Clear the input to allow re-uploading the same file
     event.target.value = '';
+
+    // Optionally summarize invalid selections
+    if (invalidCount > 0) {
+        // showNotification(`${invalidCount} non-image file(s) were skipped.`,'warning');
+    }
 }
 
 function addImageUrl() {
@@ -1070,7 +1081,7 @@ function handleGlbFileUpload(event) {
         if (file.name.toLowerCase().endsWith('.glb')) {
             addGlbFileToPreview(file, file.name);
         } else {
-            showNotification('Only .glb files are allowed for 3D models', 'error');
+            showNotification('ERROR! Only .GLB files are allowed for 3D models');
         }
     }
     // Clear the input to allow re-uploading the same file
