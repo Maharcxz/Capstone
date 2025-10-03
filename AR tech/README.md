@@ -1,2 +1,0 @@
-# Website Development
-Capstone Project
