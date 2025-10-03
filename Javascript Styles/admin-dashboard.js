@@ -347,6 +347,35 @@ function closeProductModal() {
     clearAllGlbFiles(); // Clear .glb files when closing modal
 }
 
+// Normalize external URLs from common providers to direct links
+function normalizeExternalUrl(url) {
+    if (typeof url !== 'string') return url;
+    let u = url.trim();
+    const ghMatch = u.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/(.+)$/);
+    if (ghMatch) {
+        const [, owner, repo, path] = ghMatch;
+        return `https://raw.githubusercontent.com/${owner}/${repo}/${path}`;
+    }
+    if (u.includes('dropbox.com')) {
+        try {
+            const dbUrl = new URL(u);
+            dbUrl.searchParams.set('dl', '1');
+            return dbUrl.toString();
+        } catch (e) {}
+    }
+    const gdFileMatch = u.match(/^https?:\/\/drive\.google\.com\/file\/d\/([^\/]+)\/view.*$/);
+    if (gdFileMatch) {
+        const id = gdFileMatch[1];
+        return `https://drive.google.com/uc?export=download&id=${id}`;
+    }
+    const gdUcMatch = u.match(/^https?:\/\/drive\.google\.com\/uc\?id=([^&]+).*$/);
+    if (gdUcMatch) {
+        const id = gdUcMatch[1];
+        return `https://drive.google.com/uc?export=download&id=${id}`;
+    }
+    return u;
+}
+
 // Handle product form submission
 async function handleProductSubmit(event) {
     event.preventDefault();
@@ -356,7 +385,7 @@ async function handleProductSubmit(event) {
     
     // Get .glb files from the productGlbFiles array
     const glbFiles = productGlbFiles.map(glb => ({
-        src: glb.src,
+        url: typeof glb.src === 'string' ? normalizeExternalUrl(glb.src) : glb.src,
         name: glb.name,
         size: glb.size
     }));
@@ -368,12 +397,8 @@ async function handleProductSubmit(event) {
     console.log('Product GLB Files Array:', productGlbFiles);
     console.log('Extracted GLB Files:', glbFiles);
     console.log('GLB Files Length:', glbFiles.length);
-    
-    // Validation - require at least one image
-    if (images.length === 0) {
-        showNotification('Please add at least one image', 'error');
-        return;
-    }
+    // Images are optional: allow saving without images
+    // (Product cards already show a placeholder when no image is provided)
     
     const formData = {
         title: document.getElementById('productTitle').value.trim(),
@@ -382,7 +407,7 @@ async function handleProductSubmit(event) {
         category: document.getElementById('productCategory').value,
         stock: parseInt(document.getElementById('productStock').value) || 0,
         images: images, // Store multiple images
-        image: images[0], // Keep first image for backward compatibility
+        image: images[0] || '', // Keep first image for backward compatibility (optional)
         glbFiles: glbFiles, // Store .glb files
         visible: true, // Default to visible since we removed the checkbox
         updatedAt: new Date().toISOString()
