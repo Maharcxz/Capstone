@@ -344,6 +344,24 @@ function closeProductModal() {
 async function handleProductSubmit(event) {
     event.preventDefault();
     
+    // Auto-capture a typed GLB URL if present so upload is optional
+    const glbUrlInputEl = document.getElementById('productGlbUrl');
+    if (glbUrlInputEl) {
+        const typedGlbUrl = glbUrlInputEl.value ? glbUrlInputEl.value.trim() : '';
+        if (typedGlbUrl && typedGlbUrl.toLowerCase().endsWith('.glb')) {
+            const exists = productGlbFiles.some(glb => glb.src === typedGlbUrl);
+            if (!exists) {
+                productGlbFiles.push({
+                    id: 'glb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    src: typedGlbUrl,
+                    name: 'GLB Model from URL',
+                    size: 'Unknown size',
+                    file: null
+                });
+            }
+        }
+    }
+    
     // Get images from the productImages array
     const images = productImages.map(img => img.src);
     
