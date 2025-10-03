@@ -181,6 +181,38 @@ async function getAllCategories() {
     return categories;
 }
 
+// Check if a category name already exists (case-insensitive)
+async function categoryNameExists(name) {
+    const normalized = (name || '').trim().toLowerCase();
+    const snapshot = await categoriesRef.once('value');
+    let exists = false;
+    snapshot.forEach(childSnapshot => {
+        const category = childSnapshot.val();
+        const catName = (category && category.name ? category.name : '').trim().toLowerCase();
+        if (catName === normalized) {
+            exists = true;
+        }
+    });
+    return exists;
+}
+
+async function cleanupDuplicateCategories(preferredId, normalizedName) {
+    const target = (normalizedName || '').trim().toLowerCase();
+    const snapshot = await categoriesRef.once('value');
+    const deletions = [];
+    snapshot.forEach(childSnapshot => {
+        const category = childSnapshot.val();
+        const catName = (category && category.name ? category.name : '').trim().toLowerCase();
+        const key = childSnapshot.key;
+        if (catName === target && key !== preferredId) {
+            deletions.push(categoriesRef.child(key).remove());
+        }
+    });
+    if (deletions.length) {
+        await Promise.all(deletions);
+    }
+}
+
 function deleteCategoryFromFirebase(categoryId) {
     return categoriesRef.child(categoryId).remove();
 }
@@ -251,6 +283,8 @@ window.firebaseServices = {
     getAllCategories,
     deleteCategoryFromFirebase,
     listenForCategoryChanges,
+    categoryNameExists,
+    cleanupDuplicateCategories,
     // Notifications
     notificationsRef,
     saveNotificationToFirebase: (notification) => notificationsRef.push(notification),

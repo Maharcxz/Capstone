@@ -6,6 +6,7 @@ let filteredProducts = [];
 let editingProductId = null;
 let sidebarCategories = [];
 let currentCategory = 'all';
+let pendingCategoryAdds = new Set();
 
 // Load GLB data from localStorage
 function loadGlbData(glbId) {
@@ -109,6 +110,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Set up file upload event listener
     document.getElementById('productImages').addEventListener('change', handleFileUpload);
+    
+    // Bind Add Category form submit to handler
+    const addCategoryForm = document.getElementById('addCategoryForm');
+    if (addCategoryForm) {
+        addCategoryForm.addEventListener('submit', handleAddCategory);
+    }
     
     // Initialize sidebar categories (Firebase-backed with local cache fallback)
     loadSidebarCategories();
@@ -525,7 +532,7 @@ document.addEventListener('keydown', function(event) {
 function loadSidebarCategories() {
     const fallbackLocal = () => {
         const saved = localStorage.getItem('sidebarCategories');
-        sidebarCategories = saved ? JSON.parse(saved) : [];
+        sidebarCategories = saved ? uniqueCategoriesByName(JSON.parse(saved)) : [];
         renderSidebar();
         populateCategoryDropdowns();
     };
@@ -535,12 +542,13 @@ function loadSidebarCategories() {
             // Initial load from Firebase
             getAllCategories()
                 .then(categories => {
-                    sidebarCategories = Array.isArray(categories) ? categories : [];
+                    // Deduplicate by name to prevent double entries
+                    sidebarCategories = Array.isArray(categories) ? uniqueCategoriesByName(categories) : [];
                     // Cache to localStorage for other pages and quick access
                     localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
                     renderSidebar();
-                    populateCategoryDropdowns();
                     renderExistingCategories();
+                    populateCategoryDropdowns();
                 })
                 .catch(err => {
                     console.warn('Failed to load categories from Firebase, using local cache.', err);
@@ -550,26 +558,52 @@ function loadSidebarCategories() {
             // Listen for real-time changes so UI stays in sync
             if (typeof listenForCategoryChanges === 'function') {
                 listenForCategoryChanges(categories => {
-                    sidebarCategories = Array.isArray(categories) ? categories : [];
+                    // Deduplicate by name to prevent double entries
+                    sidebarCategories = Array.isArray(categories) ? uniqueCategoriesByName(categories) : [];
                     localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
                     renderSidebar();
-                    populateCategoryDropdowns();
                     renderExistingCategories();
+                    populateCategoryDropdowns();
                 });
             }
         } else {
             fallbackLocal();
         }
-    } catch (e) {
-        console.warn('Error initializing categories, using local cache.', e);
+    } catch (error) {
+        console.error('Error loading sidebar categories:', error);
         fallbackLocal();
     }
+}
+
+// Helper: ensure unique categories by normalized name
+function uniqueCategoriesByName(categories) {
+    const map = new Map();
+    for (const cat of categories) {
+        const nameKey = (cat?.name || '').trim().toLowerCase();
+        // Prefer deterministic id if multiple entries exist
+        const preferredId = generateCategoryId(nameKey);
+        if (!map.has(nameKey)) {
+            map.set(nameKey, cat);
+        } else {
+            const current = map.get(nameKey);
+            const isPreferredCurrent = (current?.id || '') === preferredId;
+            const isPreferredNew = (cat?.id || '') === preferredId;
+            // Keep the preferred deterministic id entry if present
+            if (!isPreferredCurrent && isPreferredNew) {
+                map.set(nameKey, cat);
+            }
+        }
+    }
+    return Array.from(map.values());
 }
 
 // Populate category dropdowns with available categories
 function populateCategoryDropdowns() {
     const categoryFilter = document.getElementById('categoryFilter');
     const productCategory = document.getElementById('productCategory');
+    
+    // Always use a deduplicated snapshot to render UI elements
+    const dedupedCategories = uniqueCategoriesByName(Array.isArray(sidebarCategories) ? sidebarCategories : []);
     
     if (categoryFilter) {
         // Clear existing options except the first one (All Categories)
@@ -578,7 +612,7 @@ function populateCategoryDropdowns() {
         }
         
         // Add sidebar categories to filter dropdown
-        sidebarCategories.forEach(category => {
+        dedupedCategories.forEach(category => {
             const option = document.createElement('option');
             option.value = category.name;
             option.textContent = category.name;
@@ -600,7 +634,7 @@ function populateCategoryDropdowns() {
         productCategory.appendChild(defaultOption);
         
         // Add sidebar categories to product form dropdown
-        sidebarCategories.forEach(category => {
+        dedupedCategories.forEach(category => {
             const option = document.createElement('option');
             option.value = category.name;
             option.textContent = category.name;
@@ -672,55 +706,69 @@ async function addCategoryFromForm() {
     console.log('addCategoryFromForm called');
     const categoryNameInput = document.getElementById('categoryName');
     const categoryName = categoryNameInput.value.trim();
-    console.log('Category name from input:', categoryName);
-    
+    const normalizedName = categoryName.toLowerCase();
+
     if (!categoryName) {
-        alert('Please enter a category name');
+        showNotification('Please enter a category name', 'error');
         return;
     }
-    
-    // Check if category already exists
-    const exists = sidebarCategories.some(cat => 
-        cat.name.toLowerCase() === categoryName.toLowerCase()
+
+    if (pendingCategoryAdds.has(normalizedName)) {
+        showNotification(`Already adding "${categoryName}". Please wait...`, 'info');
+        return;
+    }
+    pendingCategoryAdds.add(normalizedName);
+
+    try {
+        const existsInDb = await firebaseServices.categoryNameExists(categoryName);
+        if (existsInDb) {
+            showNotification(`Category "${categoryName}" already exists.`, 'error');
+            return;
+        }
+    } catch (err) {
+        console.warn('Duplicate check failed, falling back to local check:', err);
+    }
+
+    const existsLocal = sidebarCategories.some(cat => 
+        (cat.name || '').trim().toLowerCase() === normalizedName
     );
-    
-    if (exists) {
-        alert('Category already exists');
+    if (existsLocal) {
+        showNotification(`Category "${categoryName}" already exists.`, 'error');
         return;
     }
-    
-    // Add new category
+
     const newCategory = {
         id: generateCategoryId(categoryName),
         name: categoryName,
         icon: '🏷️',
         createdAt: new Date().toISOString()
     };
-    
+
     try {
         await saveCategoryToFirebase(newCategory);
-        // Optimistically update local cache/UI
-        sidebarCategories.push(newCategory);
-        localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
-        renderSidebar();
-        renderExistingCategories();
-        populateCategoryDropdowns();
-        console.log('Category saved to Firebase');
+        try {
+            await firebaseServices.cleanupDuplicateCategories(newCategory.id, normalizedName);
+        } catch (cleanupErr) {
+            console.warn('Failed to cleanup duplicates:', cleanupErr);
+        }
+        showNotification(`Category "${categoryName}" added successfully!`, 'success');
     } catch (error) {
         console.error('Error saving category to Firebase:', error);
-        alert('Failed to save category. Please try again.');
+        showNotification('Failed to save category. Please try again.', 'error');
         return;
+    } finally {
+        pendingCategoryAdds.delete(normalizedName);
     }
-    
-    // Clear input
+
     categoryNameInput.value = '';
-    
-    showNotification(`Category "${categoryName}" added successfully!`, 'success');
 }
 
 // Render sidebar with categories
 function renderSidebar() {
     const sidebarContent = document.getElementById('sidebarContent');
+    
+    // Always render from a deduplicated snapshot to avoid duplicates in UI
+    const dedupedCategories = uniqueCategoriesByName(Array.isArray(sidebarCategories) ? sidebarCategories : []);
     
     let html = `
         <div class="sidebar-item ${currentCategory === 'all' ? 'active' : ''}" onclick="filterByCategory('all')">
@@ -729,7 +777,7 @@ function renderSidebar() {
         </div>
     `;
     
-    sidebarCategories.forEach(category => {
+    dedupedCategories.forEach(category => {
         html += `
             <div class="sidebar-item ${currentCategory === category.id ? 'active' : ''}" onclick="filterByCategory('${category.id}')">
                 <span class="sidebar-item-icon">${category.icon || '🏷️'}</span>
@@ -794,51 +842,61 @@ async function handleAddCategory(event) {
     console.log('handleAddCategory called');
     
     const formData = new FormData(event.target);
-    const categoryName = formData.get('categoryName').trim();
-    console.log('Category name:', categoryName);
-    
+    const categoryName = (formData.get('categoryName') || '').trim();
+    const normalizedName = categoryName.toLowerCase();
+
     if (!categoryName) {
-        alert('Please enter a category name');
+        showNotification('Please enter a category name', 'error');
         return;
     }
-    
-    // Check if category already exists
-    const exists = sidebarCategories.some(cat => 
-        cat.name.toLowerCase() === categoryName.toLowerCase()
+
+    if (pendingCategoryAdds.has(normalizedName)) {
+        showNotification(`Already adding "${categoryName}". Please wait...`, 'info');
+        return;
+    }
+    pendingCategoryAdds.add(normalizedName);
+
+    try {
+        const existsInDb = await firebaseServices.categoryNameExists(categoryName);
+        if (existsInDb) {
+            showNotification(`Category "${categoryName}" already exists.`, 'error');
+            return;
+        }
+    } catch (err) {
+        console.warn('Duplicate check failed, falling back to local check:', err);
+    }
+
+    const existsLocal = sidebarCategories.some(cat => 
+        (cat.name || '').trim().toLowerCase() === normalizedName
     );
-    
-    if (exists) {
-        alert('Category already exists');
+    if (existsLocal) {
+        showNotification(`Category "${categoryName}" already exists.`, 'error');
         return;
     }
-    
-    // Add new category
+
     const newCategory = {
         id: generateCategoryId(categoryName),
         name: categoryName,
         icon: '🏷️',
         createdAt: new Date().toISOString()
     };
-    
+
     try {
         await saveCategoryToFirebase(newCategory);
-        // Optimistically update local cache/UI
-        sidebarCategories.push(newCategory);
-        localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
-        renderSidebar();
-        renderExistingCategories();
-        populateCategoryDropdowns(); // Refresh dropdowns with new category
-        console.log('Category saved to Firebase');
+        try {
+            await firebaseServices.cleanupDuplicateCategories(newCategory.id, normalizedName);
+        } catch (cleanupErr) {
+            console.warn('Failed to cleanup duplicates:', cleanupErr);
+        }
+        showNotification(`Category "${categoryName}" added successfully!`, 'success');
+        event.target.reset();
     } catch (error) {
         console.error('Error saving category to Firebase:', error);
-        alert('Failed to save category. Please try again.');
+        showNotification('Failed to save category. Please try again.', 'error');
         return;
+    } finally {
+        pendingCategoryAdds.delete(normalizedName);
     }
-    
-    // Reset form
-    event.target.reset();
-    
-    showNotification(`Category "${categoryName}" added successfully!`, 'success');
 }
 
 // Generate category ID from name
@@ -855,14 +913,17 @@ function renderExistingCategories() {
     const container = document.getElementById('existingCategories');
     console.log('Container element:', container);
     
-    if (sidebarCategories.length === 0) {
+    // Use a deduplicated snapshot to render the list
+    const dedupedCategories = uniqueCategoriesByName(Array.isArray(sidebarCategories) ? sidebarCategories : []);
+    
+    if (dedupedCategories.length === 0) {
         container.innerHTML = '<div class="empty-categories">No categories created yet</div>';
         console.log('No categories, showing empty message');
         return;
     }
     
     let html = '';
-    sidebarCategories.forEach(category => {
+    dedupedCategories.forEach(category => {
         html += `
             <div class="category-item">
                 <div class="category-item-info">
@@ -886,10 +947,34 @@ async function editCategory(categoryId) {
     if (category) {
         const newName = prompt('Enter new category name:', category.name);
         if (newName && newName.trim() && newName.trim() !== category.name) {
+            const normalizedName = newName.trim().toLowerCase();
+            const oldId = category.id;
+            const newId = generateCategoryId(newName.trim());
+
+            // Update local object
             category.name = newName.trim();
-            category.id = generateCategoryId(newName.trim());
+            category.id = newId;
+
             try {
+                // Save under the new deterministic id
                 await saveCategoryToFirebase(category);
+
+                // Cleanup duplicates with same normalized name and remove old id if changed
+                try {
+                    await firebaseServices.cleanupDuplicateCategories(newId, normalizedName);
+                } catch (cleanupErr) {
+                    console.warn('Failed to cleanup duplicates after edit:', cleanupErr);
+                }
+                if (newId !== oldId) {
+                    try {
+                        await deleteCategoryFromFirebase(oldId);
+                    } catch (delErr) {
+                        console.warn('Failed to delete old category id after edit:', delErr);
+                    }
+                }
+
+                // Persist and re-render with a deduplicated snapshot
+                sidebarCategories = uniqueCategoriesByName(sidebarCategories);
                 localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
                 renderSidebar();
                 renderExistingCategories();

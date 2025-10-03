@@ -9,7 +9,7 @@
     opacity: 0;
     visibility: hidden;
     pointer-events: none; /* Prevent clicks when hidden */
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
     will-change: opacity, visibility;
     z-index: 9999; /* Below sidebar but above other UI */
 }
@@ -30,7 +30,7 @@
     background-color: rgba(0, 0, 0, 0.9);
     backdrop-filter: blur(10px);
     transform: translateX(-100%); /* Hidden off-screen */
-    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform 0.22s ease-out;
     will-change: transform;
     z-index: 10000; /* Ensure above overlay and all UI */
     padding-top: 100px;
@@ -81,6 +81,8 @@
         width: 100%;
         padding-top: 80px;
         box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+        transition: transform 0.18s ease-out; /* faster animation on phones */
+        backdrop-filter: none; /* remove heavy blur for smoother performance */
     }
     .sidebar-content {
         padding: 16px;
