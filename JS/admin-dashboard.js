@@ -347,7 +347,8 @@ async function handleProductSubmit(event) {
     // Auto-capture a typed GLB URL if present so upload is optional
     const glbUrlInputEl = document.getElementById('productGlbUrl');
     if (glbUrlInputEl) {
-        const typedGlbUrl = glbUrlInputEl.value ? glbUrlInputEl.value.trim() : '';
+        let typedGlbUrl = glbUrlInputEl.value ? glbUrlInputEl.value.trim() : '';
+        typedGlbUrl = normalizeExternalUrl(typedGlbUrl);
         if (typedGlbUrl && typedGlbUrl.toLowerCase().endsWith('.glb')) {
             const exists = productGlbFiles.some(glb => glb.src === typedGlbUrl);
             if (!exists) {
@@ -901,10 +902,59 @@ function handleFileUpload(event) {
     // Clear the input to allow re-uploading the same file
     event.target.value = '';
 }
+// Normalize external URLs (GitHub/Dropbox/Google Drive) into direct-download links
+function normalizeExternalUrl(url) {
+    if (!url || typeof url !== 'string') return url;
+    let out = url.trim();
+
+    // GitHub blob -> raw
+    const ghBlob = /^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^\/]+)\/(.+)$/i;
+    if (ghBlob.test(out)) {
+        const match = out.match(ghBlob);
+        const user = match[1];
+        const repo = match[2];
+        const branch = match[3];
+        const path = match[4];
+        out = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${path}`;
+    }
+
+    // Dropbox share -> direct content
+    const dbxShare = /^https?:\/\/(www\.)?dropbox\.com\/s\/([^\/]+)\/([^\?]+)(\?.*)?$/i;
+    if (dbxShare.test(out)) {
+        const match = out.match(dbxShare);
+        const id = match[2];
+        const name = match[3];
+        out = `https://dl.dropboxusercontent.com/s/${id}/${name}`;
+    }
+
+    // Google Drive file -> direct download
+    const gdriveFile = /^https?:\/\/drive\.google\.com\/file\/d\/([^\/]+)\/view(\?.*)?$/i;
+    if (gdriveFile.test(out)) {
+        const match = out.match(gdriveFile);
+        const fileId = match[1];
+        out = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    }
+    const gdriveOpen = /^https?:\/\/drive\.google\.com\/open\?id=([^&]+).*$/i;
+    if (gdriveOpen.test(out)) {
+        const match = out.match(gdriveOpen);
+        const fileId = match[1];
+        out = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    }
+    const gdriveUc = /^https?:\/\/drive\.google\.com\/uc\?(.*)$/i;
+    if (gdriveUc.test(out)) {
+        const query = out.split('?')[1] || '';
+        const params = new URLSearchParams(query);
+        const id = params.get('id');
+        if (id) out = `https://drive.google.com/uc?export=download&id=${id}`;
+    }
+
+    return out;
+}
 
 function addImageUrl() {
     const urlInput = document.getElementById('productImageUrl');
-    const url = urlInput.value.trim();
+    let url = urlInput.value.trim();
+    url = normalizeExternalUrl(url);
     
     if (!url) {
         showNotification('Please enter an image URL', 'error');
@@ -1031,7 +1081,8 @@ function handleGlbFileUpload(event) {
 
 function addGlbUrl() {
     const urlInput = document.getElementById('productGlbUrl');
-    const url = urlInput.value.trim();
+    let url = urlInput.value.trim();
+    url = normalizeExternalUrl(url);
     
     if (!url) {
         showNotification('Please enter a .glb file URL', 'error');

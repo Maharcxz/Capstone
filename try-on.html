@@ -15,40 +15,17 @@
     <link rel="stylesheet" href="css/HeaderStyles.css">
     <link rel="stylesheet" href="css/TryOnStyles.css">
     
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    
+    <!-- Firebase Config and App Services -->
+    <script src="JS/FirebaseConfig.js"></script>
+    
     <!-- A-Frame and MindAR -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function() {
-	const list = ["glasses1", "glasses2"];
-	const visibles = [true, false];
-	const setVisible = (button, entities, visible) => {
-	  if (button) {
-	    if (visible) {
-	      button.classList.add("selected");
-	    } else {
-	      button.classList.remove("selected");
-	    }
-	  }
-	  entities.forEach((entity) => {
-	    if (entity) {
-	      entity.setAttribute("visible", visible);
-	    }
-	  });
-	}
-	list.forEach((item, index) => {
-	  const button = document.querySelector("#" + item);
-	  const entities = document.querySelectorAll("." + item + "-entity");
-	  if (button && entities.length > 0) {
-	    setVisible(button, entities, visibles[index]);
-	    button.addEventListener('click', () => {
-	      visibles[index] = !visibles[index];
-	      setVisible(button, entities, visibles[index]);
-	    });
-	  }
-	});
-      })
-    </script>
 </head>
 <body>
     <div class="virtual-try-on-container">
@@ -66,8 +43,6 @@
                 
                 <a-scene mindar-face embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" style="height: 100vh; width: 100vw;">
                      <a-assets>
-                         <a-asset-item id="glassesModel1" src="SampleDropdownAssets/3dglasses.glb"></a-asset-item>
-                         <a-asset-item id="glassesModel2" src="SampleDropdownAssets/glasses1.glb"></a-asset-item>
                          <a-asset-item id="headOccluder" src="Assets/headOccluder.glb"></a-asset-item>
                      </a-assets>
                      
@@ -90,28 +65,16 @@
                          </a-gltf-model>
                      </a-entity>
                      
-                     <!-- Glasses Model 1 - 3D Glasses -->
+                     <!-- Dynamic Glasses Model (populated from products) -->
                      <a-entity mindar-face-target="anchorIndex: 168">
-                         <a-gltf-model 
+                         <a-entity 
+                             id="glassesModelEntity"
                              rotation="0 0 0" 
                              position="0 0 0" 
                              scale="0.010 0.010 0.010" 
-                             src="#glassesModel1" 
-                             class="glasses1-entity" 
-                             visible="true">
-                         </a-gltf-model>
-                     </a-entity>
-                     
-                     <!-- Glasses Model 2 - Glasses1 -->
-                     <a-entity mindar-face-target="anchorIndex: 168">
-                         <a-gltf-model 
-                             rotation="0 0 0" 
-                             position="0 0 0" 
-                             scale="0.010 0.010 0.010" 
-                             src="#glassesModel2" 
-                             class="glasses2-entity" 
-                             visible="false">
-                         </a-gltf-model>
+                             visible="false"
+                             crossorigin="anonymous">
+                         </a-entity>
                      </a-entity>
                  </a-scene>
                  
@@ -131,14 +94,7 @@
                              <span id="selected-glasses">3D Glasses</span>
                              <span class="dropdown-arrow">▼</span>
                          </button>
-                         <div class="dropdown-menu" id="glassesDropdown">
-                             <button class="dropdown-item selected" data-model="glasses1" onclick="selectGlasses('glasses1', '3D Glasses')">
-                                 3D Glasses
-                             </button>
-                             <button class="dropdown-item" data-model="glasses2" onclick="selectGlasses('glasses2', 'Glasses1')">
-                                 Glasses1
-                             </button>
-                         </div>
+                         <div class="dropdown-menu" id="glassesDropdown"></div>
                      </div>
                  </div>
                  
@@ -167,27 +123,39 @@
              window.location.href = 'index.html';
          }
          
-         // Glasses selection functions
-         function selectGlasses(model, name) {
-             // Update selected glasses display
+         // Select glasses by GLB URL
+         function selectGlasses(glbUrl, name) {
+             // Update selected label
              document.getElementById('selected-glasses').textContent = name;
              
-             // Update selected state
+             // Mark selected item
              document.querySelectorAll('.dropdown-item').forEach(item => {
-                 item.classList.remove('selected');
+                 if (item.dataset && item.dataset.url === glbUrl) {
+                     item.classList.add('selected');
+                 } else {
+                     item.classList.remove('selected');
+                 }
              });
-             document.querySelector(`[data-model="${model}"]`).classList.add('selected');
              
-             // Hide/show glasses models
-             const glasses1Entity = document.querySelector('.glasses1-entity');
-             const glasses2Entity = document.querySelector('.glasses2-entity');
-             
-             if (model === 'glasses1') {
-                 if (glasses1Entity) glasses1Entity.setAttribute('visible', true);
-                 if (glasses2Entity) glasses2Entity.setAttribute('visible', false);
-             } else if (model === 'glasses2') {
-                 if (glasses1Entity) glasses1Entity.setAttribute('visible', false);
-                 if (glasses2Entity) glasses2Entity.setAttribute('visible', true);
+             // Set model entity src and show it
+             const modelEntity = document.getElementById('glassesModelEntity');
+             if (modelEntity) {
+                 // Normalize before loading to avoid blob URLs
+                 const normalized = (function(url){
+                     if (!url || typeof url !== 'string') return url;
+                     const gh = url.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^\/]+)\/(.+)$/);
+                     if (gh) {
+                         const [, owner, repo, branch, path] = gh;
+                         return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
+                     }
+                     if (url.includes('dropbox.com') && url.includes('dl=0')) return url.replace('dl=0','dl=1');
+                     const drive = url.match(/https?:\/\/drive\.google\.com\/file\/d\/([^\/]+)/);
+                     if (drive) return `https://drive.google.com/uc?export=download&id=${drive[1]}`;
+                     return url;
+                 })(glbUrl);
+                 // Use the gltf-model component for external URLs
+                 modelEntity.setAttribute('gltf-model', normalized);
+                 modelEntity.setAttribute('visible', true);
              }
              
              // Close dropdown
@@ -234,13 +202,91 @@
              }, 3000);
          }
          
-         // Hide loading overlay when AR is ready
+         // Populate dropdown from Firebase products
+         async function loadTryOnProducts() {
+             try {
+                 if (typeof getAllProducts === 'function') {
+                     const products = await getAllProducts();
+                     populateDropdownFromProducts(products);
+                 } else {
+                     console.warn('Firebase product functions not available on try-on page');
+                 }
+                 
+                 // Listen for real-time updates to auto-refresh dropdown
+                 if (typeof listenForProductChanges === 'function') {
+                     listenForProductChanges((products) => {
+                         populateDropdownFromProducts(products);
+                     });
+                 }
+             } catch (error) {
+                 console.error('Error loading products for try-on:', error);
+             }
+         }
+         
+         function populateDropdownFromProducts(products) {
+             const dropdown = document.getElementById('glassesDropdown');
+             if (!dropdown) return;
+            // Read query params for auto-selection
+            const params = new URLSearchParams(window.location.search);
+            const targetProductId = params.get('productId');
+            const targetProductName = params.get('productName');
+
+             // Only include visible products with at least one valid GLB URL
+             const items = [];
+             dropdown.innerHTML = '';
+             products.forEach(product => {
+                 if (!product.visible) return;
+                 const firstGlb = Array.isArray(product.glbFiles) ? product.glbFiles[0] : null;
+                 const glbUrl = firstGlb && typeof firstGlb.src === 'string' ? firstGlb.src : null;
+                 if (!glbUrl || !glbUrl.toLowerCase().endsWith('.glb')) return;
+                 
+                 const btn = document.createElement('button');
+                 btn.className = 'dropdown-item';
+                 btn.textContent = product.title || 'Unnamed Product';
+                 btn.dataset.url = glbUrl;
+                  btn.dataset.productId = product.id || '';
+                 btn.addEventListener('click', () => selectGlasses(glbUrl, btn.textContent));
+                 dropdown.appendChild(btn);
+                 items.push({ url: glbUrl, title: btn.textContent, id: product.id || '' });
+             });
+             
+             // Auto-select matching item from query, otherwise first
+             if (items.length > 0) {
+                 let picked = null;
+                 if (targetProductId) {
+                     picked = items.find(i => i.id === targetProductId);
+                 }
+                 if (!picked && targetProductName) {
+                     picked = items.find(i => i.title === targetProductName);
+                 }
+                 if (!picked) picked = items[0];
+                 selectGlasses(picked.url, picked.title);
+             } else {
+                 // Hide model when no items
+                 const modelEntity = document.getElementById('glassesModelEntity');
+                 if (modelEntity) modelEntity.setAttribute('visible', false);
+             }
+         }
+         
+         // Initialize page
          document.addEventListener('DOMContentLoaded', function() {
              const loadingOverlay = document.getElementById('loadingOverlay');
+             const modelEntity = document.getElementById('glassesModelEntity');
              
-             // Simulate AR initialization
+             // Model load status events for debugging and UX
+             if (modelEntity) {
+                 modelEntity.addEventListener('model-loaded', () => {
+                     showStatus('Model loaded successfully', 'success');
+                 });
+                 modelEntity.addEventListener('model-error', (e) => {
+                     console.error('A-Frame model load error:', e.detail);
+                     showStatus('Failed to load model (check CORS/URL).', 'error');
+                 });
+             }
+             loadTryOnProducts();
+             // Simulate AR initialization complete
              setTimeout(() => {
-                 loadingOverlay.style.display = 'none';
+                 if (loadingOverlay) loadingOverlay.style.display = 'none';
              }, 2000);
          });
      </script>
