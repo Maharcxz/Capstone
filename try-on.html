@@ -179,23 +179,29 @@
              
              // Close dropdown
              document.getElementById('glassesDropdown').classList.remove('show');
+             document.querySelector('.dropdown-btn')?.classList.remove('open');
          }
          
          // Toggle dropdown function
          function toggleDropdown() {
              const dropdown = document.getElementById('glassesDropdown');
+             const btn = document.querySelector('.dropdown-btn');
              dropdown.classList.toggle('show');
+             if (btn) btn.classList.toggle('open', dropdown.classList.contains('show'));
          }
          
          // Close dropdown when clicking outside
-         window.onclick = function(event) {
-             if (!event.target.matches('.dropdown-btn') && !event.target.matches('.dropdown-arrow')) {
-                 const dropdown = document.getElementById('glassesDropdown');
-                 if (dropdown.classList.contains('show')) {
+         window.addEventListener('click', function(event) {
+             const container = document.querySelector('.dropdown-container');
+             const dropdown = document.getElementById('glassesDropdown');
+             // Only close if the click is outside the entire container (button + menu)
+             if (container && !container.contains(event.target)) {
+                 if (dropdown && dropdown.classList.contains('show')) {
                      dropdown.classList.remove('show');
+                     document.querySelector('.dropdown-btn')?.classList.remove('open');
                  }
              }
-         }
+         });
          
          // Capture photo function
          function capturePhoto() {
@@ -320,6 +326,7 @@
                      document.getElementById('selected-glasses').textContent = name;
                      await loadProductModelById(product.id);
                      document.getElementById('glassesDropdown').classList.remove('show');
+                     document.querySelector('.dropdown-btn')?.classList.remove('open');
                  };
                  dropdown.appendChild(btn);
              });
