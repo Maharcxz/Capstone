@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Virtual Try-On - Trinity Optimum Vision Center</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    
+    <!-- CSS -->
+    
+    <!-- A-Frame and MindAR -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+	const list = ["glasses1", "glasses2"];
+	const visibles = [true, false];
+	const setVisible = (button, entities, visible) => {
+	  if (button) {
+	    if (visible) {
+	      button.classList.add("selected");
+	    } else {
+	      button.classList.remove("selected");
+	    }
+	  }
+	  entities.forEach((entity) => {
+	    if (entity) {
+	      entity.setAttribute("visible", visible);
+	    }
+	  });
+	}
+	list.forEach((item, index) => {
+	  const button = document.querySelector("#" + item);
+	  const entities = document.querySelectorAll("." + item + "-entity");
+	  if (button && entities.length > 0) {
+	    setVisible(button, entities, visibles[index]);
+	    button.addEventListener('click', () => {
+	      visibles[index] = !visibles[index];
+	      setVisible(button, entities, visibles[index]);
+	    });
+	  }
+	});
+      })
+    </script>
+  <link rel="stylesheet" crossorigin href="/assets/try-on-BwHg8RjB.css">
+  <link rel="stylesheet" crossorigin href="/assets/SidebarStyles-CswwjUoS.css">
+  <link rel="stylesheet" crossorigin href="/assets/ResponsiveNotifStyles-DCUQnVJ3.css">
+</head>
+<body>
+    <div class="virtual-try-on-container">
+        <header class="try-on-header">
+              <h1 class="try-on-title" onclick="navigateToHome()">Virtual Try-On</h1>
+              <a href="index.html" class="back-button-header">↩ Back to Products</a>
+          </header>
+        
+        <main class="try-on-main">
+            <div class="camera-container">
+                <!-- Loading overlay -->
+                <div class="loading-overlay" id="loadingOverlay">
+                    <div class="loading-spinner"></div>
+                    <p>Initializing AR Camera...</p>
+                </div>
+
+                <!-- Glasses selection dropdown -->
+                <div class="dropdown-container">
+                    <button class="dropdown-btn" onclick="toggleDropdown()">
+        <span id="selected-glasses">Select Glasses</span>
+                        <span class="dropdown-arrow">▾</span>
+                    </button>
+                    <div id="glassesDropdown" class="dropdown-menu">
+                        <!-- Products will be loaded here dynamically -->
+                    </div>
+                </div>
+                
+                <a-scene mindar-face embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" style="height: 100vh; width: 100vw;">
+                     <a-assets>
+                         <a-asset-item id="glassesModel1" src="SampleDropdownAssets/3dglasses.glb"></a-asset-item>
+                         <a-asset-item id="glassesModel2" src="SampleDropdownAssets/glasses1.glb"></a-asset-item>
+                         <a-asset-item id="headOccluder" src="Assets/headOccluder.glb"></a-asset-item>
+                     </a-assets>
+                     
+                     <a-camera 
+                         id="camera"
+                         position="0 0 0" 
+                         look-controls="enabled: false" 
+                         wasd-controls="enabled: false"
+                         cursor="rayOrigin: mouse">
+                     </a-camera>
+                     
+                     <!-- Head occluder for better AR effect -->
+                     <a-entity mindar-face-target="anchorIndex: 168">
+                         <a-gltf-model 
+                             mindar-face-occluder 
+                             position="0 -0.3 0.15"
+                             rotation="0 0 0" 
+                             scale="0.065 0.065 0.065" 
+                             src="#headOccluder">
+                         </a-gltf-model>
+                     </a-entity>
+                     
+                     <!-- Glasses Model 1 - 3D Glasses -->
+                     <a-entity mindar-face-target="anchorIndex: 168">
+                         <a-gltf-model 
+                             rotation="0 0 0" 
+                             position="0 0 0" 
+                             scale="0.010 0.010 0.010" 
+                             src="#glassesModel1" 
+                             class="glasses1-entity" 
+                             visible="true">
+                         </a-gltf-model>
+                     </a-entity>
+                     
+                     <!-- Glasses Model 2 - Glasses1 -->
+                     <a-entity mindar-face-target="anchorIndex: 168">
+                         <a-gltf-model 
+                             rotation="0 0 0" 
+                             position="0 0 0" 
+                             scale="0.010 0.010 0.010" 
+                             src="#glassesModel2" 
+                             class="glasses2-entity" 
+                             visible="false">
+                         </a-gltf-model>
+                     </a-entity>
+                 </a-scene>
+                 
+                 <!-- Controls Panel Removed -->
+         </div>
+         </main>
+         
+         <!-- Status message -->
+         <div class="status-message" id="statusMessage"></div>
+     </div>
+     
+     <script>
+         // Navigation function
+         function navigateToHome() {
+             window.location.href = 'index.html';
+         }
+         
+         // Glasses selection functions
+         function selectGlasses(model, name) {
+             // Update selected glasses display
+             document.getElementById('selected-glasses').textContent = name;
+             
+             // Update selected state
+             document.querySelectorAll('.dropdown-item').forEach(item => {
+                 item.classList.remove('selected');
+             });
+             document.querySelector(`[data-model="${model}"]`).classList.add('selected');
+             
+             // Hide/show glasses models
+             const glasses1Entity = document.querySelector('.glasses1-entity');
+             const glasses2Entity = document.querySelector('.glasses2-entity');
+             
+             if (model === 'glasses1') {
+                 if (glasses1Entity) glasses1Entity.setAttribute('visible', true);
+                 if (glasses2Entity) glasses2Entity.setAttribute('visible', false);
+             } else if (model === 'glasses2') {
+                 if (glasses1Entity) glasses1Entity.setAttribute('visible', false);
+                 if (glasses2Entity) glasses2Entity.setAttribute('visible', true);
+             }
+             
+             // Close dropdown
+             document.getElementById('glassesDropdown').classList.remove('show');
+             document.querySelector('.dropdown-btn')?.classList.remove('open');
+         }
+         
+         // Toggle dropdown function
+         function toggleDropdown() {
+             const dropdown = document.getElementById('glassesDropdown');
+             const btn = document.querySelector('.dropdown-btn');
+             dropdown.classList.toggle('show');
+             if (btn) btn.classList.toggle('open', dropdown.classList.contains('show'));
+         }
+         
+         // Close dropdown when clicking outside
+         window.addEventListener('click', function(event) {
+             const container = document.querySelector('.dropdown-container');
+             const dropdown = document.getElementById('glassesDropdown');
+             // Only close if the click is outside the entire container (button + menu)
+             if (container && !container.contains(event.target)) {
+                 if (dropdown && dropdown.classList.contains('show')) {
+                     dropdown.classList.remove('show');
+                     document.querySelector('.dropdown-btn')?.classList.remove('open');
+                 }
+             }
+         });
+         
+         // Capture photo function
+         function capturePhoto() {
+             // Implementation for photo capture
+             console.log('Capturing photo...');
+         }
+         
+         // Switch camera function
+         function switchCamera() {
+             // Implementation for camera switching
+             console.log('Switching camera...');
+         }
+         
+         // Status message function
+         function showStatus(message, type = 'info') {
+             const statusElement = document.getElementById('statusMessage');
+             statusElement.textContent = message;
+             statusElement.className = `status-message ${type}`;
+             statusElement.style.display = 'block';
+             
+             setTimeout(() => {
+                 statusElement.style.display = 'none';
+             }, 3000);
+         }
+         
+         // Hide loading overlay when AR is ready
+         document.addEventListener('DOMContentLoaded', function() {
+             const loadingOverlay = document.getElementById('loadingOverlay');
+             
+             // Simulate AR initialization
+             setTimeout(() => {
+                 loadingOverlay.style.display = 'none';
+             }, 2000);
+         });
+
+         // Normalize external URLs from common providers to direct links
+         function normalizeExternalUrl(url) {
+             if (typeof url !== 'string') return url;
+             let u = url.trim();
+             const ghMatch = u.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/(.+)$/);
+             if (ghMatch) {
+                 const [, owner, repo, path] = ghMatch;
+                 return `https://raw.githubusercontent.com/${owner}/${repo}/${path}`;
+             }
+             if (u.includes('dropbox.com')) {
+                 try {
+                     const dbUrl = new URL(u);
+                     dbUrl.searchParams.set('dl', '1');
+                     return dbUrl.toString();
+                 } catch (e) {}
+             }
+             const gdFileMatch = u.match(/^https?:\/\/drive\.google\.com\/file\/d\/([^\/]+)\/view.*$/);
+             if (gdFileMatch) {
+                 const id = gdFileMatch[1];
+                 return `https://drive.google.com/uc?export=download&id=${id}`;
+             }
+             const gdUcMatch = u.match(/^https?:\/\/drive\.google\.com\/uc\?id=([^&]+).*$/);
+             if (gdUcMatch) {
+                 const id = gdUcMatch[1];
+                 return `https://drive.google.com/uc?export=download&id=${id}`;
+             }
+             return u;
+         }
+
+         // ===== Dynamic Dropdown: Load products and update on changes =====
+         async function loadProductModelById(productId) {
+             try {
+                 let product = null;
+                 if (typeof getProductById === 'function') {
+                     product = await getProductById(productId);
+                 } else {
+                     const snapshot = await firebase.database().ref('products').child(productId).once('value');
+                     product = snapshot.val();
+                     if (product) product.id = productId;
+                 }
+                 if (!product || !product.glbFiles || product.glbFiles.length === 0) {
+                     showStatus('No 3D model found for product', 'error');
+                     return;
+                 }
+                 const file = product.glbFiles[0];
+                 const glbUrl = normalizeExternalUrl(file.url || file.src || '');
+                 if (!glbUrl) {
+                     showStatus('Invalid GLB URL', 'error');
+                     return;
+                 }
+                 const glasses1Entity = document.querySelector('.glasses1-entity');
+                 const glasses2Entity = document.querySelector('.glasses2-entity');
+                 if (glasses1Entity) {
+                     glasses1Entity.setAttribute('src', glbUrl);
+                     glasses1Entity.setAttribute('visible', true);
+                 }
+                 if (glasses2Entity) {
+                     glasses2Entity.setAttribute('visible', false);
+                 }
+                 // Update dropdown label to reflect the loaded product
+                 const name = (product && product.title) ? product.title : 'Selected Product';
+                 const labelEl = document.getElementById('selected-glasses');
+                 if (labelEl) labelEl.textContent = name;
+                 showStatus('Model loaded', 'success');
+             } catch (e) {
+                 console.error(e);
+                 showStatus('Failed to load model', 'error');
+             }
+         }
+
+         function renderDropdownProducts(products) {
+             const dropdown = document.getElementById('glassesDropdown');
+             if (!dropdown) return;
+             dropdown.innerHTML = '';
+             const visibleProducts = (products || []).filter(p => p && p.visible !== false);
+             if (visibleProducts.length === 0) {
+                 dropdown.innerHTML = '<div class="dropdown-item" style="opacity:0.7;">No products available</div>';
+                 return;
+             }
+             visibleProducts.forEach(product => {
+                 const btn = document.createElement('button');
+                 btn.className = 'dropdown-item';
+                 btn.textContent = product.title || 'Untitled';
+                 btn.dataset.productId = product.id;
+                 btn.onclick = async () => {
+                     const name = product.title || 'Selected Product';
+                     document.getElementById('selected-glasses').textContent = name;
+                     await loadProductModelById(product.id);
+                     document.getElementById('glassesDropdown').classList.remove('show');
+                     document.querySelector('.dropdown-btn')?.classList.remove('open');
+                 };
+                 dropdown.appendChild(btn);
+             });
+         }
+
+         async function loadProductsToDropdown() {
+             try {
+                 let products = [];
+                 if (typeof getAllProducts === 'function') {
+                     products = await getAllProducts();
+                 } else {
+                     const snapshot = await firebase.database().ref('products').once('value');
+                     snapshot.forEach(child => {
+                         const p = child.val();
+                         p.id = child.key;
+                         products.push(p);
+                     });
+                 }
+                 renderDropdownProducts(products);
+                 // Live updates
+                 if (typeof listenForProductChanges === 'function') {
+                     listenForProductChanges((list) => renderDropdownProducts(list));
+                 } else {
+                     firebase.database().ref('products').on('value', snap => {
+                         const list = [];
+                         snap.forEach(child => {
+                             const p = child.val();
+                             p.id = child.key;
+                             list.push(p);
+                         });
+                         renderDropdownProducts(list);
+                     });
+                 }
+             } catch (e) {
+                 console.error('Failed to load products for dropdown:', e);
+             }
+         }
+
+         // Initialize dropdown products after DOM loads
+         document.addEventListener('DOMContentLoaded', function() {
+             loadProductsToDropdown();
+         });
+
+         // Auto-load GLB model based on productId from URL
+         document.addEventListener('DOMContentLoaded', async function() {
+             const params = new URLSearchParams(window.location.search);
+             const productId = params.get('productId');
+             if (!productId) return; // No product specified
+             try {
+                 showStatus('Loading 3D model...', 'info');
+                 await loadProductModelById(productId);
+             } catch (e) {
+                 console.error(e);
+                 showStatus('Failed to load model', 'error');
+             }
+         });
+     </script>
+     <!-- Firebase SDK v8 (compat globals) -->
+     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+     <script src="Javascript Styles/FirebaseConfig.js"></script>
+     <script src="Javascript Styles/AuthHandlers.js"></script>
+     <script src="Javascript Styles/ContentEditingFunc.js"></script>
+     <script src="Javascript Styles/EventListenerFunc.js"></script>
+     <script src="Javascript Styles/FrameCategoryFunc.js"></script>
+     <script src="Javascript Styles/FrameEditingModal.js"></script>
+             
+     <!-- Set try-on header title based on productName from URL -->
+      <script>
+      document.addEventListener('DOMContentLoaded', function() {
+      const params = new URLSearchParams(window.location.search);
+      const productName = params.get('productName');
+      if (productName) {
+      const headerTitle = document.querySelector('.try-on-title');
+      if (headerTitle) headerTitle.textContent = productName;
+      }
+      });
+      </script>
+ </body>
+ </html>

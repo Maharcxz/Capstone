@@ -1,0 +1,486 @@
+/* Header Styles */
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.logo {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.logo h1 {
+    font-size: 48px;
+    font-weight: normal;
+    letter-spacing: 8px;
+    margin-bottom: 5px;
+}
+
+.logo p {
+    font-size: 14px;
+    letter-spacing: 3px;
+    font-weight: normal;
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: 
+        linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(84, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0.6) 100%),
+        radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+    padding: 16px 50px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    margin: 0 -20px;
+    position: relative;
+    overflow: visible;
+    z-index: 100; /* Lower navbar stacking so modals overlay correctly */
+}
+
+.nav::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+    pointer-events: none;
+}
+
+.nav-left {
+    display: flex;
+    gap: 30px;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-link .nav-icon {
+    font-size: 1rem;
+    color: white;
+    font-weight: normal;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    opacity: 0.9;
+}
+
+.nav-link:hover .nav-icon {
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.nav-link.active {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-link:hover::before {
+    left: 100%;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.login-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.login-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    transition: left 0.6s ease;
+}
+
+.login-btn:hover {
+    background: rgba(255, 255, 255, 0.95);
+    color: #540000;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+        0 12px 32px rgba(255, 255, 255, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.login-btn:hover::before {
+    left: 100%;
+}
+
+.login-btn:active {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 
+        0 6px 20px rgba(255, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.1s ease;
+}
+
+.nav-icons {
+    display: flex;
+    gap: 15px;
+    font-size: 18px;
+}
+
+/* Responsive Navigation — phones */
+@media (max-width: 768px) {
+    .logo h1 {
+        font-size: 28px;
+        letter-spacing: 6px;
+    }
+    .logo p {
+        font-size: 12px;
+        letter-spacing: 2px;
+    }
+
+    .nav {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 14px;
+        margin: 0;
+    }
+
+    .nav-left {
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+        align-items: stretch; /* make links fill width */
+    }
+
+    .nav-link {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 12px;
+        font-size: 15px;
+        text-align: center; /* center text inside link */
+    }
+
+    .nav-link span {
+        width: 100%;
+        text-align: center;
+    }
+
+    .nav-right {
+        width: 100%;
+        justify-content: center; /* keep right controls centered below links */
+    }
+
+    .login-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .nav-icons {
+        gap: 10px;
+        font-size: 16px;
+    }
+}
+
+/* Extra small phones */
+@media (max-width: 420px) {
+    .nav {
+        padding: 10px 12px;
+        gap: 10px;
+    }
+    .nav-link {
+        font-size: 14px;
+        padding: 9px 10px;
+    }
+    .login-btn {
+        padding: 10px;
+        font-size: 13px;
+    }
+}
+
+/* Disable aggressive hover effects on touch devices to avoid sticky states */
+@media (hover: none) and (pointer: coarse) {
+    .nav-link:hover,
+    .login-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+        transform: none;
+        box-shadow: none;
+        border-color: rgba(255, 255, 255, 0.18);
+    }
+    .nav-link:active,
+    .login-btn:active {
+        background: rgba(255, 255, 255, 0.18);
+        transform: scale(0.99);
+        box-shadow: none;
+    }
+}
+
+/* Admin Navigation Area Styles */
+.admin-nav-area {
+    background: 
+        linear-gradient(135deg, rgba(84, 0, 0, 0.4) 0%, rgba(139, 0, 0, 0.3) 50%, rgba(84, 0, 0, 0.4) 100%),
+        radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.05) 0%, transparent 60%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    margin: 24px 0;
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-nav-area::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.02), transparent);
+    pointer-events: none;
+}
+
+.admin-nav-container {
+    padding: 20px 30px;
+}
+
+.admin-nav-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 15px;
+}
+
+.admin-nav-title .admin-icon {
+    font-size: 24px;
+}
+
+.admin-nav-title h3 {
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+.admin-nav {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.admin-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    text-decoration: none;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.admin-nav-link:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.admin-nav-link:hover::before {
+    left: 100%;
+}
+
+.admin-nav-link.logout-link {
+    background: rgba(220, 53, 69, 0.2);
+    border-color: rgba(220, 53, 69, 0.4);
+    color: #ff6b6b;
+}
+
+.admin-nav-link.logout-link:hover {
+    background: rgba(220, 53, 69, 0.4);
+    border-color: rgba(220, 53, 69, 0.7);
+    color: #ff5252;
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(220, 53, 69, 0.4);
+}
+
+.admin-nav-link.active {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.admin-nav-link .nav-icon {
+    font-size: 16px;
+}
+
+/* Hide admin nav area by default */
+body:not(.admin-mode) .admin-nav-area {
+    display: none !important;
+}
+
+/* Responsive Nav Hover Fixes and Focus Styling */
+.nav-link:focus,
+.login-btn:focus {
+    outline: none;
+}
+
+.nav-link:focus-visible,
+.login-btn:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.25);
+    outline-offset: 2px;
+}
+
+/* Softer interactions on mobile-sized viewports */
+@media (max-width: 768px) {
+    .nav-link:hover {
+        background: rgba(255, 255, 255, 0.12);
+        transform: none;
+        box-shadow: none;
+        border-color: rgba(255, 255, 255, 0.18);
+    }
+    .nav-link::before { display: none; }
+
+    .login-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        transform: none;
+        box-shadow: none;
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    .login-btn::before { display: none; }
+}
+
+/* Disable hover-only effects on touch devices */
+@media (hover: none) {
+    .nav-link:hover {
+        background: rgba(255, 255, 255, 0.12);
+        transform: none;
+        box-shadow: none;
+        border-color: rgba(255, 255, 255, 0.18);
+    }
+    .login-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        transform: none;
+        box-shadow: none;
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    .nav-link::before,
+    .login-btn::before {
+        display: none;
+    }
+}
+/* Mobile centering and left padding for nav */
+@media (max-width: 768px) {
+    .nav {
+        max-width: 420px;
+        margin: 0 auto;
+        padding: 0 12px; /* add side padding so hover bg isn’t flush */
+    }
+    .nav-left,
+    .nav-right {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .nav-link,
+    .login-btn {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding-left: 16px;
+        padding-right: 16px;
+        box-sizing: border-box; /* ensure padding doesn’t overflow width */
+    }
+    .nav-link { margin: 8px 0; }
+}

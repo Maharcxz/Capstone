@@ -1,0 +1,39 @@
+[
+build]
+  command = "npm run build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/index"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/about"
+  to = "/about.html"
+  status = 200
+
+[[redirects]]
+  from = "/contact"
+  to = "/contact.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin-dashboard"
+  to = "/admin-dashboard.html"
+  status = 200
+
+[[redirects]]
+  from = "/preorders"
+  to = "/preorders.html"
+  status = 200
+
+[[redirects]]
+  from = "/preorder"
+  to = "/preorder.html"
+  status = 200
+
+[[redirects]]
+  from = "/preorder-confirmation"
+  to = "/preorder-confirmation.html"
+  status = 200

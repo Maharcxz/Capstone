@@ -1,0 +1,1779 @@
+/* Admin Styles */
+.auth-section {
+    position: relative;
+    overflow: visible !important;
+    z-index: 2500;
+}
+
+.admin-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 8px;
+    margin-top: 8px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    display: none;
+    z-index: 4000;
+    min-width: 200px;
+    animation: dropdownSlide 0.2s ease-out;
+}
+
+@keyframes dropdownSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes dropdownSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.admin-dropdown.active {
+    display: block;
+}
+
+.dropdown-item {
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(247, 147, 30, 0.05) 100%);
+    border: 1px solid rgba(255, 107, 53, 0.2);
+    color: rgba(0, 0, 0, 0.8);
+    padding: 12px 16px;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 2px 0;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.1);
+}
+
+.dropdown-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(84, 0, 0, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.dropdown-item:hover {
+    background: linear-gradient(135deg, rgba(84, 0, 0, 0.2) 0%, rgba(109, 0, 0, 0.15) 100%);
+    color: #000000;
+    transform: translateX(3px) translateY(-1px);
+    box-shadow: 0 6px 20px rgba(84, 0, 0, 0.25);
+    border-color: rgba(84, 0, 0, 0.4);
+}
+
+.dropdown-item:hover::before {
+    left: 100%;
+}
+
+.dropdown-item:active {
+    transform: translateX(1px) scale(0.98);
+}
+
+.dropdown-icon {
+    font-size: 18px;
+    width: 20px;
+    text-align: center;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    transition: all 0.2s ease;
+    color: rgba(0, 0, 0, 0.7);
+}
+
+.dropdown-item:hover .dropdown-icon {
+    transform: scale(1.1);
+    color: rgba(0, 0, 0, 0.9);
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.15), transparent);
+    margin: 8px 12px;
+    position: relative;
+}
+
+.dropdown-divider::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.05), transparent);
+}
+
+.dropdown-item.logout-item {
+    color: #fff;
+    border: 2px solid #dc3545;
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    font-weight: 600;
+    margin-top: 8px;
+    box-shadow: 0 4px 16px rgba(220, 53, 69, 0.3);
+    transform: translateZ(0);
+    position: relative;
+    overflow: hidden;
+}
+
+.dropdown-item.logout-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.dropdown-item.logout-item:hover::before {
+    left: 100%;
+}
+
+.dropdown-item.logout-item:hover {
+    background: linear-gradient(135deg, #e74c3c, #dc3545);
+    border-color: #e74c3c;
+    box-shadow: 0 8px 24px rgba(220, 53, 69, 0.4), 
+                0 4px 12px rgba(220, 53, 69, 0.3);
+    transform: translateY(-2px) scale(1.02);
+    color: #fff;
+}
+
+.dropdown-item.logout-item .dropdown-icon {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+.dropdown-item.logout-item:hover .dropdown-icon {
+    transform: scale(1.15) rotate(5deg);
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4));
+    color: #fff;
+}
+
+.admin-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    justify-content: center;
+}
+
+/* Edit button - Teal theme matching Add Category */
+.admin-btn {
+    background: linear-gradient(135deg, #0d4f4f 0%, #0d6d6d 100%);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 15px rgba(13, 79, 79, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.admin-btn:hover {
+    background: linear-gradient(135deg, #0d6d6d 0%, #0d8a8a 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(13, 79, 79, 0.4);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.admin-btn:hover::before {
+    left: 100%;
+}
+
+.admin-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(13, 79, 79, 0.3);
+}
+
+/* Delete button - Dark red theme matching Add Product */
+.admin-btn.delete-btn {
+    background: linear-gradient(135deg, #540000 0%, #6d0000 100%);
+    box-shadow: 0 4px 15px rgba(84, 0, 0, 0.3);
+}
+
+.admin-btn.delete-btn:hover {
+    background: linear-gradient(135deg, #6d0000 0%, #8a0000 100%);
+    box-shadow: 0 6px 20px rgba(84, 0, 0, 0.4);
+}
+
+/* Hide/Visible button - Complementary orange theme */
+.admin-btn.visible-btn {
+    background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
+    box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
+}
+
+.admin-btn.visible-btn:hover {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4);
+}
+
+.admin-btn.pending {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.admin-btn.pending:hover {
+    background: linear-gradient(135deg, #48c774 0%, #40e0d0 100%);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+/* Order Details Modal Styles */
+.modal {
+    display: none;
+    position: fixed; /* Keep modal fixed above all content */
+    z-index: 9999;   /* Ensure modal stays on top of nav and panels */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100vh;   /* Cover entire viewport */
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    position: relative;
+    background: linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%);
+    margin: 5% auto;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    background: #540000;
+    color: white;
+    padding: 20px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    line-height: 1;
+    z-index: 1000;
+}
+
+.close:hover {
+    color: white;
+}
+
+.modal-body {
+    padding: 30px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.order-detail-section {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.order-detail-section:last-child {
+    margin-bottom: 0;
+}
+
+.order-detail-section h3 {
+    color: #d4af37;
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 15px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    color: rgba(255, 255, 255, 0.8);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    min-width: 120px;
+}
+
+.detail-row span:last-child {
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    text-align: right;
+    flex: 1;
+    margin-left: 20px;
+}
+
+.modal-footer {
+    padding: 20px 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: right;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 0 0 12px 12px;
+}
+
+/* Responsive design for modal */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+    
+    .modal-header {
+        padding: 15px;
+    }
+    
+    .modal-header h2 {
+        font-size: 20px;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .detail-row span:last-child {
+        text-align: left;
+        margin-left: 0;
+    }
+}
+
+.edit-content-btn {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    margin-top: 30px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+    text-transform: none;
+    letter-spacing: normal;
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 120px;
+    min-height: 44px;
+}
+
+.edit-content-btn svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+.edit-content-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.edit-content-btn:hover::before {
+    left: 100%;
+}
+
+.edit-content-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
+}
+
+.edit-content-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+}
+
+.search-frame-section {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+}
+
+.search-container {
+    flex: 1;
+}
+
+.search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    color: white;
+    width: 18px;
+    height: 18px;
+    stroke: white;
+}
+
+.search-input {
+    width: 100%;
+    padding: 15px 50px;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.search-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: white;
+}
+
+.search-hint {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    margin-top: 5px;
+    margin-left: 15px;
+}
+
+/* Pre-Orders Admin Page */
+.preorders-admin-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.preorders-title {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 600;
+    letter-spacing: 2px;
+    margin-bottom: 2rem;
+    color: white;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.preorders-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+    position: relative;
+    z-index: 1;
+}
+
+.stat-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 2.5rem;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    backdrop-filter: blur(20px);
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 
+                0 4px 16px rgba(0, 0, 0, 0.3),
+                0 2px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+    position: relative;
+    z-index: 1;
+}
+
+.stat-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 
+                0 8px 24px rgba(0, 0, 0, 0.4),
+                0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.stat-card h3 {
+    color: white;
+    font-size: 16px;
+    margin-bottom: 15px;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+}
+
+.stat-number {
+    color: white;
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+}
+
+.preorders-list {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 30px;
+}
+
+.preorders-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.preorders-list h3 {
+    color: white;
+    font-size: 20px;
+    margin: 0;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+}
+
+.title-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.filter-dropdown {
+    display: flex;
+    align-items: center;
+}
+
+.order-filter-select {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    color: white;
+    padding: 10px 15px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.order-filter-select:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.order-filter-select option {
+    background: #2c1810;
+    color: white;
+    padding: 10px;
+}
+
+.preorder-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.preorder-info h4 {
+    color: white;
+    font-size: 16px;
+    margin-bottom: 5px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+
+.preorder-info p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    margin: 2px 0;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+}
+
+.preorder-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    color: white;
+    padding: 8px 16px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.delete-btn:active {
+    transform: translateY(0);
+}
+
+/* Content Edit Modal Button Styles */
+.save-edit-btn {
+    background: linear-gradient(135deg, #540000 0%, #8B0000 50%, #540000 100%);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.9rem 2rem;
+    border-radius: 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    flex: 1;
+    max-width: 250px;
+    height: 48px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    box-shadow: 
+        0 6px 24px rgba(84, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.3px;
+    min-width: 140px;
+}
+
+.save-edit-btn:hover {
+    background: linear-gradient(135deg, #6B0000 0%, #A00000 50%, #6B0000 100%);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+        0 16px 40px rgba(84, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.save-edit-btn:active {
+    transform: translateY(-2px) scale(0.98);
+}
+
+.cancel-edit-btn {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    padding: 0.9rem 2rem;
+    border-radius: 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.3px;
+    min-width: 140px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.cancel-edit-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.edit-modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* Edit Content Modal Styles */
+.edit-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.edit-modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.edit-modal {
+    background: linear-gradient(135deg, #540000 0%, #3d0000 100%);
+    border-radius: 20px;
+    padding: 0;
+    width: 95%;
+    max-width: 800px;
+    max-height: 90vh;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: scale(0.8) translateY(50px);
+}
+
+/* Contact Edit Modal Styles */
+.contact-edit-modal {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 0;
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    transform: scale(0.8) translateY(50px);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    overflow: hidden;
+}
+
+.edit-modal-overlay.active .contact-edit-modal {
+    transform: scale(1) translateY(0);
+}
+
+.contact-edit-content {
+    padding: 15px;
+    overflow-y: auto;
+    max-height: calc(85vh - 60px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.contact-edit-content .contact-form-grid {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.contact-edit-content .edit-modal-actions {
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+.contact-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.form-section {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+}
+
+.form-section.full-width {
+    grid-column: 1 / -1;
+    padding: 5px 8px;
+    margin-top: 3px;
+    margin-bottom: 0px;
+}
+
+.form-section.full-width textarea {
+    min-height: 28px;
+    max-height: 50px;
+    resize: vertical;
+}
+
+.form-section.full-width .form-group {
+    margin-bottom: 5px;
+}
+
+.form-section.full-width h4 {
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.form-section h4 {
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.form-section h4 i {
+    color: #ff6b6b;
+    font-size: 16px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-sizing: border-box;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: rgba(84, 0, 0, 0.6);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 3px rgba(84, 0, 0, 0.1), 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.edit-modal-header {
+    background: linear-gradient(135deg, #6d0000 0%, #540000 100%);
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 15px 15px 0 0;
+}
+
+.edit-modal-header h3 {
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.edit-modal-header h3 i {
+    color: #ff6b6b;
+    font-size: 20px;
+}
+
+.close-edit-modal {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.close-edit-modal:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: rotate(90deg);
+}
+
+.edit-modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 5px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.save-edit-btn i,
+.cancel-edit-btn i {
+    margin-right: 8px;
+    font-size: 14px;
+}
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .contact-form-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .contact-edit-modal {
+        width: 98%;
+        margin: 10px;
+    }
+    
+    .contact-edit-content {
+        padding: 20px;
+    }
+    
+    .edit-modal-header {
+        padding: 20px;
+    }
+    
+    .edit-modal-header h3 {
+        font-size: 18px;
+    }
+    
+
+ }
+
+/* About Edit Modal Styles */
+.about-edit-modal {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 0;
+    width: 95%;
+    max-width: 800px;
+    max-height: 90vh;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    transform: scale(0.8) translateY(50px);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    overflow: hidden;
+}
+
+.edit-modal-overlay.active .about-edit-modal {
+    transform: scale(1) translateY(0);
+}
+
+.about-edit-content {
+    padding: 30px;
+    overflow-y: auto;
+    max-height: calc(90vh - 80px);
+}
+
+.about-form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+.about-form-grid .form-section {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 15px;
+    padding: 25px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+}
+
+.about-form-grid .form-section h4 {
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.about-form-grid .form-section h4 i {
+    color: #ff6b6b;
+    font-size: 16px;
+}
+
+.about-form-grid .form-group {
+    margin-bottom: 0;
+}
+
+.about-form-grid .form-group label {
+    display: block;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.about-form-grid .form-group textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.about-form-grid .form-group textarea:focus {
+    outline: none;
+    border-color: rgba(84, 0, 0, 0.6);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 3px rgba(84, 0, 0, 0.1), 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.about-form-grid .form-group textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive Design for About Modal */
+@media (max-width: 768px) {
+    .about-edit-modal {
+        width: 98%;
+        margin: 10px;
+    }
+    
+    .about-edit-content {
+        padding: 20px;
+    }
+}
+
+.edit-modal {
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    overflow: hidden;
+}
+
+.edit-modal-overlay.active .edit-modal {
+    transform: scale(1) translateY(0);
+}
+
+.edit-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px 40px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+}
+
+.edit-modal-header h3 {
+    color: #FFD700;
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.close-edit-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+.close-edit-modal:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #FFD700;
+    transform: rotate(90deg);
+}
+
+.edit-modal-content {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+#editTextarea {
+    width: 100%;
+    min-height: 400px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 25px;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    resize: vertical;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+#editTextarea:focus {
+    outline: none;
+    border-color: #FFD700;
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+#editTextarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+}
+
+/* Main Content Edit Modal Styles */
+.main-content-edit-modal {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 0;
+    width: 90%;
+    max-width: 700px;
+    max-height: 85vh;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    transform: scale(0.8) translateY(50px);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    overflow: hidden;
+}
+
+.edit-modal-overlay.active .main-content-edit-modal {
+    transform: scale(1) translateY(0);
+}
+
+.main-content-edit-content {
+    padding: 30px;
+    overflow-y: auto;
+    max-height: calc(85vh - 80px);
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.instruction-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.instruction-card i {
+    color: #FFD700;
+    font-size: 24px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.instruction-card h4 {
+    color: #FFD700;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    letter-spacing: 0.5px;
+}
+
+.instruction-card p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.editor-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.editor-section label {
+    color: #FFD700;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.main-content-edit-content #editTextarea {
+    width: 100%;
+    min-height: 300px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 20px;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    box-sizing: border-box;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.main-content-edit-content #editTextarea:focus {
+    outline: none;
+    border-color: rgba(84, 0, 0, 0.6);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 3px rgba(84, 0, 0, 0.1), 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.main-content-edit-content #editTextarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+}
+
+/* Responsive styles for main content modal */
+@media (max-width: 768px) {
+    .main-content-edit-modal {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .main-content-edit-content {
+        padding: 20px;
+        gap: 20px;
+    }
+    
+    .instruction-card {
+        padding: 15px;
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .main-content-edit-content #editTextarea {
+        min-height: 250px;
+        padding: 15px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content-edit-modal {
+        width: 98%;
+        margin: 10px;
+    }
+    
+    .main-content-edit-content {
+        padding: 15px;
+    }
+    
+    .instruction-card {
+        padding: 12px;
+    }
+    
+    .main-content-edit-content #editTextarea {
+        min-height: 200px;
+        padding: 12px;
+    }
+}
+
+/* Responsive button styles */
+@media (max-width: 768px) {
+    .edit-modal {
+        width: 95%;
+        max-height: 90vh;
+        border-radius: 15px;
+    }
+    
+    .edit-modal-header {
+        padding: 20px;
+    }
+    
+    .edit-modal-header h3 {
+        font-size: 18px;
+    }
+    
+    .edit-modal-content {
+        padding: 20px;
+    }
+    
+    #editTextarea {
+        min-height: 250px;
+        padding: 15px;
+        font-size: 14px;
+    }
+    
+    .save-edit-btn,
+    .cancel-edit-btn {
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+    
+    .edit-modal-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .edit-modal {
+        width: 98%;
+        margin: 10px;
+    }
+    
+    .edit-modal-header {
+        padding: 15px;
+    }
+    
+    .edit-modal-content {
+        padding: 15px;
+    }
+    
+    #editTextarea {
+        min-height: 200px;
+    }
+    @media (max-width: 480px) {
+        .search-frame-section {
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 12px;
+            border-radius: 12px;
+            border-width: 1px;
+        }
+        .search-container { flex: 1; }
+        .search-input-wrapper { align-items: center; }
+        .search-icon {
+            left: 12px;
+            width: 16px;
+            height: 16px;
+        }
+        .search-input {
+            padding: 10px 40px;
+            border-radius: 18px;
+            font-size: 14px;
+            border-width: 1px;
+        }
+        .search-hint {
+            font-size: 11px;
+            margin-left: 12px;
+        }
+    }
+    
+    @media (max-width: 360px) {
+        .search-frame-section {
+            gap: 10px;
+            padding: 10px;
+        }
+        .search-icon {
+            left: 10px;
+            width: 14px;
+            height: 14px;
+        }
+        .search-input {
+            padding: 9px 36px;
+            border-radius: 16px;
+            font-size: 13px;
+        }
+        .search-hint { font-size: 10px; }
+    }
+    .search-input {
+        padding: 15px 50px;
+        background: transparent;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 25px;
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        font-size: 16px;
+        font-weight: 400;
+    }
+    
+    .search-input::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: white;
+    }
+    
+    .search-hint {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 12px;
+        margin-top: 5px;
+        margin-left: 15px;
+    }
+    
+    /* Pre-Orders Admin Page */
+    .preorders-admin-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem 2rem;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .preorders-title {
+        font-size: clamp(28px, 4vw, 42px);
+        font-weight: 600;
+        letter-spacing: 2px;
+        margin-bottom: 2rem;
+        color: white;
+        text-align: center;
+        font-family: 'Inter', sans-serif;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .preorders-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .stat-card {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 2.5rem;
+        text-align: center;
+        font-family: 'Inter', sans-serif;
+        backdrop-filter: blur(20px);
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 
+                    0 4px 16px rgba(0, 0, 0, 0.3),
+                    0 2px 8px rgba(0, 0, 0, 0.2);
+        transform: translateY(-2px);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 
+                    0 8px 24px rgba(0, 0, 0, 0.4),
+                    0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .stat-card h3 {
+        color: white;
+        font-size: 16px;
+        margin-bottom: 15px;
+        font-weight: 500;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .stat-number {
+        color: white;
+        font-size: 36px;
+        font-weight: 700;
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .preorders-list {
+        background: rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        padding: 30px;
+    }
+    
+    .preorders-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .preorders-list h3 {
+        color: white;
+        font-size: 20px;
+        margin: 0;
+        font-weight: 500;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .title-section {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .filter-dropdown {
+        display: flex;
+        align-items: center;
+    }
+    
+    .order-filter-select {
+        background: rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        color: white;
+        padding: 10px 15px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .order-filter-select:focus {
+        outline: none;
+        border-color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .order-filter-select option {
+        background: #2c1810;
+        color: white;
+        padding: 10px;
+    }
+    
+    .preorder-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 15px;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .preorder-info h4 {
+        color: white;
+        font-size: 16px;
+        margin-bottom: 5px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+    }
+    
+    .preorder-info p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 14px;
+        margin: 2px 0;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 400;
+    }
+    
+    .preorder-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .delete-btn {
+        background-color: #dc3545;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 6px;
+        color: white;
+        padding: 8px 16px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .delete-btn:hover {
+        background-color: #c82333;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+    }
+    
+    .delete-btn:active {
+        transform: translateY(0);
+    }
+    
+    /* Content Edit Modal Button Styles */
+    .save-edit-btn {
+        background: linear-gradient(135deg, #540000 0%, #8B0000 50%, #540000 100%);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.9rem 2rem;
+        border-radius: 14px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        flex: 1;
+        max-width: 250px;
+        height: 48px;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        box-shadow: 
+            0 6px 24px rgba(84, 0, 0, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        letter-spacing: 0.3px;
+        min-width: 140px;
+    }
+    
+    .save-edit-btn:hover {
+        background: linear-gradient(135deg, #6B0000 0%, #A00000 50%, #6B0000 100%);
+    }
+}

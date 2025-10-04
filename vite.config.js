@@ -1,6 +1,50 @@
 import { defineConfig } from 'vite';
+import fs from 'fs';
+import path from 'path';
+
+// Simple utility to copy directories recursively (used during build)
+function copyDir(srcDir, destDir) {
+  if (!fs.existsSync(srcDir)) return;
+  fs.mkdirSync(destDir, { recursive: true });
+  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const src = path.join(srcDir, entry.name);
+    const dest = path.join(destDir, entry.name);
+    if (entry.isDirectory()) {
+      copyDir(src, dest);
+    } else if (entry.isFile()) {
+      fs.copyFileSync(src, dest);
+    }
+  }
+}
 
 export default defineConfig({
+  plugins: [
+    {
+      name: 'copy-static-directories',
+      apply: 'build',
+      closeBundle() {
+        const projectRoot = process.cwd();
+        const outDir = path.resolve(projectRoot, 'dist');
+        const staticDirs = [
+          'Javascript Styles',
+          'CSS Styles'
+        ];
+        staticDirs.forEach((dir) => {
+          const src = path.resolve(projectRoot, dir);
+          const dest = path.resolve(outDir, dir);
+          try {
+            copyDir(src, dest);
+            // eslint-disable-next-line no-console
+            console.log(`[copy-static] Copied '${dir}' to dist`);
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.warn(`[copy-static] Skipped '${dir}':`, e && e.message ? e.message : e);
+          }
+        });
+      }
+    }
+  ],
   // Temporarily remove legacy plugin to fix ES module loading
   // plugins: [
   //   legacy({

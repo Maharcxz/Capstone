@@ -1,0 +1,515 @@
+/* Product Grid */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    padding: 0;
+}
+
+.product-card {
+    background-color: white;
+    border: 3px solid white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, .5);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.product-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(0, 0, 0, 0.15);
+    border-color: #f8f9fa;
+}
+
+.product-card:hover::before {
+    left: 100%;
+}
+
+.product-image {
+    background-color: #000000;
+    height: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.product-card:hover .product-image {
+    transform: scale(1.05);
+    border-radius: 6px;
+}
+
+.image-placeholder {
+    font-size: 40px;
+    color: #666;
+    opacity: 0.7;
+}
+
+.product-info {
+    padding: 15px;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.product-title-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    margin-bottom: 15px;
+    gap: 10px;
+}
+
+.product-title {
+    font-size: 16px;
+    font-weight: normal;
+    margin: 0;
+    color: #000;
+    transition: color 0.3s ease;
+    flex: 1;
+    text-align: left;
+}
+
+.price-stock-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.product-price {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+    color: #000;
+    transition: color 0.3s ease;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.product-stock {
+    font-size: 12px;
+    font-weight: 600;
+    color: #4CAF50;
+    margin: 0;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.product-stock.out-of-stock {
+    color: #ff6b6b;
+}
+
+.product-stock.low-stock {
+    color: #ffa500;
+}
+
+.product-card:hover .product-title {
+    color: #540000;
+}
+
+.product-card:hover .product-price {
+    color: #6d0000;
+}
+
+.product-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 5px;
+    width: 100%;
+}
+
+.virtual-try-btn {
+    flex: 1;
+    background: linear-gradient(135deg, #540000 0%, #6d0000 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 3px 8px rgba(84, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.1);
+    text-transform: none;
+    letter-spacing: 0.25px;
+    position: relative;
+    overflow: hidden;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.virtual-try-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.virtual-try-btn:hover::before {
+    left: 100%;
+}
+
+.virtual-try-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(84, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(135deg, #6d0000 0%, #8a0000 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.virtual-try-btn:active {
+    transform: translateY(0px);
+    box-shadow: 0 2px 8px rgba(84, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.virtual-try-btn:focus {
+    outline: none;
+    box-shadow: 0 4px 12px rgba(84, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(84, 0, 0, 0.2);
+}
+
+.virtual-try-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(84, 0, 0, 0.3);
+}
+
+/* Pre-order button specific styling - now using same red color as Virtual Try-On */
+.virtual-try-btn.preorder-btn {
+    background: linear-gradient(135deg, #540000 0%, #6d0000 100%);
+    box-shadow: 0 4px 12px rgba(84, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.virtual-try-btn.preorder-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.virtual-try-btn.preorder-btn:hover::before {
+    left: 100%;
+}
+
+.virtual-try-btn.preorder-btn:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, #6d0000 0%, #8a0000 100%);
+    box-shadow: 0 6px 20px rgba(84, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.virtual-try-btn.preorder-btn:active {
+    transform: translateY(0px);
+    box-shadow: 0 2px 8px rgba(84, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.virtual-try-btn.preorder-btn:focus {
+    box-shadow: 0 4px 12px rgba(84, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(84, 0, 0, 0.2);
+}
+
+.virtual-try-btn.disabled {
+    background: #666 !important;
+    color: #999 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
+.virtual-try-btn.disabled:hover {
+    background: #666 !important;
+    transform: none !important;
+}
+
+/* Responsive Design */
+@media (min-width: 1200px) {
+    .nav {
+        padding-left: 60px;
+        padding-right: 60px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .nav {
+        padding-left: 30px;
+        padding-right: 30px;
+        margin: 0 -20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav {
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px 25px;
+        margin: 0 -20px;
+    }
+    
+    .nav-left {
+        order: 1;
+    }
+    
+    .nav-right {
+        order: 2;
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .frame-types-menu {
+        margin-left: 0;
+    }
+    
+    .sidebar {
+        width: 280px;
+        padding-top: 80px;
+    }
+    
+    .main-content.shifted {
+        margin-left: 280px;
+    }
+    
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    
+    .product-image {
+        height: 220px;
+    }
+    
+    .product-title {
+        font-size: 15px;
+    }
+    
+    .product-price {
+        font-size: 15px;
+    }
+    
+    .virtual-try-btn {
+        padding: 11px 20px;
+        font-size: 12px;
+        min-height: 40px;
+    }
+    
+    .product-buttons {
+        gap: 10px;
+    }
+    
+    .logo h1 {
+        font-size: 36px;
+        letter-spacing: 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav {
+        padding: 15px 20px;
+        margin: 0 -20px;
+        border-radius: 4px;
+    }
+    
+    .nav-left {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+        width: 100%;
+    }
+    
+    .nav-right {
+        flex-direction: row;
+        gap: 20px;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .nav-icons {
+        display: flex;
+        gap: 20px;
+    }
+    
+    .login-btn {
+        padding: 6px 15px;
+        font-size: 12px;
+    }
+    
+    .sidebar {
+        width: 100%;
+        left: -100%;
+    }
+    
+    .sidebar.active {
+        left: 0;
+    }
+    
+    .main-content.shifted {
+        margin-left: 0;
+    }
+    
+    .frame-category {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+    
+    .login-modal {
+        padding: 30px 20px;
+        margin: 0 10px;
+    }
+    
+    .glasses-svg {
+        width: 60px;
+        height: 40px;
+    }
+    
+    .modal-title {
+        font-size: 20px;
+        letter-spacing: 2px;
+        text-align: center;
+    }
+    
+    .login-input {
+        padding: 12px 45px;
+        font-size: 14px;
+    }
+    
+    .modal-login-btn {
+        padding: 12px;
+        font-size: 14px;
+    }
+    
+    .frame-type-title {
+        font-size: 20px;
+        letter-spacing: 1px;
+    }
+    
+    .preorder-modal {
+        padding: 25px 15px;
+        margin: 0 10px;
+        max-width: 90%;
+    }
+    
+    .preorder-title {
+        font-size: 20px;
+        letter-spacing: 2px;
+    }
+    
+    .frame-image-placeholder {
+        height: 100px;
+        font-size: 30px;
+    }
+    
+    .form-input, .form-select {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .preorder-btn, .edit-btn {
+        padding: 10px;
+        font-size: 13px;
+    }
+    
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .product-image {
+        height: 200px;
+    }
+    
+    .product-title {
+        font-size: 14px;
+    }
+    
+    .product-price {
+        font-size: 14px;
+    }
+    
+    .product-title-price-row {
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    
+    .virtual-try-btn {
+        padding: 10px 18px;
+        font-size: 12px;
+        border-radius: 5px;
+        min-height: 38px;
+    }
+    
+    .product-buttons {
+        gap: 10px;
+        flex-direction: column;
+    }
+    
+    .logo h1 {
+        font-size: 28px;
+        letter-spacing: 3px;
+    }
+    
+    .logo p {
+        font-size: 12px;
+        letter-spacing: 2px;
+    }
+}
+
+/* Additional responsive improvements for buttons */
+@media (max-width: 600px) {
+    .virtual-try-btn {
+        padding: 10px 12px;
+        font-size: 11px;
+        letter-spacing: 0.3px;
+    }
+    
+    .product-buttons {
+        gap: 6px;
+    }
+}
+
+@media (max-width: 360px) {
+         .virtual-try-btn {
+             padding: 6px 10px;
+             font-size: 10px;
+             border-radius: 4px;
+             min-height: 28px;
+         }
+    
+    .product-buttons {
+        gap: 5px;
+    }
+}

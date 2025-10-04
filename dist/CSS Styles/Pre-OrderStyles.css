@@ -1,0 +1,738 @@
+/* Pre-Order Modal Styles */
+.preorder-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 0.3s ease;
+}
+
+.preorder-modal-overlay.active {
+    display: flex;
+}
+
+.preorder-modal {
+    background-color: #540000;
+    border-radius: 20px;
+    padding: 30px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+}
+
+.frame-image-container {
+    margin-bottom: 20px;
+}
+
+.frame-image-placeholder {
+    background-color: #000;
+    border-radius: 10px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.preorder-title {
+    color: white;
+    font-size: 24px;
+    font-weight: normal;
+    letter-spacing: 3px;
+    margin: 0 0 30px 0;
+}
+
+.preorder-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    position: relative;
+    text-align: left;
+}
+
+.form-label {
+    display: block;
+    color: white;
+    font-size: 14px;
+    font-weight: normal;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.form-input, .form-select {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    color: white;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.form-input:focus, .form-select:focus {
+    outline: none;
+    border-color: white;
+}
+
+.form-select {
+    appearance: none;
+    cursor: pointer;
+    padding-right: 40px;
+}
+
+/* Form Message Styles */
+.form-message {
+    padding: 12px 15px;
+    border-radius: 25px;
+    margin-top: 15px;
+    font-size: 14px;
+    text-align: center;
+    display: none;
+}
+
+.form-message.info {
+    display: block;
+    background-color: rgba(0, 123, 255, 0.2);
+    color: #0056b3;
+    border: 1px solid #0056b3;
+}
+
+.form-message.success {
+    display: block;
+    background-color: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+    border: 1px solid #28a745;
+}
+
+.form-message.error {
+    display: block;
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+    border: 1px solid #dc3545;
+}
+
+.form-select option {
+    background-color: #540000;
+    color: white;
+}
+
+.select-arrow {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 12px;
+    pointer-events: none;
+    margin-top: 12px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.preorder-btn {
+    flex: 1;
+    background-color: transparent;
+    color: white;
+    border: 2px solid white;
+    padding: 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.preorder-btn:hover {
+    background-color: white;
+    color: #540000;
+}
+
+.edit-btn {
+    flex: 1;
+    background-color: transparent;
+    color: white;
+    border: 2px solid white;
+    padding: 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.edit-btn:hover {
+    background-color: white;
+    color: #540000;
+}
+
+.edit-icon {
+    font-size: 14px;
+}
+
+/* Pre-Order Page Styles */
+.preorder-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem 2rem;
+}
+
+.preorder-page-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 3rem;
+    font-weight: 600;
+    letter-spacing: 4px;
+    margin-bottom: 0.5rem;
+    color: white;
+    text-align: center;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.preorder-form-container {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 3.5rem;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.preorder-page-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.field-label {
+    color: rgba(255, 255, 255, 0.95);
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.6rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    display: block;
+}
+
+.name-inputs {
+    display: flex;
+    gap: 1rem;
+}
+
+.name-input, .full-input, .quantity-select {
+    padding: 1.1rem 1.4rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1.5px solid rgba(255, 255, 255, 0.18);
+    border-radius: 14px;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    box-sizing: border-box;
+}
+
+.name-input {
+    flex: 1;
+}
+
+.full-input, .quantity-select {
+    width: 100%;
+}
+
+.name-input::placeholder, .full-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 300;
+}
+
+.name-input:focus, .full-input:focus, .quantity-select:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+.quantity-select {
+    appearance: none;
+    cursor: pointer;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8"><path fill="white" d="M6 8L0 2h12z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    padding-right: 40px;
+}
+
+.quantity-select option {
+    background-color: #540000;
+    color: white;
+}
+
+.note-textarea {
+    width: 100%;
+    height: 140px;
+    padding: 1.1rem 1.4rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1.5px solid rgba(255, 255, 255, 0.18);
+    border-radius: 14px;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    resize: vertical;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    box-sizing: border-box;
+    line-height: 1.5;
+}
+
+.note-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 300;
+}
+
+.note-textarea:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1.2rem;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cancel-btn, .submit-btn {
+    padding: 0.9rem 2rem;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.3px;
+    min-width: 140px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cancel-btn {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    backdrop-filter: blur(10px);
+    flex: 0 0 auto;
+    white-space: nowrap;
+    min-width: 140px;
+}
+
+.cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.submit-btn {
+    background: linear-gradient(135deg, #540000 0%, #8B0000 50%, #540000 100%);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.9rem 2rem;
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: normal;
+    letter-spacing: normal;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    flex: 1;
+    max-width: 250px;
+    height: 48px;
+    margin-top: 0;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    box-shadow: 
+        0 6px 24px rgba(84, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+}
+
+
+
+.submit-btn:hover {
+    background: linear-gradient(135deg, #6B0000 0%, #A00000 50%, #6B0000 100%);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+        0 16px 40px rgba(84, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+
+
+.submit-btn:active {
+    transform: translateY(-2px) scale(0.98);
+    box-shadow: 
+        0 8px 24px rgba(84, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.1s ease;
+}
+
+/* Autocomplete Dropdown Styles */
+.autocomplete-container {
+    position: relative;
+    width: 100%;
+}
+
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.95);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    border-top: none;
+    border-radius: 0 0 14px 14px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+}
+
+.autocomplete-item {
+    padding: 12px 16px;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: translateX(4px);
+}
+
+.autocomplete-item strong {
+    color: #FFD700;
+    font-weight: 600;
+}
+
+/* Custom scrollbar for dropdown */
+.autocomplete-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Adjust input styling when dropdown is active */
+.autocomplete-container .full-input:focus {
+    border-radius: 14px 14px 0 0;
+}
+
+.autocomplete-container .full-input:focus + .autocomplete-dropdown {
+    border-top: 1.5px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Pre-Order Page Responsive */
+@media (max-width: 768px) {
+    .preorder-content {
+        padding: 2rem 1rem;
+    }
+    
+    .preorder-page-title {
+        font-size: 28px;
+        letter-spacing: 2px;
+        margin-bottom: 2rem;
+    }
+    
+    .preorder-form-container {
+        padding: 2rem 1.5rem;
+        border-radius: 20px;
+    }
+    
+    .preorder-page-form {
+        gap: 2rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .form-column {
+        gap: 1.5rem;
+    }
+    
+    .name-inputs {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        max-width: none;
+    }
+    
+    .cancel-btn, .submit-btn {
+        width: 100%;
+        max-width: none;
+        padding: 1rem 2rem;
+        height: 52px;
+        font-size: 15px;
+        flex: none;
+    }
+    
+    .note-textarea {
+        height: 120px;
+    }
+    
+    .field-label {
+        font-size: 14px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .name-input, .full-input, .quantity-select, .note-textarea {
+        padding: 1rem 1.2rem;
+        font-size: 14px;
+    }
+    
+    /* Autocomplete responsive styles */
+    .autocomplete-item {
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+    
+    .autocomplete-dropdown {
+        max-height: 250px;
+    }
+}
+
+@media (max-width: 480px) {
+    .preorder-content {
+        padding: 1.5rem 0.75rem;
+    }
+    
+    .preorder-form-container {
+        padding: 1.5rem 1rem;
+        border-radius: 16px;
+    }
+    
+    .preorder-page-title {
+        font-size: 24px;
+        letter-spacing: 1px;
+    }
+}
+
+/* Pre-Order Confirmation Page Styles */
+.confirmation-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 0;
+}
+
+.confirmation-page-title {
+    font-size: 36px;
+    font-weight: normal;
+    letter-spacing: 4px;
+    margin-bottom: 40px;
+    color: white;
+    text-align: center;
+}
+
+.confirmation-container {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 50px;
+    backdrop-filter: blur(10px);
+    text-align: center;
+}
+
+.confirmation-message {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+}
+
+.thank-you-message {
+    font-size: 18px;
+    color: white;
+    font-weight: normal;
+    letter-spacing: 1px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.confirmation-details {
+    font-size: 16px;
+    color: white;
+    line-height: 1.8;
+    max-width: 600px;
+    margin: 0 auto;
+    letter-spacing: 0.5px;
+}
+
+.notification-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.notification-icon {
+    font-size: 20px;
+    color: #FFD700;
+}
+
+.notification-text {
+    font-size: 16px;
+    color: white;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+.confirmation-actions {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.return-home-btn {
+    background-color: white;
+    color: #540000;
+    border: 2px solid white;
+    padding: 15px 40px;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: normal;
+    letter-spacing: 1px;
+}
+
+.return-home-btn:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Confirmation Page Responsive */
+@media (max-width: 768px) {
+    .confirmation-content {
+        padding: 30px 15px;
+    }
+    
+    .confirmation-page-title {
+        font-size: 28px;
+        letter-spacing: 3px;
+    }
+    
+    .confirmation-container {
+        padding: 30px 20px;
+    }
+    
+    .thank-you-message {
+        font-size: 16px;
+    }
+    
+    .confirmation-details {
+        font-size: 14px;
+    }
+    
+    .notification-info {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .notification-text {
+        font-size: 14px;
+    }
+    
+    .return-home-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+}
