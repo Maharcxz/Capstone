@@ -108,8 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set up form submission
     document.getElementById('productForm').addEventListener('submit', handleProductSubmit);
     
-    // Set up file upload event listener
-    document.getElementById('productImages').addEventListener('change', handleFileUpload);
+    // File input removed; using URL-only for images
     
     // Bind Add Category form submit to handler
     const addCategoryForm = document.getElementById('addCategoryForm');
@@ -692,27 +691,17 @@ function saveSidebarCategories() {
 
 // Setup sidebar management event listeners
 function setupSidebarManagement() {
-    console.log('Setting up sidebar management event listeners...');
-    
-    // Manage Categories button
+    // Attach listeners only if elements exist; avoid noisy console errors
     const manageCategoriesBtn = document.getElementById('manageCategoriesBtn');
     if (manageCategoriesBtn) {
         manageCategoriesBtn.addEventListener('click', openSidebarManagerModal);
-        console.log('Manage Categories button event listener added');
-    } else {
-        console.error('manageCategoriesBtn not found');
     }
-    
-    // Close modal button
+
     const closeSidebarManagerBtn = document.getElementById('closeSidebarManagerBtn');
     if (closeSidebarManagerBtn) {
         closeSidebarManagerBtn.addEventListener('click', closeSidebarManagerModal);
-        console.log('Close sidebar manager button event listener added');
-    } else {
-        console.error('closeSidebarManagerBtn not found');
     }
-    
-    // Close modal when clicking outside
+
     const sidebarManagerModal = document.getElementById('sidebarManagerModal');
     if (sidebarManagerModal) {
         sidebarManagerModal.addEventListener('click', function(event) {
@@ -720,9 +709,6 @@ function setupSidebarManagement() {
                 closeSidebarManagerModal();
             }
         });
-        console.log('Modal outside click event listener added');
-    } else {
-        console.error('sidebarManagerModal not found');
     }
 }
 
@@ -1345,7 +1331,7 @@ window.filterProducts = filterProducts;
 window.addCategoryFromForm = addCategoryFromForm;
 window.openSidebarManagerModal = openSidebarManagerModal;
 window.closeSidebarManagerModal = closeSidebarManagerModal;
-window.handleFileUpload = handleFileUpload;
+// window.handleFileUpload = handleFileUpload;
 window.addImageUrl = addImageUrl;
 window.removeImage = removeImage;
 window.moveImageUp = moveImageUp;
