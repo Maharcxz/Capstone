@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import fs from 'node:fs';
 
 export default defineConfig({
   // Temporarily remove legacy plugin to fix ES module loading
@@ -10,12 +11,15 @@ export default defineConfig({
   //   })
   // ],
   server: {
-    port: 3000,
+    // Enable LAN access and secure context for mobile (camera/WebXR)
     host: true,
-    https: false, // Disabled for easier local development
-    open: true,
-    // Enable HTTPS when needed for WebXR/camera features
-    // https: true
+    // Use custom cert if present (ssl/server.key, ssl/server.crt), otherwise default self-signed
+    https: (fs.existsSync('ssl/server.key') && fs.existsSync('ssl/server.crt'))
+      ? { key: fs.readFileSync('ssl/server.key'), cert: fs.readFileSync('ssl/server.crt') }
+      : true,
+    port: 3004,
+    strictPort: true,
+    open: false
   },
   build: {
     outDir: 'dist',

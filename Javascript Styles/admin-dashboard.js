@@ -351,6 +351,13 @@ function closeProductModal() {
 function normalizeExternalUrl(url) {
     if (typeof url !== 'string') return url;
     let u = url.trim();
+    try {
+        if (u.startsWith('//')) {
+            u = 'https:' + u;
+        } else if (u.startsWith('http://')) {
+            u = 'https://' + u.slice('http://'.length);
+        }
+    } catch (e) {}
     const ghMatch = u.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/(.+)$/);
     if (ghMatch) {
         const [, owner, repo, path] = ghMatch;
@@ -376,16 +383,26 @@ function normalizeExternalUrl(url) {
     return u;
 }
 
+function ensureHttps(url) {
+    if (typeof url !== 'string') return url;
+    const t = url.trim();
+    if (!t) return t;
+    if (t.startsWith('https://') || t.startsWith('data:') || t.startsWith('blob:')) return t;
+    if (t.startsWith('//')) return 'https:' + t;
+    if (t.startsWith('http://')) return 'https://' + t.slice('http://'.length);
+    return t;
+}
+
 // Handle product form submission
 async function handleProductSubmit(event) {
     event.preventDefault();
     
     // Get images from the productImages array
-    const images = productImages.map(img => img.src);
+    const images = productImages.map(img => ensureHttps(normalizeExternalUrl(img.src)));
     
     // Get .glb files from the productGlbFiles array
     const glbFiles = productGlbFiles.map(glb => ({
-        url: typeof glb.src === 'string' ? normalizeExternalUrl(glb.src) : glb.src,
+        url: typeof glb.src === 'string' ? ensureHttps(normalizeExternalUrl(glb.src)) : glb.src,
         name: glb.name,
         size: glb.size
     }));
@@ -1073,7 +1090,7 @@ function handleFileUpload(event) {
 
 function addImageUrl() {
     const urlInput = document.getElementById('productImageUrl');
-    const url = urlInput.value.trim();
+    let url = urlInput.value.trim();
     
     if (!url) {
         showNotification('Please enter an image URL', 'error');
@@ -1082,7 +1099,9 @@ function addImageUrl() {
     
     // Validate URL format
     try {
-        new URL(url);
+        const normalized = ensureHttps(normalizeExternalUrl(url));
+        new URL(normalized);
+        url = normalized;
     } catch (e) {
         showNotification('Please enter a valid URL', 'error');
         return;
@@ -1200,7 +1219,7 @@ function handleGlbFileUpload(event) {
 
 function addGlbUrl() {
     const urlInput = document.getElementById('productGlbUrl');
-    const url = urlInput.value.trim();
+    let url = urlInput.value.trim();
     
     if (!url) {
         showNotification('Please enter a .glb file URL', 'error');
@@ -1209,7 +1228,9 @@ function addGlbUrl() {
     
     // Validate URL format
     try {
-        new URL(url);
+        const normalized = ensureHttps(normalizeExternalUrl(url));
+        new URL(normalized);
+        url = normalized;
     } catch (e) {
         showNotification('Please enter a valid URL', 'error');
         return;
@@ -1232,7 +1253,7 @@ function addGlbFileToPreview(src, name) {
     
     const glbFile = {
         id: glbId,
-        src: src instanceof File ? URL.createObjectURL(src) : src,
+        src: src instanceof File ? URL.createObjectURL(src) : ensureHttps(normalizeExternalUrl(src)),
         name: name,
         size: fileSize,
         file: src instanceof File ? src : null
@@ -1244,6 +1265,57 @@ function addGlbFileToPreview(src, name) {
     
     renderGlbPreview();
 }
+
+async function fixAllProductAssetUrls() {
+    try {
+        const products = await getAllProducts();
+        let updated = 0;
+        for (const product of products) {
+            let changed = false;
+            if (Array.isArray(product.images) && product.images.length) {
+                const images = product.images.map(u => ensureHttps(normalizeExternalUrl(u)));
+                if (JSON.stringify(images) !== JSON.stringify(product.images)) {
+                    product.images = images;
+                    product.image = images[0] || product.image || '';
+                    changed = true;
+                }
+            }
+            if (Array.isArray(product.glbFiles) && product.glbFiles.length) {
+                const glbFiles = product.glbFiles.map(g => {
+                    const src = g.url || g.src;
+                    const fixed = typeof src === 'string' ? ensureHttps(normalizeExternalUrl(src)) : src;
+                    return { ...g, url: fixed };
+                });
+                if (JSON.stringify(glbFiles) !== JSON.stringify(product.glbFiles)) {
+                    product.glbFiles = glbFiles;
+                    changed = true;
+                }
+            }
+            if (changed) {
+                await saveProductToFirebase(product);
+                updated++;
+            }
+        }
+        showNotification(`Asset sweep complete. Updated ${updated} product(s).`, 'success');
+    } catch (err) {
+        console.error('Asset sweep failed:', err);
+        showNotification('Asset sweep failed. Check console for details.', 'error');
+    }
+}
+
+window.adminTools = Object.assign({}, window.adminTools || {}, {
+    fixAllProductAssetUrls,
+    ensureHttps,
+    normalizeExternalUrl
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('fixAssets') === '1') {
+        const ok = confirm('Run HTTPS asset sweep across all products?');
+        if (ok) fixAllProductAssetUrls();
+    }
+});
 
 function removeGlbFile(glbId) {
     productGlbFiles = productGlbFiles.filter(glb => glb.id !== glbId);
