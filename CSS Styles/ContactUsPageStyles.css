@@ -15,6 +15,16 @@
     margin-left: 0;
 }
 
+/* Ensure unified empty-state styles consistent across pages */
+.editable-content .empty-state h3 {
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+.editable-content .empty-state p {
+    font-size: 16px;
+    margin-bottom: 25px;
+}
+
 .contact-description {
     font-size: 18px;
     margin-bottom: 40px;

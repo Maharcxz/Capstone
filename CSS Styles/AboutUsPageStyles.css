@@ -6,10 +6,6 @@
     line-height: 1.6;
 }
 
-.about-paragraph {
-    font-family: poppins, sans-serif;
-}
-
 .about-title {
     font-size: 36px;
     font-weight: normal;
@@ -20,6 +16,7 @@
 }
 
 .about-paragraph {
+    font-family: poppins, sans-serif;
     font-size: 18px;
     margin-bottom: 30px;
     color: white;
@@ -29,6 +26,16 @@
 
 .about-paragraph:last-child {
     margin-bottom: 0;
+}
+
+/* Unified empty-state look to match other pages */
+.editable-content .empty-state h3 {
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+.editable-content .empty-state p {
+    font-size: 16px;
+    margin-bottom: 25px;
 }
 
 /* About Page Responsive */

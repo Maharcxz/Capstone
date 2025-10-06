@@ -487,49 +487,46 @@ function escapeHtml(text) {
 
 // Show notification
 function showNotification(message, type = 'info') {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 8px;
-        color: white;
-        font-weight: 600;
-        z-index: 10000;
-        max-width: 300px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-    `;
+    // Check if notification container exists, create if not
+    let notificationContainer = document.getElementById('notificationContainer');
     
-    // Set background color based on type
-    switch (type) {
-        case 'success':
-            notification.style.background = 'linear-gradient(135deg, #28a745 0%, #1e7e34 100%)';
-            break;
-        case 'error':
-            notification.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
-            break;
-        default:
-            notification.style.background = 'linear-gradient(135deg, #540000 0%, #6d0000 100%)';
+    if (!notificationContainer) {
+        notificationContainer = document.createElement('div');
+        notificationContainer.id = 'notificationContainer';
+        notificationContainer.style.position = 'fixed';
+        notificationContainer.style.top = '20px';
+        notificationContainer.style.right = '20px';
+        notificationContainer.style.zIndex = '9999';
+        document.body.appendChild(notificationContainer);
     }
     
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
     notification.textContent = message;
-    document.body.appendChild(notification);
+    notification.style.backgroundColor = type === 'success' ? '#4CAF50' : type === 'info' ? '#2196F3' : '#F44336';
+    notification.style.color = 'white';
+    notification.style.padding = '12px 20px';
+    notification.style.marginBottom = '10px';
+    notification.style.borderRadius = '4px';
+    notification.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    notification.style.opacity = '0';
+    notification.style.transition = 'opacity 0.3s ease';
     
-    // Animate in
-    setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-    }, 100);
+    // Add notification to container
+    notificationContainer.appendChild(notification);
     
-    // Remove after 3 seconds
+    // Show notification with animation
     setTimeout(() => {
-        notification.style.transform = 'translateX(100%)';
+        notification.style.opacity = '1';
+    }, 10);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
         setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
+            if (notificationContainer && notification.parentNode) {
+                notificationContainer.removeChild(notification);
             }
         }, 300);
     }, 3000);

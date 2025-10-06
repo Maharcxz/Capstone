@@ -351,19 +351,17 @@ function createAboutEditModal() {
 
     return `
         <div class="edit-modal-overlay active" id="editModalOverlay">
-            <div class="about-edit-modal">
+            <div class="contact-edit-modal">
                 <div class="edit-modal-header">
                     <h3><i class="fas fa-info-circle"></i> Edit About Content</h3>
                     <button class="close-edit-modal" onclick="closeEditModal()">&times;</button>
                 </div>
-                <div class="about-edit-content">
-                    <div class="about-form-grid">
-                        <div class="form-section full-width">
-                            <h4><i class="fas fa-edit"></i> About Us Content</h4>
-                            <div class="form-group">
-                                <label for="aboutTextarea">Content</label>
-                                <textarea id="aboutTextarea" placeholder="Enter your about us content here. Use double line breaks to separate paragraphs..." rows="12">${combinedText}</textarea>
-                            </div>
+                <div class="contact-edit-content" style="max-height: 70vh; overflow-y: auto; padding-right: 10px;">
+                    <div class="form-section">
+                        <h4><i class="fas fa-edit"></i> About Us Content</h4>
+                        <div class="form-group">
+                            <label for="aboutTextarea">Content</label>
+                            <textarea id="aboutTextarea" placeholder="Enter your about us content here. Use double line breaks to separate paragraphs..." rows="12">${combinedText}</textarea>
                         </div>
                     </div>
                     
@@ -778,14 +776,9 @@ function toggleContentManagement() {
     }
 }
 
-// Function for user management toggle (placeholder)
+// Function for user management toggle (unified)
 function toggleUserManagement() {
-    if (!isAdminMode) {
-        console.log('Not in admin mode, cannot access user management');
-        return;
-    }
-    
-    showNotification('User management feature is coming soon!', 'info');
+    showUserManagementModal();
 }
 
 // Function for admin settings toggle (placeholder)
@@ -889,12 +882,165 @@ function showDebugInfo() {
     showNotification('Debug information logged to console. Press F12 to view.', 'info');
 }
 
-// Function for user management (placeholder)
+// Function for user management (unified)
 function openUserManagement() {
-    if (!isAdminMode) {
-        console.log('Not in admin mode, cannot access user management');
-        return;
+    showUserManagementModal();
+}
+
+function showUserManagementModal() {
+    // Remove any existing modal
+    const existing = document.getElementById('userManagementModalOverlay');
+    if (existing) existing.remove();
+
+    const user = (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) ? firebase.auth().currentUser : null;
+
+    const email = user?.email || 'Not logged in';
+    const uid = user?.uid || 'N/A';
+    // Metadata timing may not be immediately available; fallback gracefully
+    const createdAt = user?.metadata?.creationTime || 'N/A';
+    const lastSignIn = user?.metadata?.lastSignInTime || 'N/A';
+
+    const modalHtml = `
+        <div class="edit-modal-overlay active" id="userManagementModalOverlay" style="z-index: 10000;">
+            <div class="contact-edit-modal" style="max-width: 800px;">
+                <div class="edit-modal-header">
+                    <h3>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="margin-right:8px; vertical-align:middle" aria-hidden="true">
+                            <circle cx="12" cy="8" r="4"></circle>
+                            <path d="M5 21v-2a7 7 0 0114 0v2"></path>
+                        </svg>
+                        USER MANAGEMENT
+                    </h3>
+                    <button class="close-edit-modal" onclick="closeUserManagementModal()">&times;</button>
+                </div>
+                <div class="contact-edit-content" style="max-height: 70vh; overflow-y: auto; padding-right: 10px;">
+                    <div class="form-section" style="margin-bottom: 16px;">
+                        <h4>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="margin-right:8px; vertical-align:middle" aria-hidden="true">
+                                <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                                <line x1="8" y1="10" x2="16" y2="10"></line>
+                                <line x1="8" y1="14" x2="12" y2="14"></line>
+                            </svg>
+                            ACCOUNT INFORMATION
+                        </h4>
+                        <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div>
+                                <label>EMAIL</label>
+                                <div style="color: rgba(255, 255, 255, 0.9); padding: 10px 14px; border: 1.5px solid rgba(255,255,255,0.18); border-radius: 14px; background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);">${email}</div>
+                            </div>
+                            <div>
+                                <label>ACCOUNT UID</label>
+                                <div style="color: rgba(255, 255, 255, 0.9); word-break: break-all; padding: 10px 14px; border: 1.5px solid rgba(255,255,255,0.18); border-radius: 14px; background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);">${uid}</div>
+                            </div>
+                            <div>
+                                <label>CREATED</label>
+                                <div style="color: rgba(255, 255, 255, 0.9); padding: 10px 14px; border: 1.5px solid rgba(255,255,255,0.18); border-radius: 14px; background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);">${createdAt}</div>
+                            </div>
+                            <div>
+                                <label>LAST SIGN-IN</label>
+                                <div style="color: rgba(255, 255, 255, 0.9); padding: 10px 14px; border: 1.5px solid rgba(255,255,255,0.18); border-radius: 14px; background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);">${lastSignIn}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h4>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="margin-right:8px; vertical-align:middle" aria-hidden="true">
+                                <rect x="6" y="11" width="12" height="9" rx="2"></rect>
+                                <path d="M8 11V8a4 4 0 018 0v3"></path>
+                            </svg>
+                            CHANGE PASSWORD
+                        </h4>
+                        <div class="form-group">
+                            <label>CURRENT PASSWORD</label>
+
+                            <input type="password" id="umCurrentPassword" placeholder="Current password" class="contact-input" style="color: rgba(255, 255, 255, 0.9); padding: 10px 14px; border: 1.5px solid rgba(255,255,255,0.18); border-radius: 14px; background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);">
+                        </div>
+                        <div class="form-group">
+                            <label>NEW PASSWORD</label>
+
+                            <input type="password" id="umNewPassword" placeholder="New password" class="contact-input" style="color: rgba(255, 255, 255, 0.9); padding: 10px 14px; border: 1.5px solid rgba(255,255,255,0.18); border-radius: 14px; background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);">
+                        </div>
+                        <div class="form-group">
+                            <label>CONFIRM NEW PASSWORD</label>
+
+                            <input type="password" id="umConfirmPassword" placeholder="Confirm new password" class="contact-input" style="color: rgba(255, 255, 255, 0.9); padding: 10px 14px; border: 1.5px solid rgba(255,255,255,0.18); border-radius: 14px; background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);">
+                        </div>
+                        <div class="edit-modal-actions" style="display:flex; gap: 12px;">
+                            <button class="save-edit-btn" onclick="handleUpdatePassword()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="margin-right:8px; vertical-align:middle" aria-hidden="true">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                Update Password
+                            </button>
+                            <button class="cancel-edit-btn" onclick="closeUserManagementModal()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="margin-right:8px; vertical-align:middle" aria-hidden="true">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function closeUserManagementModal() {
+    const modal = document.getElementById('userManagementModalOverlay');
+    if (modal) modal.remove();
+}
+
+async function handleUpdatePassword() {
+    try {
+        const user = (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) ? firebase.auth().currentUser : null;
+        if (!user) {
+            showNotification('You must be logged in to update password.', 'error');
+            return;
+        }
+
+        const currentPassword = document.getElementById('umCurrentPassword').value.trim();
+        const newPassword = document.getElementById('umNewPassword').value.trim();
+        const confirmPassword = document.getElementById('umConfirmPassword').value.trim();
+
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            showNotification('Please fill in all password fields.', 'error');
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            showNotification('New passwords do not match.', 'error');
+            return;
+        }
+        if (newPassword.length < 6) {
+            showNotification('New password must be at least 6 characters.', 'error');
+            return;
+        }
+
+        // Re-authenticate user with current password before updating
+        const credential = firebase.auth.EmailAuthProvider.credential(user.email, currentPassword);
+        await user.reauthenticateWithCredential(credential);
+        await user.updatePassword(newPassword);
+
+        showNotification('Password updated successfully.', 'success');
+        closeUserManagementModal();
+    } catch (error) {
+        console.error('Error updating password:', error);
+        let message = 'Failed to update password.';
+        if (error && error.code) {
+            switch (error.code) {
+                case 'auth/wrong-password':
+                    message = 'Current password is incorrect.'; break;
+                case 'auth/weak-password':
+                    message = 'New password is too weak.'; break;
+                case 'auth/too-many-requests':
+                    message = 'Too many attempts. Please try again later.'; break;
+                default:
+                    message = 'Failed to update password. Please try again.';
+            }
+        }
+        showNotification(message, 'error');
     }
-    
-    showNotification('User management feature is coming soon!', 'info');
 }
