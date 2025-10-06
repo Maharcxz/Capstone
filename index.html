@@ -339,6 +339,25 @@
         </div>
     </div>
 
+    <!-- Status / Confirmation Modal -->
+    <div id="statusModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header status-header">
+                <div class="status-title-wrap">
+                    <i class="fas fa-check-circle status-icon" aria-hidden="true"></i>
+                    <h3 id="statusModalTitle">Status</h3>
+                </div>
+                <button class="close-modal" onclick="closeStatusModal()" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body status-body">
+                <p id="statusModalMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="admin-btn status-ok-btn" onclick="closeStatusModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
 
 </body>
 </html>

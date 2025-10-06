@@ -223,6 +223,13 @@
                             </div>
                             <small class="form-help-text">Add images by URL one at a time</small>
                         </div>
+
+                        <!-- New: Upload image files from device -->
+                        <div class="upload-option">
+                            <label class="form-label" for="productImageFiles">Upload Image Files</label>
+                            <input type="file" id="productImageFiles" accept="image/*" multiple onchange="handleFileUpload(event)" class="form-input">
+                            <small class="form-help-text">You can select multiple images. Only image files are accepted.</small>
+                        </div>
                     </div>
                     
                     <!-- Image Preview Area -->
@@ -272,8 +279,8 @@
             </form>
             
             <div class="modal-actions">
-                <button type="button" class="modal-btn cancel-btn" onclick="closeProductModal()">Cancel</button>
                 <button type="submit" class="modal-btn save-btn" form="productForm">Save Product</button>
+                <button type="button" class="modal-btn cancel-btn" onclick="closeProductModal()">Cancel</button>
             </div>
             </div>
         </div>

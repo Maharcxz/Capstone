@@ -339,10 +339,8 @@ function openProductDetailModal(productId) {
     const virtualTryOnBtn = document.querySelector('#productDetailModal .virtual-try-btn');
     if (virtualTryOnBtn) {
         virtualTryOnBtn.onclick = function() {
-            // Pass precise product identifiers for accurate GLB selection
-            const productId = encodeURIComponent(product.id);
-            const productName = encodeURIComponent(product.title);
-            window.location.href = `try-on.html?productId=${productId}&productName=${productName}`;
+            // Navigate to try-on page with the selected productId and productName for dynamic 3D model loading
+            window.location.href = `try-on.html?productId=${encodeURIComponent(product.id)}&productName=${encodeURIComponent(product.title)}`;
         };
     }
 
@@ -464,7 +462,7 @@ function handlePreOrder() {
 // Update product stock (Admin function)
 async function updateProductStock() {
     if (!currentProductId) {
-        alert('No product selected.');
+        showStatusModal('No product selected.', 'error');
         return;
     }
     
@@ -474,7 +472,7 @@ async function updateProductStock() {
     const newStock = parseInt(adminStockInput.value);
     
     if (isNaN(newStock) || newStock < 0) {
-        alert('Please enter a valid stock quantity (0 or greater).');
+        showStatusModal('Please enter a valid stock quantity (0 or greater).', 'error');
         return;
     }
     
@@ -491,21 +489,17 @@ async function updateProductStock() {
         
         // Update displays
         updateStockDisplay(newStock);
-        initializeQuantitySelector(newStock);
+        updatePreorderButton(newStock);
         
         // Refresh product grid to show updated stock
         renderProductGrid();
         
-        // Show success notification
-        if (typeof showHomepageNotification === 'function') {
-            showHomepageNotification('Stock updated successfully!', 'success');
-        } else {
-            alert('Stock updated successfully!');
-        }
+        // Show success confirmation modal
+        showStatusModal('Stock updated successfully!', 'success');
         
     } catch (error) {
         console.error('Error updating stock:', error);
-        alert('Error updating stock: ' + error.message);
+        showStatusModal('Error updating stock: ' + error.message, 'error');
     }
 }
 
@@ -527,7 +521,7 @@ async function reduceProductStock(productId, quantity) {
         // If modal is open for this product, update displays
         if (currentProductId === productId) {
             updateStockDisplay(newStock);
-            initializeQuantitySelector(newStock);
+            updatePreorderButton(newStock);
         }
         
         // Refresh product grid
@@ -539,6 +533,24 @@ async function reduceProductStock(productId, quantity) {
         return false;
     }
 }
+
+// Close status modal when clicking outside of the content
+(function attachStatusModalHandlers() {
+    const modal = document.getElementById('statusModal');
+    if (modal) {
+        modal.addEventListener('click', function (event) {
+            if (event.target === modal) {
+                closeStatusModal();
+            }
+        });
+    }
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            const m = document.getElementById('statusModal');
+            if (m && m.style.display === 'block') closeStatusModal();
+        }
+    });
+})();
 
 // Export functions to global scope
 window.selectFrameCategory = selectFrameCategory;
@@ -552,3 +564,42 @@ window.setMainImage = setMainImage;
 window.handlePreOrder = handlePreOrder;
 window.updateProductStock = updateProductStock;
 window.reduceProductStock = reduceProductStock;
+window.showStatusModal = showStatusModal;
+window.closeStatusModal = closeStatusModal;
+
+function showStatusModal(message, type = 'info') {
+    const modal = document.getElementById('statusModal');
+    const titleEl = document.getElementById('statusModalTitle');
+    const messageEl = document.getElementById('statusModalMessage');
+    if (!modal || !titleEl || !messageEl) return;
+
+    // Set modal title based on type
+    let title = 'Status';
+    if (type === 'success') title = 'Stock Updated';
+    else if (type === 'error') title = 'Update Failed';
+
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+
+    // Apply type class for compact success design
+    modal.classList.remove('success', 'error', 'info', 'show');
+    if (type === 'success') {
+        modal.classList.add('success');
+    } else if (type === 'error') {
+        modal.classList.add('error');
+    } else {
+        modal.classList.add('info');
+    }
+
+    // Use flex centering via base modal styles
+    modal.style.display = 'flex';
+    modal.classList.add('show');
+}
+
+function closeStatusModal() {
+    const modal = document.getElementById('statusModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('show');
+    }
+}

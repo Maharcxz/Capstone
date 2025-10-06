@@ -739,3 +739,108 @@
         height: 45px;
     }
 }
+
+/* Status / Confirmation Modal Styles */
+#statusModal.modal {
+  justify-content: center;
+  align-items: center;
+  padding: 10px; /* overlay padding */
+  padding-top: 0; /* remove top padding */
+}
+#statusModal .modal-content {
+  width: 100%;
+  max-width: 380px; /* modest size */
+  min-width: 280px;
+  text-align: center;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.35); /* subtle drop shadow */
+  background: linear-gradient(135deg, rgba(44,24,16,0.95) 0%, rgba(26,15,10,0.95) 100%); /* slightly lightened */
+}
+#statusModal .status-header {
+  display: flex;
+  align-items: center; /* vertical center for icon+title */
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+#statusModal .status-title-wrap {
+  display: flex;
+  align-items: center; /* vertically center icon with title */
+  padding-left: 15px;
+  gap: 15px; /* reduced gap between icon and title */
+}
+#statusModal .status-body {
+  padding: 8px 12px; /* reduced body padding */
+}
+#statusModal #statusModalMessage {
+  margin-top: 1px; /* reduced spacing between title and message */
+}
+#statusModal .modal-footer {
+  padding: 8px 12px 12px 12px; /* reduced footer padding */
+}
+#statusModal .status-ok-btn {
+  padding: 6px 12px; /* reduced button padding */
+}
+#statusModal .status-ok-btn {
+  background: linear-gradient(135deg, #540000 0%, #8B0000 100%);
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-align: center;
+  display: inline-flex; /* center text reliably */
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  width: 100px !important; /* fixed width for consistent sizing */
+}
+#statusModal .status-ok-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(139, 0, 0, 0.35);
+  filter: brightness(1.05);
+}
+#statusModal .modal-body {
+  padding: 16px 24px;
+}
+#statusModal .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 0 24px 24px 24px;
+}
+/* Compact success variant */
+#statusModal.success .modal-content {
+  max-width: 500px; /* smaller overall width */
+}
+#statusModal.success .status-header {
+  padding: 0 0 0 0; /* add extra right padding for close (x) */
+}
+#statusModal.success .status-body {
+  padding: 0px 10px 20px 0px; /* further reduce top padding for message area */
+}
+#statusModal.success .modal-footer {
+  padding: 8px 10px 10px 0; /* tight footer */
+}
+#statusModal.success .status-ok-btn {
+  padding: 6px 12px; /* compact button */
+  font-size: 16px; /* slightly smaller */
+  width: 60px; /* fixed width for consistent sizing */
+  display: inline-flex; /* center text reliably */
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+#statusModal .status-ok-btn {
+  background: linear-gradient(135deg, #540000 0%, #8B0000 100%);
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-align: center;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+#statusModal .status-ok-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(139, 0, 0, 0.35);
+  filter: brightness(1.05);
+}
