@@ -1,0 +1,16 @@
+# Netlify configuration for Vite multi-page static site
+
+[build]
+command = "npm run build"
+publish = "dist"
+
+# Optional: local dev via Netlify CLI (not required for CI builds)
+[dev]
+command = "npm run dev"
+
+# Minimal security/feature headers. Camera permission policy helps WebXR/camera features.
+[[headers]]
+for = "/*"
+  [headers.values]
+  Permissions-Policy = "camera=(self)"
+  Referrer-Policy = "strict-origin-when-cross-origin"
