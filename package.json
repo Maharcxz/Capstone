@@ -1,0 +1,30 @@
+{
+  "name": "trinity-optimum-vision-center",
+  "version": "1.0.0",
+  "description": "Virtual Try-On System with WebXR and Three.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "vite preview --port 3000"
+  },
+  "dependencies": {
+    "@mediapipe/camera_utils": "^0.3.1620248257",
+    "@mediapipe/drawing_utils": "^0.3.1620248257",
+    "@mediapipe/face_mesh": "^0.4.1633559619",
+    "three": "^0.158.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-legacy": "^5.0.0",
+    "terser": "^5.24.0",
+    "vite": "^5.0.0",
+    "vite-plugin-mkcert": "^1.17.9"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
+}
