@@ -79,9 +79,8 @@ function initializeEventListeners() {
         if (event.target.classList.contains('edit-btn')) {
             openFrameEditModal(event.target);
         } else if (event.target.classList.contains('delete-btn')) {
-            if (confirm('Are you sure you want to delete this product?')) {
-                console.log('Delete product confirmed');
-            }
+            // Removed legacy confirm; deletion is handled via Admin Dashboard modal
+            // Intentionally no-op here to avoid conflicting UI
         } else if (event.target.classList.contains('visible-btn')) {
             const button = event.target;
             if (button.textContent === 'Visible') {

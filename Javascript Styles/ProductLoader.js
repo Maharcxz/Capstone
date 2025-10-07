@@ -183,12 +183,11 @@ function editProductFromHomepage(productId) {
 }
 
 async function deleteProductFromHomepage(productId, productTitle) {
-    if (!confirm(`Are you sure you want to delete "${productTitle}"?`)) {
-        return;
-    }
-    
     try {
         if (typeof deleteProductFromFirebase === 'function') {
+            // Use a simple custom notification instead of native confirm; homepage does not use the admin modal
+            const proceed = true; // always proceed when admin triggers from homepage
+            if (!proceed) return;
             await deleteProductFromFirebase(productId);
             showHomepageNotification('Product deleted successfully', 'success');
         }

@@ -440,10 +440,50 @@ async function handleProductSubmit(event) {
 
 // Delete product
 async function deleteProduct(productId, productTitle) {
-    if (!confirm(`Are you sure you want to delete "${productTitle}"? This action cannot be undone.`)) {
+    // Open custom confirm modal
+    const overlay = document.getElementById('confirmDeleteOverlay');
+    const messageEl = document.getElementById('confirmDeleteMessage');
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    const cancelBtn = document.getElementById('cancelDeleteBtn');
+    const closeBtn = document.getElementById('closeConfirmDeleteBtn');
+
+    if (!overlay || !messageEl || !confirmBtn || !cancelBtn || !closeBtn) {
+        console.warn('Confirm delete modal elements missing for product deletion.');
         return;
     }
-    
+
+    messageEl.textContent = `Are you sure you want to delete "${productTitle}"? This action cannot be undone.`;
+    overlay.classList.add('active');
+
+    const cleanup = () => {
+        overlay.classList.remove('active');
+        confirmBtn.removeEventListener('click', onConfirm);
+        cancelBtn.removeEventListener('click', onCancel);
+        closeBtn.removeEventListener('click', onCancel);
+        document.removeEventListener('keydown', onEsc);
+        overlay.removeEventListener('click', onOverlayClick);
+    };
+
+    const onConfirm = async () => {
+        try {
+            await performProductDelete(productId);
+        } finally {
+            cleanup();
+        }
+    };
+
+    const onCancel = () => cleanup();
+    const onEsc = (e) => { if (e.key === 'Escape') cleanup(); };
+    const onOverlayClick = (e) => { if (e.target === overlay) cleanup(); };
+
+    confirmBtn.addEventListener('click', onConfirm);
+    cancelBtn.addEventListener('click', onCancel);
+    closeBtn.addEventListener('click', onCancel);
+    document.addEventListener('keydown', onEsc);
+    overlay.addEventListener('click', onOverlayClick);
+}
+
+async function performProductDelete(productId) {
     try {
         await deleteProductFromFirebase(productId);
         showNotification('Product deleted successfully', 'success');
@@ -998,30 +1038,74 @@ async function editCategory(categoryId) {
 // Delete category
 async function deleteCategory(categoryId) {
     const category = sidebarCategories.find(cat => cat.id === categoryId);
-    if (category && confirm(`Are you sure you want to delete "${category.name}"?`)) {
-        try {
-            await deleteCategoryFromFirebase(categoryId);
-        } catch (error) {
-            console.error('Error deleting category from Firebase:', error);
-            alert('Failed to delete category. Please try again.');
-            return;
-        }
+    if (!category) return;
 
-        // Update local cache/UI after successful deletion
-        sidebarCategories = sidebarCategories.filter(cat => cat.id !== categoryId);
-        localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
-        
-        // If currently viewing this category, switch to all products
-        if (currentCategory === categoryId) {
-            filterByCategory('all');
-        } else {
-            renderSidebar();
-        }
-        
-        renderExistingCategories();
-        populateCategoryDropdowns(); // Refresh dropdowns after deletion
-        showNotification(`Category "${category.name}" deleted successfully!`, 'success');
+    // Open custom confirm modal
+    const overlay = document.getElementById('confirmDeleteOverlay');
+    const messageEl = document.getElementById('confirmDeleteMessage');
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    const cancelBtn = document.getElementById('cancelDeleteBtn');
+    const closeBtn = document.getElementById('closeConfirmDeleteBtn');
+
+    if (!overlay || !messageEl || !confirmBtn || !cancelBtn || !closeBtn) {
+        console.warn('Confirm delete modal elements missing for category deletion.');
+        return;
     }
+
+    messageEl.textContent = `Are you sure you want to delete "${category.name}"?`;
+    overlay.classList.add('active');
+
+    const cleanup = () => {
+        overlay.classList.remove('active');
+        confirmBtn.removeEventListener('click', onConfirm);
+        cancelBtn.removeEventListener('click', onCancel);
+        closeBtn.removeEventListener('click', onCancel);
+        document.removeEventListener('keydown', onEsc);
+        overlay.removeEventListener('click', onOverlayClick);
+    };
+
+    const onConfirm = async () => {
+        try {
+            await performCategoryDelete(categoryId, category.name);
+        } finally {
+            cleanup();
+        }
+    };
+
+    const onCancel = () => cleanup();
+    const onEsc = (e) => { if (e.key === 'Escape') cleanup(); };
+    const onOverlayClick = (e) => { if (e.target === overlay) cleanup(); };
+
+    confirmBtn.addEventListener('click', onConfirm);
+    cancelBtn.addEventListener('click', onCancel);
+    closeBtn.addEventListener('click', onCancel);
+    document.addEventListener('keydown', onEsc);
+    overlay.addEventListener('click', onOverlayClick);
+}
+
+async function performCategoryDelete(categoryId, categoryName) {
+    try {
+        await deleteCategoryFromFirebase(categoryId);
+    } catch (error) {
+        console.error('Error deleting category from Firebase:', error);
+        alert('Failed to delete category. Please try again.');
+        return;
+    }
+
+    // Update local cache/UI after successful deletion
+    sidebarCategories = sidebarCategories.filter(cat => cat.id !== categoryId);
+    localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
+    
+    // If currently viewing this category, switch to all products
+    if (currentCategory === categoryId) {
+        filterByCategory('all');
+    } else {
+        renderSidebar();
+    }
+    
+    renderExistingCategories();
+    populateCategoryDropdowns(); // Refresh dropdowns after deletion
+    showNotification(`Category "${categoryName}" deleted successfully!`, 'success');
 }
 
 // Multiple Image Management Functions

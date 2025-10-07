@@ -518,6 +518,104 @@
     flex-direction: column;
 }
 
+/* Confirm Delete Modal */
+#confirmDeleteOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2200;
+    /* effects removed */
+}
+#confirmDeleteOverlay.active {
+    display: flex;
+}
+#confirmDeleteModal {
+    background: #2c1810;
+    border-radius: 12px;
+    max-width: 480px;
+    width: 95%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    /* animation removed */
+}
+#confirmDeleteModal .modal-header {
+    background: linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+#confirmDeleteModal .modal-title {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+}
+#confirmDeleteModal .close-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: none;
+    line-height: 1;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#confirmDeleteModal .close-btn:hover {
+    color: rgba(255, 255, 255, 0.8);
+    background: none;
+}
+#confirmDeleteModal .modal-content {
+    padding: 18px 20px;
+}
+#confirmDeleteModal .modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding: 16px 20px 20px 20px;
+}
+#confirmDeleteModal .modal-btn.delete {
+    background: linear-gradient(135deg, #540000 0%, #6d0000 100%);
+    color: white;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(84, 0, 0, 0.3);
+}
+#confirmDeleteModal .modal-btn.delete:hover {
+    background: linear-gradient(135deg, #6d0000 0%, #8a0000 100%);
+    box-shadow: 0 6px 20px rgba(84, 0, 0, 0.4);
+}
+#confirmDeleteModal .modal-btn.cancel {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: white;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+#confirmDeleteModal .modal-btn.cancel:hover {
+    background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}
+
 .modal-header {
     background: linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%);
     color: white;
