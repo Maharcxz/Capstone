@@ -14,3 +14,49 @@ for = "/*"
   [headers.values]
   Permissions-Policy = "camera=(self)"
   Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Clean-URL redirects for multi-page HTML entries
+[[redirects]]
+from = "/"
+to = "/index.html"
+status = 200
+
+[[redirects]]
+from = "/index"
+to = "/index.html"
+status = 200
+
+[[redirects]]
+from = "/about"
+to = "/about.html"
+status = 200
+
+[[redirects]]
+from = "/contact"
+to = "/contact.html"
+status = 200
+
+[[redirects]]
+from = "/admin-dashboard"
+to = "/admin-dashboard.html"
+status = 200
+
+[[redirects]]
+from = "/preorders"
+to = "/preorders.html"
+status = 200
+
+[[redirects]]
+from = "/preorder"
+to = "/preorder.html"
+status = 200
+
+[[redirects]]
+from = "/preorder-confirmation"
+to = "/preorder-confirmation.html"
+status = 200
+
+[[redirects]]
+from = "/try-on"
+to = "/try-on.html"
+status = 200
