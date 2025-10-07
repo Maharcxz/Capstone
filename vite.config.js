@@ -1,18 +1,31 @@
 import { defineConfig } from 'vite';
 import mkcert from 'vite-plugin-mkcert';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
 // Netlify-friendly Vite config: use mkcert only in dev, plain build for CI
 export default defineConfig(({ command, mode }) => {
   const isDev = command === 'serve';
   return {
     base: '/',
-    plugins: isDev
-      ? [
-          mkcert({
-            hosts: ['localhost', '127.0.0.1', process.env.DEV_HOST || '192.168.100.7']
-          })
-        ]
-      : [],
+    plugins: [
+      ...(isDev
+        ? [
+            mkcert({
+              hosts: ['localhost', '127.0.0.1', process.env.DEV_HOST || '192.168.100.7']
+            })
+          ]
+        : []),
+      (() => {
+        const jsDir = fileURLToPath(new URL('./Javascript Styles', import.meta.url));
+        return viteStaticCopy({
+          targets: [
+            { src: path.join(jsDir, '**/*'), dest: 'Javascript Styles' }
+          ]
+        });
+      })()
+    ],
     server: {
       port: 3000,
       host: true,
