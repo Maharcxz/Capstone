@@ -105,11 +105,22 @@ document.addEventListener('DOMContentLoaded', function() {
         setInterval(updatePreorderNotificationBadge, 30000);
     }
     
-    // Set up form submission
-    document.getElementById('productForm').addEventListener('submit', handleProductSubmit);
+    // Set up form submission (guard if element missing)
+    const productFormEl = document.getElementById('productForm');
+    if (productFormEl) {
+        productFormEl.addEventListener('submit', handleProductSubmit);
+    } else {
+        console.warn('productForm element not found; submit handler not bound.');
+    }
     
-    // Set up file upload event listener
-    document.getElementById('productImages').addEventListener('change', handleFileUpload);
+    // Set up file upload event listener (match actual input id and guard)
+    // HTML uses id="productImageFiles"; maintain fallback for legacy id "productImages"
+    const productImagesInput = document.getElementById('productImageFiles') || document.getElementById('productImages');
+    if (productImagesInput) {
+        productImagesInput.addEventListener('change', handleFileUpload);
+    } else {
+        console.warn('Product image input not found; change handler not bound.');
+    }
     
     // Bind Add Category form submit to handler
     const addCategoryForm = document.getElementById('addCategoryForm');
@@ -908,6 +919,15 @@ async function handleAddCategory(event) {
 
     try {
         await saveCategoryToFirebase(newCategory);
+        // Immediately update local cache and UI for responsiveness
+        try {
+            sidebarCategories = uniqueCategoriesByName([...(Array.isArray(sidebarCategories) ? sidebarCategories : []), newCategory]);
+            localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
+            renderSidebar();
+            renderExistingCategories();
+        } catch (uiErr) {
+            console.warn('Local/UI update failed after Firebase save:', uiErr);
+        }
         try {
             await firebaseServices.cleanupDuplicateCategories(newCategory.id, normalizedName);
         } catch (cleanupErr) {
@@ -917,8 +937,19 @@ async function handleAddCategory(event) {
         event.target.reset();
     } catch (error) {
         console.error('Error saving category to Firebase:', error);
-        showNotification('Failed to save category. Please try again.', 'error');
-        return;
+        // Fallback: save to local cache and update UI so the user can proceed
+        try {
+            sidebarCategories = uniqueCategoriesByName([...(Array.isArray(sidebarCategories) ? sidebarCategories : []), newCategory]);
+            localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
+            renderSidebar();
+            renderExistingCategories();
+            showNotification(`Saved "${categoryName}" locally (offline mode).`, 'info');
+            event.target.reset();
+        } catch (localErr) {
+            console.error('Local fallback failed:', localErr);
+            showNotification('Failed to save category. Please try again.', 'error');
+            return;
+        }
     } finally {
         pendingCategoryAdds.delete(normalizedName);
     }
