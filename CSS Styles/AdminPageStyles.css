@@ -605,7 +605,6 @@
     margin-top: 5px;
     margin-left: 15px;
 }
-
 /* Pre-Orders Admin Page */
 .preorders-admin-content {
     max-width: 1200px;
@@ -1834,5 +1833,537 @@
     
     .save-edit-btn:hover {
         background: linear-gradient(135deg, #6B0000 0%, #A00000 50%, #6B0000 100%);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 
+            0 16px 40px rgba(84, 0, 0, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    
+    .save-edit-btn:active {
+        transform: translateY(-2px) scale(0.98);
+    }
+    
+    .cancel-edit-btn {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        backdrop-filter: blur(10px);
+        border: 1.5px solid rgba(255, 255, 255, 0.3);
+        padding: 0.9rem 2rem;
+        border-radius: 14px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        letter-spacing: 0.3px;
+        min-width: 140px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
+    
+    .cancel-edit-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    .edit-modal-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    
+    /* Edit Content Modal Styles */
+    .edit-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(10px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    .edit-modal-overlay.active {
+        display: flex;
+        opacity: 1;
+    }
+    
+    .edit-modal {
+        background: linear-gradient(135deg, #540000 0%, #3d0000 100%);
+        border-radius: 20px;
+        padding: 0;
+        width: 95%;
+        max-width: 800px;
+        max-height: 90vh;
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.6),
+            0 0 0 1px rgba(255, 255, 255, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transform: scale(0.8) translateY(50px);
+    }
+    
+    /* Contact Edit Modal Styles */
+    .contact-edit-modal {
+        background: rgba(255, 255, 255, 0.08);
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        border-radius: 20px;
+        padding: 0;
+        width: 90%;
+        max-width: 900px;
+        max-height: 90vh;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        transform: scale(0.8) translateY(50px);
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        overflow: hidden;
+    }
+    
+    .edit-modal-overlay.active .contact-edit-modal {
+        transform: scale(1) translateY(0);
+    }
+    
+    .contact-edit-content {
+        padding: 15px;
+        overflow-y: auto;
+        max-height: calc(85vh - 60px);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .contact-edit-content .contact-form-grid {
+        flex: 1;
+        overflow-y: auto;
+    }
+    
+    .contact-edit-content .edit-modal-actions {
+        flex-shrink: 0;
+        margin-top: auto;
+    }
+    
+    .contact-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
+    
+    .form-section {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+    }
+    
+    .form-section.full-width {
+        grid-column: 1 / -1;
+        padding: 5px 8px;
+        margin-top: 3px;
+        margin-bottom: 0px;
+    }
+    
+    .form-section.full-width textarea {
+        min-height: 28px;
+        max-height: 50px;
+        resize: vertical;
+    }
+    
+    .form-section.full-width .form-group {
+        margin-bottom: 5px;
+    }
+    
+    .form-section.full-width h4 {
+        margin-bottom: 8px;
+        font-size: 16px;
+    }
+    
+    .form-section h4 {
+        color: #ffffff;
+        font-family: 'Poppins', sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .form-section h4 i {
+        color: #ff6b6b;
+        font-size: 16px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.08);
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        padding: 12px 16px;
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-sizing: border-box;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: rgba(84, 0, 0, 0.6);
+        background: rgba(255, 255, 255, 0.12);
+        box-shadow: 0 0 0 3px rgba(84, 0, 0, 0.1), 0 8px 24px rgba(0, 0, 0, 0.15);
+        transform: translateY(-1px);
+    }
+    
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .form-group textarea {
+        resize: vertical;
+        min-height: 60px;
+    }
+    
+    .edit-modal-header {
+        background: linear-gradient(135deg, #6d0000 0%, #540000 100%);
+        padding: 6px 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .edit-modal-header h3 {
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .edit-modal-header h3 i {
+        color: #ff6b6b;
+        font-size: 20px;
+    }
+    
+    .close-edit-modal {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 20px;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    
+    .close-edit-modal:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        transform: rotate(90deg);
+    }
+    
+    .edit-modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 5px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .save-edit-btn i,
+    .cancel-edit-btn i {
+        margin-right: 8px;
+        font-size: 14px;
+    }
+    
+    
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .contact-form-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .contact-edit-modal {
+            width: 98%;
+            margin: 10px;
+        }
+        
+        .contact-edit-content {
+            padding: 20px;
+        }
+        
+        .edit-modal-header {
+            padding: 20px;
+        }
+        
+        .edit-modal-header h3 {
+            font-size: 18px;
+        }
+        
+    
+     }
+    
+    /* About Edit Modal Styles */
+    .about-edit-modal {
+        background: rgba(255, 255, 255, 0.08);
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        border-radius: 20px;
+        padding: 0;
+        width: 95%;
+        max-width: 800px;
+        max-height: 90vh;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        transform: scale(0.8) translateY(50px);
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        overflow: hidden;
+    }
+    
+    .edit-modal-overlay.active .about-edit-modal {
+        transform: scale(1) translateY(0);
+    }
+    
+    .about-edit-content {
+        padding: 30px;
+        overflow-y: auto;
+        max-height: calc(90vh - 80px);
+    }
+    
+    .about-form-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+        margin-bottom: 25px;
+    }
+    
+    .about-form-grid .form-section {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 15px;
+        padding: 25px;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+    }
+    
+    .about-form-grid .form-section h4 {
+        color: #ffffff;
+        font-family: 'Poppins', sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .about-form-grid .form-section h4 i {
+        color: #ff6b6b;
+        font-size: 16px;
+    }
+    
+    .about-form-grid .form-group {
+        margin-bottom: 0;
+    }
+    
+    .about-form-grid .form-group label {
+        display: block;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .about-form-grid .form-group textarea {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.08);
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        padding: 12px 16px;
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        line-height: 1.6;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-sizing: border-box;
+        resize: vertical;
+        min-height: 300px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .about-form-grid .form-group textarea:focus {
+        outline: none;
+        border-color: rgba(84, 0, 0, 0.6);
+        background: rgba(255, 255, 255, 0.12);
+        box-shadow: 0 0 0 3px rgba(84, 0, 0, 0.1), 0 8px 24px rgba(0, 0, 0, 0.15);
+        transform: translateY(-1px);
+    }
+    
+    .about-form-grid .form-group textarea::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    /* Responsive Design for About Modal */
+    @media (max-width: 768px) {
+        .about-edit-modal {
+            width: 98%;
+            margin: 10px;
+        }
+        
+        .about-edit-content {
+            padding: 20px;
+        }
+    }
+    
+    .edit-modal {
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        overflow: hidden;
+    }
+    
+    .edit-modal-overlay.active .edit-modal {
+        transform: scale(1) translateY(0);
+    }
+    
+    .edit-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 30px 40px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+    }
+    
+    .edit-modal-header h3 {
+        color: #FFD700;
+        font-size: 22px;
+        font-weight: 600;
+        margin: 0;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .close-edit-modal {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 28px;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+    }
+    
+    .close-edit-modal:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #FFD700;
+        transform: rotate(90deg);
+    }
+    
+    .edit-modal-content {
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+    }
+    
+    #editTextarea {
+        width: 100%;
+        min-height: 400px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 25px;
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        font-size: 18px;
+        line-height: 1.6;
+        resize: vertical;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+    }
+    
+    #editTextarea:focus {
+        outline: none;
+        border-color: #FFD700;
+        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+        background: rgba(0, 0, 0, 0.4);
+    }
+    
+    #editTextarea::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+        font-style: italic;
+    }
+    
+    /* Main Content Edit Modal Styles */
+    .main-content-edit-modal {
+        background: rgba(255, 255, 255, 0.08);
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        border-radius: 20px;
+        padding: 0;
+        width: 90%;
+        max-width: 700px;
+        max-height: 85vh;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        transform: scale(0.8) translateY(50)
     }
 }

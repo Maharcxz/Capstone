@@ -1223,17 +1223,20 @@
     height: 100%;
     background-color: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(5px);
+    justify-content: center; /* center horizontally */
+    align-items: center;    /* center vertically */
 }
 
 #sidebarManagerModal .modal-content {
     position: relative;
     background: linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%);
-    margin: 5% 24px; /* add side margins for floating look */
+    margin: 0 24px; /* remove vertical margins so it centers */
     padding: 0;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
     width: calc(100% - 48px); /* account for left/right margins so no horizontal scroll */
     max-width: 600px;
+    max-height: 70vh; /* constrain overall modal height */
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
     animation: modalSlideIn 0.3s ease-out;
 }
@@ -1300,7 +1303,7 @@
 /* Responsive margins for floating look */
 @media (max-width: 480px) {
     #sidebarManagerModal .modal-content {
-        margin: 8% 16px; /* slightly tighter margins on very small screens */
+        margin: 0 16px; /* remove vertical margins for center on mobile */
         width: calc(100% - 32px);
     }
     #sidebarManagerModal .modal-body {

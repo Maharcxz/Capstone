@@ -923,7 +923,7 @@ function showUserManagementModal() {
                             </svg>
                             ACCOUNT INFORMATION
                         </h4>
-                        <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
                             <div>
                                 <label>EMAIL</label>
                                 <div style="color: rgba(255, 255, 255, 0.9); padding: 10px 14px; border: 1.5px solid rgba(255,255,255,0.18); border-radius: 14px; background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);">${email}</div>
@@ -966,7 +966,7 @@ function showUserManagementModal() {
 
                             <input type="password" id="umConfirmPassword" placeholder="Confirm new password" class="contact-input" style="color: rgba(255, 255, 255, 0.9); padding: 10px 14px; border: 1.5px solid rgba(255,255,255,0.18); border-radius: 14px; background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);">
                         </div>
-                        <div class="edit-modal-actions" style="display:flex; gap: 12px;">
+                        <div class="edit-modal-actions" style="display:flex; gap: 12px; align-items: center;">
                             <button class="save-edit-btn" onclick="handleUpdatePassword()">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="margin-right:8px; vertical-align:middle" aria-hidden="true">
                                     <polyline points="20 6 9 17 4 12"></polyline>
