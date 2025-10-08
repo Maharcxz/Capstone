@@ -437,6 +437,14 @@
     .modal-actions {
         flex-direction: column;
         gap: 10px;
+        justify-content: flex-end;
+        align-items: stretch;
+    }
+
+    .modal-actions .cancel-btn,
+    .modal-actions .modal-btn.cancel,
+    .modal-actions .cancel-edit-btn {
+        order: 99;
     }
     
     .preorder-btn, .edit-btn {

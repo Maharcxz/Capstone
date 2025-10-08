@@ -242,7 +242,7 @@ function renderProducts() {
                         Delete
                     </button>
                     <button class="admin-btn toggle-visibility-btn ${product.visible ? '' : 'hidden'}" 
-                            onclick="toggleProductVisibility('${product.id}', ${product.visible})">
+                            onclick="toggleProductVisibility('${product.id}', ${product.visible}, '${escapeHtml(product.title)}')">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             ${product.visible ? 
                                 '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>' :
@@ -450,35 +450,138 @@ async function handleProductSubmit(event) {
     }
 }
 
-// Delete product
+// Delete product (uses custom confirmation modal)
 async function deleteProduct(productId, productTitle) {
-    if (!confirm(`Are you sure you want to delete "${productTitle}"? This action cannot be undone.`)) {
+    // Get modal elements
+    const overlay = document.getElementById('confirmDeleteOverlay');
+    const messageEl = document.getElementById('confirmDeleteMessage');
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    const cancelBtn = document.getElementById('cancelDeleteBtn');
+    const closeBtn = document.getElementById('closeConfirmDeleteBtn');
+
+    // Fallback to native confirm if modal elements are missing
+    if (!overlay || !messageEl || !confirmBtn || !cancelBtn || !closeBtn) {
+        if (!confirm(`Are you sure you want to delete "${productTitle}"? This action cannot be undone.`)) return;
+        try {
+            await deleteProductFromFirebase(productId);
+            showNotification('Product deleted successfully', 'success');
+        } catch (error) {
+            console.error('Error deleting product:', error);
+            showNotification('Error deleting product', 'error');
+        }
         return;
     }
-    
-    try {
-        await deleteProductFromFirebase(productId);
-        showNotification('Product deleted successfully', 'success');
-    } catch (error) {
-        console.error('Error deleting product:', error);
-        showNotification('Error deleting product', 'error');
-    }
+
+    // Configure message and show modal
+    messageEl.textContent = `Are you sure you want to delete "${productTitle}"? This action cannot be undone.`;
+    overlay.classList.add('active');
+
+    // Helper to close modal and clean handlers
+    const cleanupAndClose = () => {
+        overlay.classList.remove('active');
+        confirmBtn.onclick = null;
+        cancelBtn.onclick = null;
+        closeBtn.onclick = null;
+        overlay.onclick = null;
+    };
+
+    // Click-outside closes modal
+    overlay.onclick = function (event) {
+        if (event.target === overlay) cleanupAndClose();
+    };
+
+    // Cancel/x handlers
+    cancelBtn.onclick = cleanupAndClose;
+    closeBtn.onclick = cleanupAndClose;
+
+    // Confirm deletion
+    confirmBtn.onclick = async function () {
+        try {
+            await deleteProductFromFirebase(productId);
+            showNotification('Product deleted successfully', 'success');
+            // Re-render products list after deletion
+            await loadProducts();
+        } catch (error) {
+            console.error('Error deleting product:', error);
+            showNotification('Error deleting product', 'error');
+        }
+        cleanupAndClose();
+    };
 }
 
 // Toggle product visibility
-async function toggleProductVisibility(productId, currentVisibility) {
+async function toggleProductVisibility(productId, currentVisibility, productTitle) {
     try {
-        const product = await getProductById(productId);
-        if (!product) {
-            showNotification('Product not found', 'error');
+        const actionText = currentVisibility ? 'Hide' : 'Show';
+
+        // Try to use the custom confirm delete modal
+        const overlay = document.getElementById('confirmDeleteOverlay');
+        const messageEl = document.getElementById('confirmDeleteMessage');
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        const cancelBtn = document.getElementById('cancelDeleteBtn');
+        const closeBtn = document.getElementById('closeConfirmDeleteBtn');
+
+        // Fallback to native confirm if modal elements are missing
+        if (!overlay || !messageEl || !confirmBtn || !cancelBtn || !closeBtn) {
+            const proceed = confirm(`Are you sure you want to ${actionText.toLowerCase()} \"${productTitle}\"?`);
+            if (!proceed) return;
+
+            // Fetch only when confirmed
+            const product = await getProductById(productId);
+            if (!product) { showNotification('Product not found', 'error'); return; }
+            product.visible = !currentVisibility;
+            product.updatedAt = new Date().toISOString();
+
+            await saveProductToFirebase(product);
+            showNotification(`Product ${product.visible ? 'shown' : 'hidden'} successfully`, 'success');
+            // Refresh list to reflect the change immediately
+            await loadProducts();
             return;
         }
-        
-        product.visible = !currentVisibility;
-        product.updatedAt = new Date().toISOString();
-        
-        await saveProductToFirebase(product);
-        showNotification(`Product ${product.visible ? 'shown' : 'hidden'} successfully`, 'success');
+
+        // Configure message and show modal
+        const originalConfirmText = confirmBtn.textContent;
+        messageEl.textContent = `Are you sure you want to ${actionText.toLowerCase()} \"${productTitle}\"?`;
+        confirmBtn.textContent = actionText;
+        overlay.classList.add('active');
+
+        // Helper to close modal and clean handlers (and restore button text)
+        const cleanupAndClose = () => {
+            overlay.classList.remove('active');
+            confirmBtn.onclick = null;
+            cancelBtn.onclick = null;
+            closeBtn.onclick = null;
+            overlay.onclick = null;
+            confirmBtn.textContent = originalConfirmText;
+        };
+
+        // Click-outside closes modal
+        overlay.onclick = function (event) {
+            if (event.target === overlay) cleanupAndClose();
+        };
+
+        // Cancel/x handlers
+        cancelBtn.onclick = cleanupAndClose;
+        closeBtn.onclick = cleanupAndClose;
+
+        // Confirm visibility toggle
+        confirmBtn.onclick = async function () {
+            try {
+                // Fetch the product only after confirmation
+                const product = await getProductById(productId);
+                if (!product) { showNotification('Product not found', 'error'); cleanupAndClose(); return; }
+                product.visible = !currentVisibility;
+                product.updatedAt = new Date().toISOString();
+                await saveProductToFirebase(product);
+                showNotification(`Product ${product.visible ? 'shown' : 'hidden'} successfully`, 'success');
+                // Refresh list to reflect the change immediately
+                await loadProducts();
+            } catch (error) {
+                console.error('Error updating product visibility:', error);
+                showNotification('Error updating product visibility', 'error');
+            }
+            cleanupAndClose();
+        };
     } catch (error) {
         console.error('Error toggling product visibility:', error);
         showNotification('Error updating product visibility', 'error');
@@ -711,7 +814,7 @@ function setupSidebarManagement() {
         manageCategoriesBtn.addEventListener('click', openSidebarManagerModal);
         console.log('Manage Categories button event listener added');
     } else {
-        console.error('manageCategoriesBtn not found');
+        console.warn('manageCategoriesBtn not found');
     }
     
     // Close modal button
@@ -720,7 +823,7 @@ function setupSidebarManagement() {
         closeSidebarManagerBtn.addEventListener('click', closeSidebarManagerModal);
         console.log('Close sidebar manager button event listener added');
     } else {
-        console.error('closeSidebarManagerBtn not found');
+        console.warn('closeSidebarManagerBtn not found');
     }
     
     // Close modal when clicking outside
@@ -733,7 +836,7 @@ function setupSidebarManagement() {
         });
         console.log('Modal outside click event listener added');
     } else {
-        console.error('sidebarManagerModal not found');
+        console.warn('sidebarManagerModal not found');
     }
 }
 
@@ -1043,10 +1146,21 @@ async function editCategory(categoryId) {
     }
 }
 
-// Delete category
+// Delete category (uses custom confirmation modal instead of native confirm)
 async function deleteCategory(categoryId) {
     const category = sidebarCategories.find(cat => cat.id === categoryId);
-    if (category && confirm(`Are you sure you want to delete "${category.name}"?`)) {
+    if (!category) return;
+
+    // Try to use the custom confirm delete modal
+    const overlay = document.getElementById('confirmDeleteOverlay');
+    const messageEl = document.getElementById('confirmDeleteMessage');
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    const cancelBtn = document.getElementById('cancelDeleteBtn');
+    const closeBtn = document.getElementById('closeConfirmDeleteBtn');
+
+    // Fallback to native confirm if modal elements are missing
+    if (!overlay || !messageEl || !confirmBtn || !cancelBtn || !closeBtn) {
+        if (!confirm(`Are you sure you want to delete "${category.name}"?`)) return;
         try {
             await deleteCategoryFromFirebase(categoryId);
         } catch (error) {
@@ -1054,22 +1168,70 @@ async function deleteCategory(categoryId) {
             alert('Failed to delete category. Please try again.');
             return;
         }
-
-        // Update local cache/UI after successful deletion
         sidebarCategories = sidebarCategories.filter(cat => cat.id !== categoryId);
         localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
-        
-        // If currently viewing this category, switch to all products
         if (currentCategory === categoryId) {
             filterByCategory('all');
         } else {
             renderSidebar();
         }
-        
+        renderExistingCategories();
+        populateCategoryDropdowns();
+        showNotification(`Category "${category.name}" deleted successfully!`, 'success');
+        return;
+    }
+
+    // Configure and show the modal
+    messageEl.textContent = `Are you sure you want to delete "${category.name}"?`;
+    overlay.classList.add('active');
+
+    // Helper to close modal and clean handlers
+    const cleanupAndClose = () => {
+        overlay.classList.remove('active');
+        confirmBtn.onclick = null;
+        cancelBtn.onclick = null;
+        closeBtn.onclick = null;
+        overlay.onclick = null;
+    };
+
+    // Close modal when clicking outside content
+    overlay.onclick = function (event) {
+        if (event.target === overlay) {
+            cleanupAndClose();
+        }
+    };
+
+    // Cancel/close handlers
+    cancelBtn.onclick = cleanupAndClose;
+    closeBtn.onclick = cleanupAndClose;
+
+    // Confirm deletion handler
+    confirmBtn.onclick = async function () {
+        try {
+            await deleteCategoryFromFirebase(categoryId);
+        } catch (error) {
+            console.error('Error deleting category from Firebase:', error);
+            alert('Failed to delete category. Please try again.');
+            cleanupAndClose();
+            return;
+        }
+
+        // Update local cache/UI after successful deletion
+        sidebarCategories = sidebarCategories.filter(cat => cat.id !== categoryId);
+        localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
+
+        // If currently viewing this category, switch to all products
+        if (typeof currentCategory !== 'undefined' && currentCategory === categoryId) {
+            filterByCategory('all');
+        } else {
+            renderSidebar();
+        }
+
         renderExistingCategories();
         populateCategoryDropdowns(); // Refresh dropdowns after deletion
         showNotification(`Category "${category.name}" deleted successfully!`, 'success');
-    }
+        cleanupAndClose();
+    };
 }
 
 // Multiple Image Management Functions

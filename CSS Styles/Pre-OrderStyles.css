@@ -150,6 +150,14 @@
     display: flex;
     gap: 15px;
     margin-top: 20px;
+    justify-content: flex-end;
+}
+
+/* Default: place cancel on the right for action rows */
+.modal-actions .cancel-btn,
+.modal-actions .modal-btn.cancel,
+.modal-actions .cancel-edit-btn {
+    order: 99;
 }
 
 .preorder-btn {

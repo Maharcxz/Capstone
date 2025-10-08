@@ -78,7 +78,7 @@
     pointer-events: none;
 }
 
-.modal-header {
+.login-modal .modal-header {
     text-align: center;
     margin-bottom: 2.5rem;
     position: relative;
@@ -127,8 +127,7 @@
     transform: scale(1.05);
 }
 
-.login-modal .modal-header .modal-title,
-.modal-title {
+.login-modal .modal-header .modal-title {
     font-family: 'Cinzel', serif;
     font-size: 32px;
     font-weight: 200;

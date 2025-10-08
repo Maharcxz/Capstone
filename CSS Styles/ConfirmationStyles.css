@@ -22,7 +22,7 @@
 .confirmation-modal {
     background-color: #540000;
     border-radius: 20px;
-    padding: 30px;
+    padding: 18px 20px 20px 20px;
     width: 90%;
     max-width: 500px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
@@ -37,10 +37,11 @@
 
 .confirmation-modal-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
+    position: relative;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -50,14 +51,20 @@
     font-weight: normal;
     margin: 0;
     letter-spacing: 1px;
+    text-align: center;
+    width: 100%;
 }
 
 .close-confirmation {
     color: white;
-    font-size: 24px;
+    font-size: 22px;
     cursor: pointer;
-    padding: 5px;
+    padding: 4px;
     line-height: 1;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .close-confirmation:hover {

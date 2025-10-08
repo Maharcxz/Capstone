@@ -301,30 +301,53 @@
 .modal-header {
     background: #540000;
     color: white;
-    padding: 20px;
+    padding: 8px 12px;
     border-radius: 12px 12px 0 0;
     display: flex;
-    justify-content: space-between;
+    justify-content: center !important;
     align-items: center;
+    position: relative;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Strict centering for Pre-Orders modals */
+#confirmActionModal .modal-header,
+#orderDetailsModal .modal-header {
+    display: grid;
+    place-items: center; /* ensures perfect centering */
+    text-align: center;
+    background: linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%);
+    color: white;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px 12px 0 0;
+    padding: 12px 16px; /* add some space in header */
+}
+#confirmActionModal .modal-header h2,
+#orderDetailsModal .modal-header h2 {
+    text-align: center;
+    margin: 0 auto;
+    width: 100%;
+    justify-self: center;
 }
 
 .modal-header h2 {
     margin: 0;
     font-family: 'Poppins', sans-serif;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 600;
+    text-align: center;
+    width: 100%;
 }
 
 .close {
     position: absolute;
-    top: 15px;
-    right: 20px;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 28px;
+    top: 12px;
+    right: 16px;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 22px;
     font-weight: bold;
     cursor: pointer;
-    transition: color 0.3s ease;
+    transition: color 0.2s ease;
     line-height: 1;
     z-index: 1000;
 }
@@ -333,8 +356,11 @@
     color: white;
 }
 
+/* Remove the X close icon for modals on admin pages */
+.modal .close { display: none !important; }
+
 .modal-body {
-    padding: 30px;
+    padding: 22px;
     max-height: 60vh;
     overflow-y: auto;
 }
@@ -394,9 +420,42 @@
 .modal-footer {
     padding: 20px 30px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    text-align: right;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 0 0 12px 12px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Default: place cancel on the right side for all modal footers */
+.modal-footer .cancel-btn,
+.modal-footer .modal-btn.cancel,
+.modal-footer #confirmCancelBtn,
+.modal-footer .cancel-edit-btn {
+    order: 99;
+}
+
+/* Smaller modal sizes and centered text for confirmation & order details */
+#confirmActionModal .modal-content {
+    max-width: 420px;
+    width: 92%;
+    margin: 6% auto;
+}
+#confirmActionModal .modal-body {
+    text-align: center;
+}
+#confirmActionModal .modal-body p {
+    margin: 0 0 10px;
+}
+#orderDetailsModal .modal-content {
+    max-width: 540px;
+}
+/* Smaller footer for preorders modals */
+#confirmActionModal .modal-footer,
+#orderDetailsModal .modal-footer {
+    padding: 10px 16px; /* reduced footer padding */
+    gap: 8px; /* slightly tighter spacing between buttons */
 }
 
 /* Responsive design for modal */
