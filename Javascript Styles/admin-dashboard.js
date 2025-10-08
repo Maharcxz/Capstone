@@ -520,10 +520,11 @@ async function toggleProductVisibility(productId, currentVisibility, productTitl
         const confirmBtn = document.getElementById('confirmDeleteBtn');
         const cancelBtn = document.getElementById('cancelDeleteBtn');
         const closeBtn = document.getElementById('closeConfirmDeleteBtn');
+        const titleEl = document.querySelector('#confirmDeleteModal .modal-title');
 
         // Fallback to native confirm if modal elements are missing
         if (!overlay || !messageEl || !confirmBtn || !cancelBtn || !closeBtn) {
-            const proceed = confirm(`Are you sure you want to ${actionText.toLowerCase()} \"${productTitle}\"?`);
+            const proceed = confirm(`Are you sure you want to ${actionText.toLowerCase()} "${productTitle}"?`);
             if (!proceed) return;
 
             // Fetch only when confirmed
@@ -541,8 +542,10 @@ async function toggleProductVisibility(productId, currentVisibility, productTitl
 
         // Configure message and show modal
         const originalConfirmText = confirmBtn.textContent;
-        messageEl.textContent = `Are you sure you want to ${actionText.toLowerCase()} \"${productTitle}\"?`;
+        const originalTitleText = titleEl ? titleEl.textContent : null;
+        messageEl.textContent = `Are you sure you want to ${actionText.toLowerCase()} "${productTitle}"?`;
         confirmBtn.textContent = actionText;
+        if (titleEl) titleEl.textContent = `Confirm ${actionText}`;
         overlay.classList.add('active');
 
         // Helper to close modal and clean handlers (and restore button text)
@@ -553,6 +556,7 @@ async function toggleProductVisibility(productId, currentVisibility, productTitl
             closeBtn.onclick = null;
             overlay.onclick = null;
             confirmBtn.textContent = originalConfirmText;
+            if (titleEl && originalTitleText) titleEl.textContent = originalTitleText;
         };
 
         // Click-outside closes modal

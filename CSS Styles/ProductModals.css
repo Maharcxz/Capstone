@@ -602,6 +602,10 @@
         width: 100%;
         margin: 0;
     }
+    /* Add right padding for product modal content on mobile */
+    #productModal .modal-content {
+        padding-right: 16px;
+    }
     
     .product-detail-modal {
         width: 100%;
