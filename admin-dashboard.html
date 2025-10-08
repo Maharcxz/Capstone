@@ -500,6 +500,25 @@
         </div>
     </div>
 
+    <!-- Edit Category Modal -->
+    <div id="editCategoryOverlay" class="modal-overlay">
+        <div id="editCategoryModal" class="confirm-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Category</h2>
+                <button id="closeEditCategoryBtn" class="close-btn" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-content">
+                <label for="editCategoryName">Category Name</label>
+                <input type="text" id="editCategoryName" placeholder="Enter category name">
+                <p id="editCategoryError" style="display:none;color:#ff4d4f;margin-top:8px;"></p>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="modal-btn save" id="saveEditCategoryBtn">Save</button>
+                <button type="button" class="modal-btn cancel" id="cancelEditCategoryBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script src="Javascript Styles/ContentEditingFunc.js"></script>
     <script src="Javascript Styles/EventListenerFunc.js"></script>
     <script src="Javascript Styles/FrameEditingModal.js"></script>

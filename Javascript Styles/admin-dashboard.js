@@ -1107,7 +1107,17 @@ function renderExistingCategories() {
 // Edit category (placeholder for future enhancement)
 async function editCategory(categoryId) {
     const category = sidebarCategories.find(cat => cat.id === categoryId);
-    if (category) {
+    if (!category) return;
+
+    const overlay = document.getElementById('editCategoryOverlay');
+    const input = document.getElementById('editCategoryName');
+    const saveBtn = document.getElementById('saveEditCategoryBtn');
+    const cancelBtn = document.getElementById('cancelEditCategoryBtn');
+    const closeBtn = document.getElementById('closeEditCategoryBtn');
+    const errorEl = document.getElementById('editCategoryError');
+
+    // Fallback to native prompt if modal elements are missing
+    if (!overlay || !input || !saveBtn || !cancelBtn || !closeBtn || !errorEl) {
         const newName = prompt('Enter new category name:', category.name);
         if (newName && newName.trim() && newName.trim() !== category.name) {
             const normalizedName = newName.trim().toLowerCase();
@@ -1119,35 +1129,102 @@ async function editCategory(categoryId) {
             category.id = newId;
 
             try {
-                // Save under the new deterministic id
                 await saveCategoryToFirebase(category);
-
-                // Cleanup duplicates with same normalized name and remove old id if changed
-                try {
-                    await firebaseServices.cleanupDuplicateCategories(newId, normalizedName);
-                } catch (cleanupErr) {
-                    console.warn('Failed to cleanup duplicates after edit:', cleanupErr);
-                }
+                try { await firebaseServices.cleanupDuplicateCategories(newId, normalizedName); } catch (cleanupErr) { console.warn('Failed to cleanup duplicates after edit:', cleanupErr); }
                 if (newId !== oldId) {
-                    try {
-                        await deleteCategoryFromFirebase(oldId);
-                    } catch (delErr) {
-                        console.warn('Failed to delete old category id after edit:', delErr);
-                    }
+                    try { await deleteCategoryFromFirebase(oldId); } catch (delErr) { console.warn('Failed to delete old category id after edit:', delErr); }
                 }
-
-                // Persist and re-render with a deduplicated snapshot
                 sidebarCategories = uniqueCategoriesByName(sidebarCategories);
                 localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
                 renderSidebar();
                 renderExistingCategories();
-                showNotification(`Category updated successfully!`, 'success');
+                populateCategoryDropdowns();
+                showNotification('Category updated successfully!', 'success');
             } catch (error) {
                 console.error('Error updating category in Firebase:', error);
                 alert('Failed to update category. Please try again.');
             }
         }
+        return;
     }
+
+    // Configure and show modal
+    input.value = category.name;
+    errorEl.style.display = 'none';
+    errorEl.textContent = '';
+    overlay.classList.add('active');
+
+    const cleanupAndClose = () => {
+        overlay.classList.remove('active');
+        saveBtn.onclick = null;
+        cancelBtn.onclick = null;
+        closeBtn.onclick = null;
+        overlay.onclick = null;
+    };
+
+    // Close modal when clicking outside content
+    overlay.onclick = function (event) {
+        if (event.target === overlay) {
+            cleanupAndClose();
+        }
+    };
+
+    // Cancel/close handlers
+    cancelBtn.onclick = cleanupAndClose;
+    closeBtn.onclick = cleanupAndClose;
+
+    // Save handler
+    saveBtn.onclick = async function () {
+        const newName = (input.value || '').trim();
+        if (!newName) {
+            errorEl.textContent = 'Please enter a category name.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        if (newName === category.name) {
+            cleanupAndClose();
+            return;
+        }
+
+        const normalizedName = newName.toLowerCase();
+
+        // Prevent naming conflict with another category
+        const conflict = sidebarCategories.some(c => ((c.name || '').trim().toLowerCase() === normalizedName) && c.id !== category.id);
+        if (conflict) {
+            errorEl.textContent = 'A category with this name already exists.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        const oldId = category.id;
+        const newId = generateCategoryId(newName);
+
+        // Update local object
+        category.name = newName;
+        category.id = newId;
+
+        try {
+            await saveCategoryToFirebase(category);
+            try { await firebaseServices.cleanupDuplicateCategories(newId, normalizedName); } catch (cleanupErr) { console.warn('Failed to cleanup duplicates after edit:', cleanupErr); }
+            if (newId !== oldId) {
+                try { await deleteCategoryFromFirebase(oldId); } catch (delErr) { console.warn('Failed to delete old category id after edit:', delErr); }
+            }
+
+            // Persist and re-render with a deduplicated snapshot
+            sidebarCategories = uniqueCategoriesByName(sidebarCategories);
+            localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
+            renderSidebar();
+            renderExistingCategories();
+            populateCategoryDropdowns();
+            showNotification('Category updated successfully!', 'success');
+            cleanupAndClose();
+        } catch (error) {
+            console.error('Error updating category in Firebase:', error);
+            errorEl.textContent = 'Failed to update category. Please try again.';
+            errorEl.style.display = 'block';
+        }
+    };
 }
 
 // Delete category (uses custom confirmation modal instead of native confirm)

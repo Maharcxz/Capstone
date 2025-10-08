@@ -675,6 +675,147 @@
     box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
 }
 
+/* Edit Category Modal (styles mirror Confirm Delete Modal) */
+#editCategoryModal {
+    background: #2c1810;
+    border-radius: 12px;
+    max-width: 520px;
+    width: 95%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+}
+#editCategoryModal .modal-header {
+    background: linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%);
+    color: white;
+    padding: 18px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+#editCategoryModal .modal-title {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+    text-align: center !important;
+    width: 85%;
+}
+#editCategoryModal .close-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: none;
+    line-height: 1;
+    padding: 0;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#editCategoryModal .close-btn:hover {
+    color: rgba(255, 255, 255, 0.8);
+    background: none;
+}
+/* ensure X close control is visible like other admin modals */
+#editCategoryModal .close-btn { display: inline-flex; }
+
+#editCategoryModal .modal-content {
+    padding: 20px;
+    display: block;
+    max-width: 480px;
+    width: 92%;
+    box-sizing: border-box;
+}
+#editCategoryModal label {
+    display: block;
+    margin-bottom: 15px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+}
+#editCategoryModal input[type="text"] {
+    width: 90%;
+    padding: 15px 15px 15px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: #1a0f0a;
+    color: #fff;
+    outline: none;
+    transition: all 0.2s ease;
+}
+#editCategoryModal input[type="text"]::placeholder { color: rgba(255, 255, 255, 0.6); }
+#editCategoryModal input[type="text"]:focus {
+    border-color: #20c997;
+    box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.25);
+}
+#editCategoryError { color: #ff4d4f; }
+
+#editCategoryModal .modal-actions {
+    display: block;
+    text-align: center;
+    padding: 1px 2px 20px 2px;
+}
+#editCategoryModal .modal-btn {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    gap: 6px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 140px;
+    margin: 0 6px;
+    padding: 12px 20px;
+}
+#editCategoryModal .modal-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+    transition: left 0.5s ease;
+    pointer-events: none;
+}
+#editCategoryModal .modal-btn:hover { transform: translateY(-1px); }
+#editCategoryModal .modal-btn:hover::before { left: 100%; }
+#editCategoryModal .modal-btn:active { transform: translateY(0); }
+
+#editCategoryModal .modal-btn.save {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+#editCategoryModal .modal-btn.save:hover {
+    background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+#editCategoryModal .modal-btn.cancel {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: white;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+#editCategoryModal .modal-btn.cancel:hover {
+    background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}
+
 .modal-header {
     background: linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%);
     color: white;
