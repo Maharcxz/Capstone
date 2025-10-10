@@ -285,6 +285,31 @@
     margin: 0;
 }
 
+/* Styled description properties */
+.description-properties {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.description-property {
+    color: white;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+}
+
+.description-property strong {
+    color: #ff6b6b;
+    margin-right: 5px;
+    font-weight: 600;
+}
+
+.description-text {
+    color: white;
+    line-height: 1.8;
+}
+
 .product-actions {
     display: flex;
     gap: 15px;

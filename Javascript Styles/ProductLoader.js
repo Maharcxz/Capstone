@@ -285,7 +285,22 @@ function openProductDetailModal(productId) {
     // Populate modal with product data
     document.getElementById('productDetailTitle').textContent = product.title;
     document.getElementById('productDetailPrice').textContent = `₱ ${parseFloat(product.price).toLocaleString()}`;
-    document.getElementById('productDetailDescription').textContent = product.description || 'No description available.';
+    
+    // Format description as structured HTML
+    const descriptionElement = document.getElementById('productDetailDescription');
+    if (product.description) {
+        // Check if description is already formatted
+        if (product.description.includes('Material:') || product.description.includes('Shape:') || product.description.includes('Color:') || product.description.includes('Bridge:')) {
+            // Parse the description and format it as HTML
+            const descriptionHTML = formatDescriptionAsHTML(product.description);
+            descriptionElement.innerHTML = descriptionHTML;
+        } else {
+            // Use plain text if not in the expected format
+            descriptionElement.textContent = product.description;
+        }
+    } else {
+        descriptionElement.textContent = 'No description available.';
+    }
 
     // Update stock information
     updateStockDisplay(product.stock || 0);
@@ -354,6 +369,109 @@ function setMainImage(imageSrc, index) {
     document.querySelectorAll('.thumbnail-image').forEach((thumb, i) => {
         thumb.classList.toggle('active', i === index);
     });
+}
+
+// Function to format product description as structured HTML
+function formatDescriptionAsHTML(description) {
+    // Create a structured HTML from description text
+    let html = '';
+    
+    // Split by line breaks or look for specific patterns
+    const lines = description.split(/[\n\r]+/);
+    
+    // If no line breaks, try to parse from the format in the image
+    if (lines.length <= 1) {
+        // Extract key properties using regex patterns
+        const materialMatch = description.match(/Material:\s*(.*?)(?=Shape:|Color:|Bridge:|Other:|$)/i);
+        const shapeMatch = description.match(/Shape:\s*(.*?)(?=Material:|Color:|Bridge:|Other:|$)/i);
+        const colorMatch = description.match(/Color:\s*(.*?)(?=Material:|Shape:|Bridge:|Other:|$)/i);
+        const bridgeMatch = description.match(/Bridge:\s*(.*?)(?=Material:|Shape:|Color:|Other:|$)/i);
+        const otherMatch = description.match(/Other:\s*(.*?)(?=Material:|Shape:|Color:|Bridge:|$)/i);
+        
+        // Check if there's any content that doesn't match the standard properties
+        let remainingContent = description;
+        const standardPatterns = [
+            /Material:\s*(.*?)(?=Shape:|Color:|Bridge:|Other:|$)/i,
+            /Shape:\s*(.*?)(?=Material:|Color:|Bridge:|Other:|$)/i,
+            /Color:\s*(.*?)(?=Material:|Shape:|Bridge:|Other:|$)/i,
+            /Bridge:\s*(.*?)(?=Material:|Shape:|Color:|Other:|$)/i,
+            /Other:\s*(.*?)(?=Material:|Shape:|Color:|Bridge:|$)/i
+        ];
+        
+        standardPatterns.forEach(pattern => {
+            const match = remainingContent.match(pattern);
+            if (match) {
+                remainingContent = remainingContent.replace(match[0], '');
+            }
+        });
+        
+        // Build HTML with extracted properties
+        html = '<div class="description-properties">';
+        
+        if (materialMatch && materialMatch[1]) {
+            html += `<div class="description-property"><strong>Material:</strong> ${materialMatch[1].trim()}</div>`;
+        }
+        
+        if (shapeMatch && shapeMatch[1]) {
+            html += `<div class="description-property"><strong>Shape:</strong> ${shapeMatch[1].trim()}</div>`;
+        }
+        
+        if (colorMatch && colorMatch[1]) {
+            html += `<div class="description-property"><strong>Color:</strong> ${colorMatch[1].trim()}</div>`;
+        }
+        
+        if (bridgeMatch && bridgeMatch[1]) {
+            html += `<div class="description-property"><strong>Bridge:</strong> ${bridgeMatch[1].trim()}</div>`;
+        }
+        
+        // Add explicit "Other" section if it exists
+        if (otherMatch && otherMatch[1]) {
+            html += `<div class="description-property"><strong>Other:</strong> ${otherMatch[1].trim()}</div>`;
+        }
+        
+        // Add any remaining content as "Other" if it's not empty
+        remainingContent = remainingContent.trim();
+        if (remainingContent && !otherMatch) {
+            html += `<div class="description-property"><strong>Other:</strong> ${remainingContent}</div>`;
+        }
+        
+        html += '</div>';
+    } else {
+        // Process line by line if there are multiple lines
+        html = '<div class="description-properties">';
+        let otherContent = [];
+        
+        lines.forEach(line => {
+            if (line.trim()) {
+                const parts = line.split(':');
+                if (parts.length >= 2) {
+                    const property = parts[0].trim();
+                    const value = parts.slice(1).join(':').trim();
+                    
+                    // Check if it's a standard property or should go to "Other"
+                    const standardProperties = ['Material', 'Shape', 'Color', 'Bridge', 'Other'];
+                    if (standardProperties.includes(property)) {
+                        html += `<div class="description-property"><strong>${property}:</strong> ${value}</div>`;
+                    } else {
+                        // Add to other content
+                        otherContent.push(`${property}: ${value}`);
+                    }
+                } else {
+                    // Add to other content
+                    otherContent.push(line);
+                }
+            }
+        });
+        
+        // Add "Other" section if there's any other content
+        if (otherContent.length > 0) {
+            html += `<div class="description-property"><strong>Other:</strong> ${otherContent.join(', ')}</div>`;
+        }
+        
+        html += '</div>';
+    }
+    
+    return html;
 }
 
 function closeProductDetailModal() {
