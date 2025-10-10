@@ -326,9 +326,12 @@ async function editProduct(productId) {
         clearAllGlbFiles(); // Clear any existing .glb files first
         
         if (product.glbFiles && Array.isArray(product.glbFiles)) {
-            // Load multiple .glb files from array
+            // Load multiple .glb files from array; support both saved shapes (url/src)
             product.glbFiles.forEach((glbFile, index) => {
-                addGlbFileToPreview(glbFile.src, glbFile.name || `GLB Model ${index + 1}`);
+                const source = (glbFile && (glbFile.url || glbFile.src)) || '';
+                if (typeof source === 'string' && source.trim()) {
+                    addGlbFileToPreview(source, glbFile.name || `GLB Model ${index + 1}`);
+                }
             });
         }
         
@@ -390,16 +393,32 @@ function normalizeExternalUrl(url) {
 // Handle product form submission
 async function handleProductSubmit(event) {
     event.preventDefault();
+    // Surface current auth state for clearer diagnostics
+    try {
+        const firebaseUser = firebase.auth && firebase.auth().currentUser;
+        if (!firebaseUser) {
+            console.warn('No Firebase user is authenticated. Writes may be blocked by database rules.');
+        }
+    } catch (e) {
+        console.warn('Unable to read Firebase auth state:', e);
+    }
     
     // Get images from the productImages array
     const images = productImages.map(img => img.src);
     
     // Get .glb files from the productGlbFiles array
-    const glbFiles = productGlbFiles.map(glb => ({
-        url: typeof glb.src === 'string' ? normalizeExternalUrl(glb.src) : glb.src,
-        name: glb.name,
-        size: glb.size
-    }));
+    // Only persist real URLs (skip temporary blob: URLs from local File previews)
+    const glbFiles = productGlbFiles
+        .map(glb => {
+            const rawUrl = typeof glb.src === 'string' ? glb.src : '';
+            const normalizedUrl = normalizeExternalUrl(rawUrl);
+            return {
+                url: normalizedUrl,
+                name: glb.name,
+                size: glb.size
+            };
+        })
+        .filter(glb => typeof glb.url === 'string' && glb.url.trim() && !glb.url.startsWith('blob:'));
     
     // Debug logging
     console.log('Product Images Array:', productImages);
@@ -446,7 +465,15 @@ async function handleProductSubmit(event) {
         closeProductModal();
     } catch (error) {
         console.error('Error saving product:', error);
-        showNotification('Error saving product', 'error');
+        const msg = (error && (error.message || error.code)) ? (error.message || error.code) : '';
+        if (msg) {
+            showNotification(`Error saving product: ${msg}`, 'error');
+        } else {
+            showNotification('Error saving product', 'error');
+        }
+        if (msg && /PERMISSION_DENIED|permission|auth/i.test(msg)) {
+            showNotification('Please log in with your Firebase admin account and retry.', 'error');
+        }
     }
 }
 
