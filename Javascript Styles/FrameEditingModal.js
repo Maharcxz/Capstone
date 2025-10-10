@@ -2,14 +2,26 @@
 function openFrameEditModal(editButton) {
     if (!isAdminMode) return;
     
-    const productCard = editButton.closest('.product-card');
-    const productTitle = productCard.querySelector('.product-title').textContent;
-    const productPrice = productCard.querySelector('.product-price').textContent;
+    const productCard = editButton ? editButton.closest('.product-card') : null;
+    if (!productCard) {
+        console.warn('openFrameEditModal: product card element not found for edit button');
+        return;
+    }
+    
+    const titleEl = productCard.querySelector('.product-title');
+    const priceEl = productCard.querySelector('.product-price');
+    const productTitle = titleEl ? titleEl.textContent : '';
+    const productPrice = priceEl ? priceEl.textContent : '';
     
     const modal = document.getElementById('frameEditModalOverlay');
     const nameInput = document.getElementById('frameNameInput');
     const priceInput = document.getElementById('framePriceInput');
     const statusInput = document.getElementById('frameStatusInput');
+    
+    if (!modal) {
+        console.warn('openFrameEditModal: frameEditModalOverlay not found');
+        return;
+    }
     
     // Populate the form with current values
     if (nameInput) nameInput.value = productTitle;
@@ -17,12 +29,11 @@ function openFrameEditModal(editButton) {
     if (statusInput) statusInput.value = 'Available';
     
     // Store reference to the product card being edited
-    modal.dataset.editingCard = productCard.dataset.cardIndex || Array.from(document.querySelectorAll('.product-card')).indexOf(productCard);
+    const allCards = Array.from(document.querySelectorAll('.product-card'));
+    modal.dataset.editingCard = productCard.dataset.cardIndex || allCards.indexOf(productCard);
     
-    if (modal) {
-        modal.classList.add('active');
-        modal.style.display = 'flex';
-    }
+    modal.classList.add('active');
+    modal.style.display = 'flex';
 }
 
 function closeFrameEditModal() {
