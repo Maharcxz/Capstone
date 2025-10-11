@@ -37,12 +37,11 @@ function renderSidebarCategories() {
     // Clear existing categories
     sidebarContent.innerHTML = '';
 
-    // Always add "All Frames" as the first option
+    // Always add "All Frame Brands" as the first option
     const allFramesLink = document.createElement('a');
-    allFramesLink.href = '#';
+    allFramesLink.href = './index.html';
     allFramesLink.className = 'frame-category';
-    allFramesLink.textContent = 'All Frames';
-    allFramesLink.onclick = () => selectFrameCategory('All Frames');
+    allFramesLink.textContent = 'All Frame Brands';
     sidebarContent.appendChild(allFramesLink);
 
     // Load and add dynamic categories
