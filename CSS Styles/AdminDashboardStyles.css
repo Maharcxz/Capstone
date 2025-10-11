@@ -903,8 +903,10 @@
 
 .form-textarea {
     resize: vertical;
-    min-height: 100px;
+    height: 200px;
+    min-height: 200px;
     line-height: 1.5;
+    overflow-y: auto;
 }
 
 .file-input {
