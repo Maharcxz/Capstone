@@ -122,9 +122,9 @@
     color: white;
     font-size: 14px;
     font-family: 'Poppins', sans-serif;
-    width: clamp(160px, 17vw, 320px);
+    width: clamp(145px, 15vw, 320px);
     min-width: 0;
-    max-width: none;
+    max-width: 230px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
