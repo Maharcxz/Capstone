@@ -534,8 +534,10 @@
 
 .admin-stock-controls {
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: row; /* Place input and button on the same row */
+    align-items: center; /* Align input and button vertically */
+    gap: 10px; /* Spacing between input and button */
+    flex-wrap: wrap; /* Wrap on small screens */
 }
 
 .stock-input-group {
