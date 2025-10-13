@@ -558,6 +558,8 @@
     color: #333;
     font-size: 14px;
     width: 150px;
+    box-sizing: border-box; /* Ensure width includes padding & border */
+    height: 40px; /* Match button height */
 }
 
 #adminStockInput:focus {
@@ -570,12 +572,18 @@
     background: linear-gradient(135deg, #540000 0%, #8B0000 100%);
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 10px; /* Align vertical/horizontal padding with input */
     border-radius: 6px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    width: fit-content;
+    width: 150px; /* Match input width */
+    box-sizing: border-box; /* Ensure width includes padding */
+    height: 40px; /* Match input height */
+    display: inline-flex; /* Center text horizontally/vertically */
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 .update-stock-btn:hover {

@@ -171,9 +171,9 @@ function createContactEditModal() {
     const phoneMatch = currentContent.match(/Phone:\s*([^<]+)/i);
     const emailMatch = currentContent.match(/Email:\s*([^<]+)/i);
     const addressMatch = currentContent.match(/Address:\s*([^<]+)/i);
-    const mondayFridayMatch = currentContent.match(/Monday to Friday[^\d]*([\d:]+\s*[AP]M\s*to\s*[\d:]+\s*[AP]M)/i);
-    const saturdayMatch = currentContent.match(/Saturday[^\d]*([\d:]+\s*[AP]M\s*to\s*[\d:]+\s*[AP]M)/i);
-    const sundayMatch = currentContent.match(/Sunday[^\d]*([\d:]+\s*[AP]M\s*to\s*[\d:]+\s*[AP]M)/i);
+    const mondayFridayMatch = currentContent.match(/Monday to Friday[^\d]*([\d+:]+\s*[AP]M\s*to\s*[\d+:]+\s*[AP]M)/i);
+    const saturdayMatch = currentContent.match(/Saturday[^\d]*([\d+:]+\s*[AP]M\s*to\s*[\d+:]+\s*[AP]M)/i);
+    const sundayMatch = currentContent.match(/Sunday[^\d]*([\d+:]+\s*[AP]M\s*to\s*[\d+:]+\s*[AP]M)/i);
     const footerMatch = currentContent.match(/<p class="contact-footer">([^<]+)<\/p>/i);
     const descriptionMatch = currentContent.match(/<p class="contact-description">([^<]+)<\/p>/i);
     
@@ -187,12 +187,25 @@ function createContactEditModal() {
         <div class="edit-modal-overlay active" id="editModalOverlay">
             <div class="contact-edit-modal">
                 <div class="edit-modal-header">
-                    <h3><i class="fas fa-edit"></i> Edit Contact Information</h3>
+                    <h3>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" aria-hidden="true">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5l4 4-11 11H5.5v-4z"></path>
+                        </svg>
+                        Edit Contact Information
+                    </h3>
                     <button class="close-edit-modal" onclick="closeEditModal()">&times;</button>
                 </div>
                 <div class="contact-edit-content" style="max-height: 70vh; overflow-y: auto; padding-right: 10px;">
                     <div class="form-section">
-                        <h4><i class="fas fa-file-text"></i> Contact Description</h4>
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" aria-hidden="true">
+                                <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                                <line x1="7" y1="10" x2="17" y2="10"></line>
+                                <line x1="7" y1="14" x2="13" y2="14"></line>
+                            </svg>
+                            Contact Description
+                        </h4>
                         <div class="form-group">
                             <label for="contactDescription">Description Text</label>
                             <textarea id="contactDescription" rows="3" placeholder="We'd love to hear from you! Whether you have questions about our products, need assistance with your AR try-on experience, or want to schedule an appointment, our team is ready to help.">${descriptionMatch ? cleanText(descriptionMatch[1]) : ''}</textarea>
@@ -200,7 +213,14 @@ function createContactEditModal() {
                     </div>
                     
                     <div class="form-section">
-                        <h4><i class="fas fa-info-circle"></i> Contact Details</h4>
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <circle cx="12" cy="16" r="1"></circle>
+                            </svg>
+                            Contact Details
+                        </h4>
                         <div class="form-group">
                             <label for="contactPhone">Phone Number</label>
                             <input type="tel" id="contactPhone" value="${phoneMatch ? cleanText(phoneMatch[1]) : ''}" placeholder="+63 917 123 4567">
@@ -216,7 +236,14 @@ function createContactEditModal() {
                     </div>
                     
                     <div class="form-section">
-                        <h4><i class="fas fa-clock"></i> Business Hours</h4>
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9"></circle>
+                                <line x1="12" y1="12" x2="16" y2="12"></line>
+                                <line x1="12" y1="12" x2="12" y2="8"></line>
+                            </svg>
+                            Business Hours
+                        </h4>
                         <div class="form-group">
                             <label for="mondayFriday">Monday - Friday</label>
                             <input type="text" id="mondayFriday" value="${mondayFridayMatch ? cleanText(mondayFridayMatch[1]) : ''}" placeholder="9:00 AM to 7:00 PM">
@@ -232,7 +259,12 @@ function createContactEditModal() {
                     </div>
                     
                     <div class="form-section">
-                        <h4><i class="fas fa-comment"></i> Footer Message</h4>
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" aria-hidden="true">
+                                <path d="M21 15a3 3 0 01-3 3H8l-4 4V6a3 3 0 013-3h11a3 3 0 013 3z"></path>
+                            </svg>
+                            Footer Message
+                        </h4>
                         <div class="form-group">
                             <label for="contactFooter">Contact Footer Text</label>
                             <textarea id="contactFooter" rows="2" placeholder="Feel free to reach out through any of the above channels. We look forward to serving you!">${footerMatch ? cleanText(footerMatch[1]) : ''}</textarea>
@@ -240,8 +272,19 @@ function createContactEditModal() {
                     </div>
                     
                     <div class="edit-modal-actions">
-                        <button class="save-edit-btn" onclick="saveContactEditedContent()"><i class="fas fa-save"></i> Save Changes</button>
-                        <button class="cancel-edit-btn" onclick="closeEditModal()"><i class="fas fa-times"></i> Cancel</button>
+                        <button class="save-edit-btn" onclick="saveContactEditedContent()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" aria-hidden="true">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Save Changes
+                        </button>
+                        <button class="cancel-edit-btn" onclick="closeEditModal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" aria-hidden="true">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                            Cancel
+                        </button>
                     </div>
                 </div>
             </div>
@@ -353,12 +396,12 @@ function createAboutEditModal() {
         <div class="edit-modal-overlay active" id="editModalOverlay">
             <div class="contact-edit-modal">
                 <div class="edit-modal-header">
-                    <h3><i class="fas fa-info-circle"></i> Edit About Content</h3>
+                    <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="#ffffff" stroke-width="2"/><rect x="11" y="10" width="2" height="6" fill="#ffffff"/><circle cx="12" cy="7" r="1.5" fill="#ffffff"/></svg> Edit About Content</h3>
                     <button class="close-edit-modal" onclick="closeEditModal()">&times;</button>
                 </div>
                 <div class="contact-edit-content" style="max-height: 70vh; overflow-y: auto; padding-right: 10px;">
                     <div class="form-section">
-                        <h4><i class="fas fa-edit"></i> About Us Content</h4>
+                        <h4><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" fill="#ffffff"/><path d="M20.71 7.04a1 1 0 0 0 0-1.41L18.37 3.29a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="#ffffff"/></svg> About Us Content</h4>
                         <div class="form-group">
                             <label for="aboutTextarea">Content</label>
                             <textarea id="aboutTextarea" placeholder="Enter your about us content here. Use double line breaks to separate paragraphs..." rows="12">${combinedText}</textarea>
@@ -367,10 +410,10 @@ function createAboutEditModal() {
                     
                     <div class="edit-modal-actions">
                         <button class="save-edit-btn" onclick="saveAboutEditedContent()">
-                            <i class="fas fa-save"></i> Save Changes
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Save Changes
                         </button>
                         <button class="cancel-edit-btn" onclick="closeEditModal()">
-                            <i class="fas fa-times"></i> Cancel
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M18 6L6 18" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/><path d="M6 6l12 12" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/></svg> Cancel
                         </button>
                     </div>
                 </div>
