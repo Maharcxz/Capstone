@@ -1,0 +1,85 @@
+html {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', 'Poppins', sans-serif;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(84, 0, 0, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(139, 0, 0, 0.2) 0%, transparent 50%),
+        linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 25%, #2d1b1b 50%, #1a1a1a 75%, #0f0f0f 100%);
+    min-height: 100vh;
+    color: white;
+    overflow-x: hidden;
+    line-height: 1.6;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.02) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.maintitle {
+    font-family: 'Playfair Display', 'Cinzel', serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 400;
+    color: white;
+    text-align: center;
+    letter-spacing: clamp(8px, 2vw, 20px);
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.subtitle {
+    font-family: 'Inter', 'Poppins', sans-serif;
+    font-size: clamp(14px, 2vw, 18px) !important;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+    letter-spacing: clamp(2px, 1vw, 4px);
+    margin-top: -5px;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.main-content {
+    padding: 0;
+    margin: 0;
+}
+
+/* Shared Empty State styling (matches homepage/admin look) */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: rgba(255, 255, 255, 0.7);
+}
+.empty-state h3 {
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+.empty-state p {
+    font-size: 16px;
+    margin-bottom: 25px;
+}

@@ -1,0 +1,68 @@
+/* Frame Types Menu */
+.frame-types-menu {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding-left: 0;
+    margin-left: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.frame-types-menu:hover {
+    opacity: 0.9;
+    transform: translateX(5px);
+}
+
+.menu-icon {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    cursor: pointer;
+}
+
+.menu-icon span {
+    width: 20px;
+    height: 2px;
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+.menu-text {
+    font-size: 16px;
+    color: white;
+}
+
+/* Frame Type Header Styles */
+.frame-type-header {
+    margin-bottom: 30px;
+    text-align: left;
+    padding-left: 0;
+}
+
+.frame-type-title {
+    font-size: 24px;
+    font-weight: normal;
+    letter-spacing: 2px;
+    color: white;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+/* Reduce hover effects on touch devices for instant response */
+@media (hover: none) and (pointer: coarse) {
+    .frame-types-menu {
+        transition: none;
+    }
+    .frame-types-menu:hover {
+        opacity: 1;
+        transform: none;
+    }
+    .menu-icon span {
+        transition: none;
+    }
+}
