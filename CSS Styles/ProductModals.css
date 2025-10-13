@@ -580,27 +580,27 @@
     box-shadow: 0 0 5px rgba(139, 0, 0, 0.3);
 }
 
-.update-stock-btn {
-    background: linear-gradient(135deg, #540000 0%, #8B0000 100%);
-    color: white;
-    border: none;
-    padding: 10px; /* Align vertical/horizontal padding with input */
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    width: 150px; /* Match input width */
-    box-sizing: border-box; /* Ensure width includes padding */
-    height: 40px; /* Match input height */
-    display: inline-flex; /* Center text horizontally/vertically */
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+/* Shared red button style for Update Stock, Virtual Try, and Pre-Order */
+.update-stock-btn,
+.product-actions .virtual-try-btn,
+.product-actions .preorder-btn {
+  background: linear-gradient(135deg, #540000, #8B0000) !important;
+  color: #fff !important;
+  border: none !important;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
-.update-stock-btn:hover {
-    background: linear-gradient(135deg, #8B0000 0%, #a50000 100%);
-    transform: translateY(-1px);
+.update-stock-btn:hover,
+.product-actions .virtual-try-btn:hover,
+.product-actions .preorder-btn:hover {
+  background: linear-gradient(135deg, #8B0000, #A50000) !important;
+  transform: translateY(-1px);
 }
 
 

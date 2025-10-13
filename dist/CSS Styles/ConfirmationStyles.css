@@ -156,23 +156,27 @@
     margin-top: 1.5rem;
 }
 
-.cancel-btn,
-.submit-btn {
-    background-color: transparent;
-    color: #ffffff;
-    border: 2px solid #ffffff;
-    padding: 0.8rem 1.25rem;
-    border-radius: 16px;
-    font-size: 0.95rem;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: all 0.25s ease-in-out;
+/* Unified primary style for confirmation actions buttons */
+.confirmation-container .form-actions .cancel-btn,
+.confirmation-container .form-actions .submit-btn {
+  background: linear-gradient(135deg, #540000 0%, #8B0000 50%, #540000 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0.9rem 2rem;
+  border-radius: 16px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  box-shadow: 0 6px 24px rgba(84, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
 }
 
-.cancel-btn:hover,
-.submit-btn:hover {
-    background-color: #ffffff;
-    color: #540000;
+.confirmation-container .form-actions .cancel-btn:hover,
+.confirmation-container .form-actions .submit-btn:hover {
+  background: linear-gradient(135deg, #6B0000 0%, #A00000 50%, #6B0000 100%) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(84, 0, 0, 0.5);
 }
 
 @media (max-width: 768px) {

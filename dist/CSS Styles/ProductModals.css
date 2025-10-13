@@ -530,12 +530,20 @@
     font-size: 16px;
     margin: 0 0 15px 0;
     font-weight: 600;
+    display: block; /* Ensure title is on its own line */
+}
+
+/* Force section to stack title and controls vertically even in admin mode */
+.admin-mode .admin-stock-section {
+    display: block !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
 }
 
 .admin-stock-controls {
     display: flex;
-    flex-direction: row; /* Place input and button on the same row */
-    align-items: center; /* Align input and button vertically */
+    flex-direction: row !important; /* Force input and button on the same row */
+    align-items: flex-end !important; /* align input and button bottoms */
     gap: 10px; /* Spacing between input and button */
     flex-wrap: wrap; /* Wrap on small screens */
 }
@@ -547,9 +555,98 @@
 }
 
 .stock-input-group label {
-    color: white;
+    color: #fff;
     font-size: 14px;
     font-weight: 500;
+    display: block !important; /* Ensure label sits above input */
+    margin-bottom: 6px; /* Space between label and input */
+}
+
+#adminStockInput {
+    padding: 10px;
+    border: 1px solid #540000;
+    border-radius: 4px;
+    background: white;
+    color: #333;
+    font-size: 14px;
+    width: 150px;
+    box-sizing: border-box; /* Ensure width includes padding & border */
+    height: 40px; /* Match button height */
+}
+
+#adminStockInput:focus {
+    outline: none;
+    border-color: #8B0000;
+    box-shadow: 0 0 5px rgba(139, 0, 0, 0.3);
+}
+
+/* Shared red button style for Update Stock, Virtual Try, and Pre-Order */
+.update-stock-btn,
+.product-actions .virtual-try-btn,
+.product-actions .preorder-btn {
+  background: linear-gradient(135deg, #540000, #8B0000) !important;
+  color: #fff !important;
+  border: none !important;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.update-stock-btn:hover,
+.product-actions .virtual-try-btn:hover,
+.product-actions .preorder-btn:hover {
+  background: linear-gradient(135deg, #8B0000, #A50000) !important;
+  transform: translateY(-1px);
+}
+
+
+
+/* Admin Mode Visibility */
+.admin-only {
+    display: none !important;
+}
+
+.admin-mode .admin-only {
+    display: flex !important;
+}
+
+/* Strong overrides to ensure the Admin Stock section stacks title and controls vertically */
+.admin-mode .admin-stock-section.admin-only {
+    display: block !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+}
+.admin-mode .admin-stock-section.admin-only h4 {
+    display: block;
+    margin: 0 0 12px 0; /* Ensure title sits above controls */
+}
+.admin-mode .admin-stock-section.admin-only .admin-stock-controls {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-end !important; /* ensure bottom alignment in admin mode */
+    gap: 10px !important;
+    flex-wrap: wrap !important;
+}
+
+.admin-mode .admin-stock-controls {
+    align-items: flex-end !important;
+}
+
+.stock-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stock-input-group label {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px; /* Space between label and input */
 }
 
 #adminStockInput {

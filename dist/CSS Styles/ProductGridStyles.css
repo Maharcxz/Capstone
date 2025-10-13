@@ -521,3 +521,23 @@
         gap: 5px;
     }
 }
+/* Ensure dist product grid buttons adopt unified red styling */
+.product-buttons .virtual-try-btn,
+.product-buttons .preorder-btn {
+  background: linear-gradient(135deg, #540000, #8B0000) !important;
+  color: #fff !important;
+  border: none !important;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.product-buttons .virtual-try-btn:hover,
+.product-buttons .preorder-btn:hover {
+  background: linear-gradient(135deg, #8B0000, #A50000) !important;
+  transform: translateY(-1px);
+}
