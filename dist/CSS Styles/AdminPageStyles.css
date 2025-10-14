@@ -440,7 +440,7 @@
 #confirmActionModal .modal-content {
     max-width: 420px;
     width: 92%;
-    margin: 6% auto;
+    margin: 0; /* remove offset to allow true centering */
 }
 #confirmActionModal .modal-body {
     text-align: center;
@@ -450,6 +450,7 @@
 }
 #orderDetailsModal .modal-content {
     max-width: 540px;
+    margin: 0; /* ensure no vertical offset */
 }
 /* Smaller footer for preorders modals */
 #confirmActionModal .modal-footer,
@@ -462,7 +463,12 @@
 @media (max-width: 768px) {
     .modal-content {
         width: 95%;
-        margin: 10% auto;
+        margin: 10% auto; /* default for other modals */
+    }
+    /* keep Pre-Orders modals centered on mobile */
+    #confirmActionModal .modal-content,
+    #orderDetailsModal .modal-content {
+        margin: 0;
     }
     
     .modal-header {
@@ -2397,4 +2403,21 @@
         backdrop-filter: blur(10px);
         transform: scale(0.8) translateY(50)
     }
+}
+
+/* Center Pre-Orders modal content in the viewport without relying on overlay display */
+#confirmActionModal .modal-content,
+#orderDetailsModal .modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: none; /* avoid transform conflict with slide-in */
+}
+
+/* Center the message inside the modal body when using confirm-center */
+.modal-body.confirm-center {
+    display: grid;
+    place-items: center;
+    padding: 16px;
 }
