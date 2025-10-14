@@ -663,16 +663,16 @@
     box-shadow: 0 6px 20px rgba(84, 0, 0, 0.4);
 }
 #confirmDeleteModal .modal-btn.cancel {
-    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    background: linear-gradient(135deg, #2f3136 0%, #262a2f 100%);
     color: white;
     border-radius: 8px;
     padding: 12px 20px;
     font-weight: 600;
-    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
 }
 #confirmDeleteModal .modal-btn.cancel:hover {
-    background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
-    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    background: linear-gradient(135deg, #3a3e44 0%, #2f3439 100%);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
 }
 
 /* Edit Category Modal (styles mirror Confirm Delete Modal) */
@@ -804,16 +804,16 @@
     box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
 }
 #editCategoryModal .modal-btn.cancel {
-    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    background: linear-gradient(135deg, #2f3136 0%, #262a2f 100%);
     color: white;
     border-radius: 8px;
     padding: 12px 20px;
     font-weight: 600;
-    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
 }
 #editCategoryModal .modal-btn.cancel:hover {
-    background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
-    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    background: linear-gradient(135deg, #3a3e44 0%, #2f3439 100%);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
 }
 
 .modal-header {
@@ -1035,12 +1035,12 @@
 }
 
 .cancel-btn {
-    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    background: linear-gradient(135deg, #2f3136 0%, #262a2f 100%);
     color: white;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.15);
     position: relative;
     overflow: hidden;
-    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
 .cancel-btn::before {
@@ -1055,10 +1055,10 @@
 }
 
 .cancel-btn:hover {
-    background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+    background: linear-gradient(135deg, #3a3e44 0%, #2f3439 100%);
     transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(108, 117, 125, 0.4);
-    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.22);
 }
 
 .cancel-btn:hover::before {

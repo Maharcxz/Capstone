@@ -532,8 +532,32 @@
             currentConfirmHandler = function() {
                 const preOrdersRef = firebase.database().ref('preOrders/' + orderId);
                 preOrdersRef.update({ status: newStatus })
-                    .then(() => {
+                    .then(async () => {
                         console.log(`Order ${orderId} status updated to ${newStatus}`);
+
+                        // If marking as completed, remove any notifications linked to this pre-order
+                        if (isCompleting) {
+                            try {
+                                const notifQuery = firebase.database().ref('notifications').orderByChild('preOrderId').equalTo(orderId);
+                                const snapshot = await notifQuery.once('value');
+                                const removals = [];
+                                snapshot.forEach(child => {
+                                    removals.push(child.ref.remove());
+                                });
+                                await Promise.all(removals);
+                                // Refresh notification UI/badge
+                                if (typeof updateNotificationBadge === 'function') {
+                                    updateNotificationBadge();
+                                }
+                                if (typeof updateNotificationsList === 'function') {
+                                    updateNotificationsList();
+                                }
+                                console.log(`Removed ${removals.length} notification(s) for order ${orderId}`);
+                            } catch (err) {
+                                console.error('Failed to remove notifications for completed order:', err);
+                            }
+                        }
+
                         loadPreOrders();
                     })
                     .catch(error => {
@@ -578,9 +602,32 @@
             currentConfirmHandler = function() {
                 const preOrdersRef = firebase.database().ref('preOrders');
                 preOrdersRef.remove()
-                    .then(() => {
+                    .then(async () => {
                         console.log('All pre-orders cleared successfully');
-                        alert('All pre-orders have been cleared from the database.');
+                        
+                        // Also clear all notifications related to pre-orders
+                        try {
+                            const notificationsRef = firebase.database().ref('notifications');
+                            await notificationsRef.remove();
+                            console.log('All pre-order notifications cleared successfully');
+                            
+                            // Refresh notification UI
+                            if (typeof updateNotificationBadge === 'function') {
+                                updateNotificationBadge();
+                            }
+                            if (typeof updateNotificationsList === 'function') {
+                                updateNotificationsList();
+                            }
+                        } catch (notifErr) {
+                            console.error('Error clearing notifications:', notifErr);
+                        }
+
+                        // Reload orders list
+                        if (typeof loadPreOrders === 'function') {
+                            loadPreOrders();
+                        }
+                        
+                        alert('All pre-orders and notifications have been cleared from the database.');
                     })
                     .catch(error => {
                         console.error('Error clearing all pre-orders:', error);
