@@ -203,7 +203,7 @@
     font-family: 'Poppins', sans-serif;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 16px !important    ; /* increase spacing between icon and text */
     box-shadow: 0 6px 20px rgba(13, 79, 79, 0.3);
     position: relative;
     overflow: hidden;

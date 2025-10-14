@@ -170,7 +170,23 @@ function createContactEditModal() {
     // Extract current values using regex patterns
     const phoneMatch = currentContent.match(/Phone:\s*([^<]+)/i);
     const emailMatch = currentContent.match(/Email:\s*([^<]+)/i);
-    const addressMatch = currentContent.match(/Address:\s*([^<]+)/i);
+    // More robust address extraction: try regex first, then fallback to DOM parsing
+    let addressMatch = currentContent.match(/Address:\s*([^<]+)/i);
+    if (!addressMatch) {
+        try {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(currentContent, 'text/html');
+            // Find an LI or any element whose textContent starts with "Address:"
+            const addressEl = Array.from(doc.querySelectorAll('li, p, div, span'))
+                .find(el => /Address\s*:/i.test((el.textContent || '').trim()));
+            if (addressEl) {
+                const addrText = (addressEl.textContent || '').replace(/^[^:]*:\s*/, '');
+                addressMatch = [null, addrText];
+            }
+        } catch (e) {
+            // ignore parser errors and keep addressMatch as null if not found
+        }
+    }
     const mondayFridayMatch = currentContent.match(/Monday to Friday[^\d]*([\d+:]+\s*[AP]M\s*to\s*[\d+:]+\s*[AP]M)/i);
     const saturdayMatch = currentContent.match(/Saturday[^\d]*([\d+:]+\s*[AP]M\s*to\s*[\d+:]+\s*[AP]M)/i);
     const sundayMatch = currentContent.match(/Sunday[^\d]*([\d+:]+\s*[AP]M\s*to\s*[\d+:]+\s*[AP]M)/i);
