@@ -521,7 +521,8 @@
         gap: 5px;
     }
 }
-/* Ensure dist product grid buttons adopt unified red styling */
+
+/* Unified red button style for product grid action buttons */
 .product-buttons .virtual-try-btn,
 .product-buttons .preorder-btn {
   background: linear-gradient(135deg, #540000, #8B0000) !important;
