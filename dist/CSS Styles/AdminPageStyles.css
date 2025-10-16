@@ -450,6 +450,20 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
+/* Make Order Details Close button match Cancel button styling */
+#orderDetailsModal .modal-footer .admin-btn {
+    background: linear-gradient(135deg, #2f3136 0%, #262a2f 100%);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+#orderDetailsModal .modal-footer .admin-btn:hover {
+    background: linear-gradient(135deg, #3a3e44 0%, #2f3439 100%);
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
 /* Smaller modal sizes and centered text for confirmation & order details */
 #confirmActionModal .modal-content {
     max-width: 420px;

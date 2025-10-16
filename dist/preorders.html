@@ -276,17 +276,30 @@
             document.getElementById('modal-customer-phone').textContent = order.phone || 'N/A';
             
             // Order Information
-            document.getElementById('modal-product-name').textContent = order.productName || 'N/A';
-            
-            // Format date
-            const orderDate = order.timestamp ? new Date(order.timestamp).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            }) : 'N/A';
-            document.getElementById('modal-order-date').textContent = orderDate;
+            document.getElementById('modal-product-name').textContent = (order.productName || order.frameName || 'N/A');
+
+            // Format date robustly (supports ISO string or epoch seconds/millis)
+            const rawDate = order.date || order.timestamp;
+            let formattedDate = 'N/A';
+            if (rawDate) {
+                let dateObj;
+                if (typeof rawDate === 'number') {
+                    // If seconds, convert to ms
+                    dateObj = new Date(rawDate < 1e12 ? rawDate * 1000 : rawDate);
+                } else {
+                    dateObj = new Date(rawDate);
+                }
+                if (!isNaN(dateObj.getTime())) {
+                    formattedDate = dateObj.toLocaleString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+            }
+            document.getElementById('modal-order-date').textContent = formattedDate;
             
             // Status with styling
             const statusElement = document.getElementById('modal-order-status');
