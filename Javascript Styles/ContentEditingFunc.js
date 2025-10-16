@@ -245,7 +245,7 @@ function createContactEditModal() {
                         </h4>
                         <div class="form-group">
                             <label for="contactPhone">Phone Number</label>
-                            <input type="tel" id="contactPhone" value="${phoneMatch ? cleanText(phoneMatch[1]) : ''}" placeholder="+63 917 123 4567">
+                            <input type="tel" id="contactPhone" value="${phoneMatch ? cleanText(phoneMatch[1]) : ''}" placeholder="09171234567" inputmode="numeric" maxlength="11" pattern="^09\\d{9}$" title="Enter PH mobile format: 09XXXXXXXXX" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,11)">
                         </div>
                         <div class="form-group">
                             <label for="contactEmail">Email Address</label>
@@ -352,7 +352,12 @@ function saveContactEditedContent() {
     
     // Get form values
     const description = document.getElementById('contactDescription').value;
-    const phone = document.getElementById('contactPhone').value;
+    const phoneInput = document.getElementById('contactPhone').value;
+    const phone = phoneInput.replace(/\D/g, '');
+    if (!/^09\d{9}$/.test(phone)) {
+        showNotification('Please enter a valid PH mobile number (09XXXXXXXXX).', 'error');
+        return;
+    }
     const email = document.getElementById('contactEmail').value;
     const address = document.getElementById('contactAddress').value;
     const mondayFriday = document.getElementById('mondayFriday').value;

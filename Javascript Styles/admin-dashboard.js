@@ -202,7 +202,7 @@ function renderProducts() {
                     const imageCount = images.length;
                     
                     if (primaryImage) {
-                        return `<img src="${primaryImage}" alt="${product.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        return `<img src="${primaryImage}" alt="${escapeHtml(product.title)}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                 <div class="image-placeholder-admin" style="display: none;">🖼</div>
                                 ${imageCount > 1 ? `<div class="image-count-badge">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

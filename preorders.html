@@ -487,37 +487,72 @@
                 return;
             }
             
-            // Display filtered orders
+            // Display filtered orders (safe rendering)
             filteredOrders.forEach(order => {
                 const preOrderItem = document.createElement('div');
                 preOrderItem.className = 'preorder-item';
-                
-                // Format date
+
+                // Format date safely
                 const orderDate = new Date(order.date);
                 const formattedDate = orderDate.toISOString().split('T')[0];
-                
-                preOrderItem.innerHTML = `
-                    <div class="preorder-info">
-                        <h4>${order.frameName || 'Custom Frame'}</h4>
-                        <p>Customer: ${order.firstName} ${order.lastName}</p>
-                        <p>Email: ${order.email}</p>
-                        <p>Phone: ${order.phone}</p>
-                        <p>Date: ${formattedDate}</p>
-                        <p>Status: ${order.status || 'Pending'}</p>
-                    </div>
-                    <div class="preorder-actions">
-                        <button class="admin-btn" onclick="viewOrderDetails('${order.id}')">View Details</button>
-                        <button class="admin-btn ${order.status === 'pending' || !order.status ? 'pending' : ''}" 
-                            onclick="toggleOrderStatus('${order.id}', '${order.status || 'pending'}')">
-                            ${order.status === 'completed' ? 'Mark as Pending' : 'Mark as Completed'}
-                        </button>
-                        <button class="delete-btn" onclick="deleteOrder('${order.id}')">
-                            <span>🗑️</span>
-                            <span>Delete</span>
-                        </button>
-                    </div>
-                `;
-                
+
+                // Info section
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'preorder-info';
+
+                const titleEl = document.createElement('h4');
+                titleEl.textContent = order.frameName || 'Custom Frame';
+                infoDiv.appendChild(titleEl);
+
+                const nameEl = document.createElement('p');
+                const fullName = `${(order.firstName || '').trim()} ${(order.lastName || '').trim()}`.trim();
+                nameEl.textContent = `Customer: ${fullName}`;
+                infoDiv.appendChild(nameEl);
+
+                const emailEl = document.createElement('p');
+                emailEl.textContent = `Email: ${order.email || ''}`;
+                infoDiv.appendChild(emailEl);
+
+                const phoneEl = document.createElement('p');
+                phoneEl.textContent = `Phone: ${order.phone || ''}`;
+                infoDiv.appendChild(phoneEl);
+
+                const dateEl = document.createElement('p');
+                dateEl.textContent = `Date: ${formattedDate}`;
+                infoDiv.appendChild(dateEl);
+
+                const statusEl = document.createElement('p');
+                statusEl.textContent = `Status: ${order.status || 'Pending'}`;
+                infoDiv.appendChild(statusEl);
+
+                // Actions section
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'preorder-actions';
+
+                const viewBtn = document.createElement('button');
+                viewBtn.className = 'admin-btn';
+                viewBtn.textContent = 'View Details';
+                viewBtn.addEventListener('click', () => viewOrderDetails(order.id));
+                actionsDiv.appendChild(viewBtn);
+
+                const toggleBtn = document.createElement('button');
+                toggleBtn.className = 'admin-btn';
+                if (order.status === 'pending' || !order.status) {
+                    toggleBtn.classList.add('pending');
+                }
+                toggleBtn.textContent = (order.status === 'completed') ? 'Mark as Pending' : 'Mark as Completed';
+                toggleBtn.addEventListener('click', () => toggleOrderStatus(order.id, order.status || 'pending'));
+                actionsDiv.appendChild(toggleBtn);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.innerHTML = '<span>🗑️</span><span>Delete</span>';
+                deleteBtn.addEventListener('click', () => deleteOrder(order.id));
+                actionsDiv.appendChild(deleteBtn);
+
+                preOrderItem.appendChild(infoDiv);
+                preOrderItem.appendChild(actionsDiv);
+
                 preordersContainer.appendChild(preOrderItem);
             });
         }
