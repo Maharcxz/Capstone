@@ -1097,7 +1097,7 @@
 .close-edit-modal {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.7);
+    color: white;
     font-size: 20px;
     cursor: pointer;
     padding: 4px;
@@ -1353,7 +1353,7 @@
 
 .close-edit-modal:hover {
     background: rgba(255, 255, 255, 0.1);
-    color: #FFD700;
+    color: white;
     transform: rotate(90deg);
 }
 
@@ -2139,21 +2139,21 @@
         font-size: 20px;
     }
     
-    .close-edit-modal {
-        background: none;
-        border: none;
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 20px;
-        cursor: pointer;
-        padding: 4px;
-        border-radius: 50%;
-        width: 28px;
-        height: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
-    }
+.close-edit-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
     
     .close-edit-modal:hover {
         background: rgba(255, 255, 255, 0.1);
@@ -2365,11 +2365,11 @@
         height: 40px;
     }
     
-    .close-edit-modal:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: #FFD700;
-        transform: rotate(90deg);
-    }
+.close-edit-modal:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: rotate(90deg);
+}
     
     .edit-modal-content {
         padding: 40px;

@@ -53,7 +53,13 @@ function showCachedContentImmediately() {
     contentTypes.forEach(contentType => {
         const contentElement = document.getElementById(contentType + 'Content');
         if (contentElement) {
-            // Check localStorage first
+            // Skip localStorage for about/contact to use Firebase-only
+            if (contentType === 'about' || contentType === 'contact') {
+                console.log(`Skipping localStorage cache for ${contentType}; using Firebase only`);
+                return;
+            }
+
+            // Check localStorage for other content types
             const savedRaw = localStorage.getItem(`content_${contentType}`);
             if (savedRaw !== null) {
                 let savedContent = null;
@@ -462,17 +468,22 @@ function saveAboutEditedContent() {
 function saveContentToFirebase(contentType, content) {
     console.log('saveContentToFirebase called with:', { contentType, content });
     
-    // Always save to localStorage first for immediate persistence
-    try {
-        if (typeof content === 'string') {
-            localStorage.setItem(`content_${contentType}`, content);
-        } else {
-            localStorage.setItem(`content_${contentType}`, JSON.stringify(content));
+    // Skip localStorage persistence for about/contact to use Firebase-only
+    const allowLocal = (contentType !== 'about' && contentType !== 'contact');
+    if (allowLocal) {
+        try {
+            if (typeof content === 'string') {
+                localStorage.setItem(`content_${contentType}`, content);
+            } else {
+                localStorage.setItem(`content_${contentType}`, JSON.stringify(content));
+            }
+        } catch (e) {
+            console.warn('Failed to cache content in localStorage:', e);
         }
-    } catch (e) {
-        console.warn('Failed to cache content in localStorage:', e);
+        console.log('Content saved to localStorage:', localStorage.getItem(`content_${contentType}`));
+    } else {
+        console.log(`Skipping localStorage for ${contentType}; using Firebase only`);
     }
-    console.log('Content saved to localStorage:', localStorage.getItem(`content_${contentType}`));
     
     // Check if Firebase is initialized
     if (window.firebase && window.firebase.database) {
@@ -553,15 +564,20 @@ async function processBatchedContentUpdates(contentUpdates) {
         batch.forEach(({ type: contentType, data }) => {
             console.log(`Processing ${contentType} content from Firebase`);
             
-            // Check if there's saved content in localStorage first
-            const savedRaw = localStorage.getItem(`content_${contentType}`);
-            console.log(`localStorage content for ${contentType}:`, savedRaw !== null ? 'exists' : 'not found');
+            // For about/contact, ignore localStorage entirely
+            const allowLocal = (contentType !== 'about' && contentType !== 'contact');
+            const savedRaw = allowLocal ? localStorage.getItem(`content_${contentType}`) : null;
+            if (!allowLocal) {
+                console.log(`localStorage content for ${contentType}: skipped (Firebase-only)`);
+            } else {
+                console.log(`localStorage content for ${contentType}:`, savedRaw !== null ? 'exists' : 'not found');
+            }
             
             // Only update if the content element exists
             const contentElement = document.getElementById(contentType + 'Content');
             if (contentElement) {
                 // Prefer localStorage content if available; otherwise use Firebase content
-                if (savedRaw !== null && !contentCache.has(contentType)) {
+                if (allowLocal && savedRaw !== null && !contentCache.has(contentType)) {
                     console.log(`Using localStorage content for ${contentType} instead of Firebase`);
                     let parsed = null;
                     try {
@@ -576,11 +592,13 @@ async function processBatchedContentUpdates(contentUpdates) {
                         updateContentElementOptimized(contentType, data.text);
                         // Cache the content in memory and localStorage
                         contentCache.set(contentType, data.text);
-                        try {
-                            const toStore = typeof data.text === 'string' ? data.text : JSON.stringify(data.text);
-                            localStorage.setItem(`content_${contentType}`, toStore);
-                        } catch (e) {
-                            console.warn('Failed to cache Firebase content to localStorage:', e);
+                        if (allowLocal) {
+                            try {
+                                const toStore = typeof data.text === 'string' ? data.text : JSON.stringify(data.text);
+                                localStorage.setItem(`content_${contentType}`, toStore);
+                            } catch (e) {
+                                console.warn('Failed to cache Firebase content to localStorage:', e);
+                            }
                         }
                     } else {
                         console.log(`No Firebase text found for ${contentType}`);
@@ -706,6 +724,10 @@ function loadContentFromLocalStorage() {
     
     editableContents.forEach(content => {
         const contentType = content.id.replace('Content', '');
+        if (contentType === 'about' || contentType === 'contact') {
+            console.log(`Skipping localStorage fallback for ${contentType}; using Firebase only`);
+            return;
+        }
         const savedRaw = localStorage.getItem(`content_${contentType}`);
         
         console.log(`Checking localStorage for ${contentType}:`, savedRaw !== null ? 'found' : 'not found');
