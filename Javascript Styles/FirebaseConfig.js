@@ -2,14 +2,14 @@
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDJrDD5N7t_q5tQAxcCfx1N2_1nh7nPxtQ",
-  authDomain: "capstone2-3b873.firebaseapp.com",
-  databaseURL: "https://capstone2-3b873-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "capstone2-3b873",
-  storageBucket: "capstone2-3b873.firebasestorage.app",
-  messagingSenderId: "51692718197",
-  appId: "1:51692718197:web:23c9a40c67a409185b503c",
-  measurementId: "G-F78Y2STL50"
+  apiKey: "AIzaSyB7eVqS_oUDh6lRFmLaqCV6Pd_PsZq35RQ",
+  authDomain: "capstonewebsite-12387.firebaseapp.com",
+  databaseURL: "https://capstonewebsite-12387-default-rtdb.firebaseio.com",
+  projectId: "capstonewebsite-12387",
+  storageBucket: "capstonewebsite-12387.firebasestorage.app",
+  messagingSenderId: "665697001145",
+  appId: "1:665697001145:web:4fe1e428d2f8f5d6c34568",
+  measurementId: "G-L5CLTDK74K"
 };
 
 // Initialize Firebase

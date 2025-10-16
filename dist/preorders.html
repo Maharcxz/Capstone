@@ -337,7 +337,7 @@
         // Reusable Confirmation Modal logic
         let currentConfirmHandler = null;
         
-        function openConfirmModal({ title = 'Confirm Action', message = '', confirmText = 'Confirm', confirmClass = '' }) {
+        function openConfirmModal({ title = 'Confirm Action', message = '', confirmText = 'Confirm', confirmClass = '', showCancel = true }) {
             const modal = document.getElementById('confirmActionModal');
             const titleEl = document.getElementById('confirmModalTitle');
             const msgEl = document.getElementById('confirmModalMessage');
@@ -351,6 +351,9 @@
             // Reset classes then apply base and optional variant
             confirmBtn.className = 'admin-btn';
             if (confirmClass) confirmBtn.classList.add(confirmClass);
+
+            // Toggle cancel button visibility for info-only modals
+            cancelBtn.style.display = showCancel ? '' : 'none';
             
             // Bind actions
             confirmBtn.onclick = function() {
@@ -627,12 +630,20 @@
                             loadPreOrders();
                         }
                         
-                        alert('All pre-orders and notifications have been cleared from the database.');
-                    })
-                    .catch(error => {
-                        console.error('Error clearing all pre-orders:', error);
-                        alert('Error clearing pre-orders: ' + error.message);
-                    });
+                // Show success message in the same styled modal
+                currentConfirmHandler = null;
+                openConfirmModal({
+                    title: 'Clear All Data',
+                    message: 'All pre-orders and notifications have been cleared from the database.',
+                    confirmText: 'OK',
+                    confirmClass: '',
+                    showCancel: false
+                });
+            })
+            .catch(error => {
+                console.error('Error clearing all pre-orders:', error);
+                alert('Error clearing pre-orders: ' + error.message);
+            });
             };
             
             openConfirmModal({
