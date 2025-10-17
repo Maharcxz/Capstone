@@ -125,16 +125,24 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Admin dashboard initialized');
 });
 
-// Check if user has admin access
+// Check if user has admin access (wait for auth state)
 function checkAdminAccess() {
     try {
-        const firebaseUser = firebase.auth && firebase.auth().currentUser;
-        if (!firebaseUser) {
-            alert('Access denied. Admin login required.');
-            window.location.href = 'index.html';
-        }
+        // Defer redirect until Firebase resolves auth state
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                console.log('Admin access granted; user is authenticated:', user.email);
+                // Ensure admin UI visibility updates if available
+                if (typeof updateAdminButtonVisibility === 'function') {
+                    updateAdminButtonVisibility();
+                }
+            } else {
+                alert('Access denied. Admin login required.');
+                window.location.href = 'index.html';
+            }
+        });
     } catch (e) {
-        console.warn('Unable to read Firebase auth state:', e);
+        console.warn('Unable to attach auth state listener:', e);
         alert('Access denied. Admin login required.');
         window.location.href = 'index.html';
     }

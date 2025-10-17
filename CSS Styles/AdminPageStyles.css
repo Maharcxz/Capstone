@@ -834,8 +834,7 @@
     font-weight: 500;
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    flex: 1;
-    max-width: 220px;
+    flex: 0 0 auto;
     height: 40px;
     position: relative;
     overflow: hidden;
@@ -1881,8 +1880,7 @@
         font-weight: 500;
         cursor: pointer;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        flex: 1;
-        max-width: 220px;
+        flex: 0 0 auto;
         height: 40px;
         position: relative;
         overflow: hidden;
