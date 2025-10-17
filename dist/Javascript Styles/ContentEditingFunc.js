@@ -7,39 +7,32 @@ let isContentLoaded = false; // Flag to prevent duplicate loading
 
 // Initialize admin mode based on login status
 document.addEventListener('DOMContentLoaded', function() {
-    // Show content immediately from cache or localStorage
+    // Firebase-only: no localStorage cache preload
     showCachedContentImmediately();
-    
-    // Check if user is logged in as admin
-    const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
+
     const currentUser = firebase.auth().currentUser;
-    
+
     // Check URL parameters for edit mode
     const urlParams = new URLSearchParams(window.location.search);
     const editParam = urlParams.get('edit');
-    
-    if (isAdminLoggedIn || currentUser) {
+
+    if (currentUser) {
         isAdminMode = true;
-        
-        // Set edit mode from URL parameter or localStorage
-        if (editParam === 'true') {
-            isEditMode = true;
-            localStorage.setItem('isEditMode', 'true');
-        } else {
-            isEditMode = localStorage.getItem('isEditMode') === 'true';
-        }
-        
+
+        // Edit mode is session-only via URL param
+        isEditMode = (editParam === 'true');
+
         // Add edit buttons to editable content (only for pages without existing edit buttons)
         if (!document.querySelector('.edit-content-btn')) {
             addEditButtons();
         }
-        
+
         // Update admin button visibility based on current page
         if (typeof updateAdminButtonVisibility === 'function') {
             updateAdminButtonVisibility();
         }
     }
-    
+
     // Load content from Firebase asynchronously (non-blocking)
     setTimeout(() => {
         loadContentFromFirebaseAsync();
@@ -48,31 +41,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Show cached content immediately to reduce perceived loading time
 function showCachedContentImmediately() {
-    const contentTypes = ['about', 'contact', 'home', 'services'];
-    
-    contentTypes.forEach(contentType => {
-        const contentElement = document.getElementById(contentType + 'Content');
-        if (contentElement) {
-            // Skip localStorage for about/contact to use Firebase-only
-            if (contentType === 'about' || contentType === 'contact') {
-                console.log(`Skipping localStorage cache for ${contentType}; using Firebase only`);
-                return;
+    try {
+        // Render any content already in memory cache (session-only)
+        contentCache.forEach((cachedContent, contentType) => {
+            const contentElement = document.getElementById(contentType + 'Content');
+            if (contentElement) {
+                updateContentElementOptimized(contentType, cachedContent);
             }
-
-            // Check localStorage for other content types
-            const savedRaw = localStorage.getItem(`content_${contentType}`);
-            if (savedRaw !== null) {
-                let savedContent = null;
-                try {
-                    savedContent = JSON.parse(savedRaw);
-                } catch (e) {
-                    savedContent = savedRaw;
-                }
-                updateContentElementOptimized(contentType, savedContent);
-                contentCache.set(contentType, savedContent);
-            }
-        }
-    });
+        });
+    } catch (e) {
+        console.warn('Error showing cached content:', e);
+    }
 }
 
 function addEditButtons() {
@@ -391,7 +370,7 @@ function saveContactEditedContent() {
         console.log('Updating DOM via updateContentElementOptimized');
         updateContentElementOptimized(currentEditTarget, structuredContent);
         
-        // Save to Firebase/localStorage
+        // Save to Firebase
         console.log('Calling saveContentToFirebase with JSON content');
         saveContentToFirebase(currentEditTarget, structuredContent);
         
@@ -459,7 +438,7 @@ function saveAboutEditedContent() {
         // Update DOM by reconstructing structured HTML from plain text
         updateContentElementOptimized(currentEditTarget, content);
         
-        // Save plain text to Firebase/localStorage
+        // Save plain text to Firebase
         saveContentToFirebase(currentEditTarget, content);
         
         // Show success notification
@@ -473,29 +452,19 @@ function saveAboutEditedContent() {
 function saveContentToFirebase(contentType, content) {
     console.log('saveContentToFirebase called with:', { contentType, content });
     
-    // Skip localStorage persistence for about/contact to use Firebase-only
-    const allowLocal = (contentType !== 'about' && contentType !== 'contact');
-    if (allowLocal) {
-        try {
-            if (typeof content === 'string') {
-                localStorage.setItem(`content_${contentType}`, content);
-            } else {
-                localStorage.setItem(`content_${contentType}`, JSON.stringify(content));
-            }
-        } catch (e) {
-            console.warn('Failed to cache content in localStorage:', e);
-        }
-        console.log('Content saved to localStorage:', localStorage.getItem(`content_${contentType}`));
-    } else {
-        console.log(`Skipping localStorage for ${contentType}; using Firebase only`);
+    // Update in-memory cache only
+    try {
+        contentCache.set(contentType, content);
+    } catch (e) {
+        console.warn('Failed to update in-memory cache:', e);
     }
-    
+
     // Check if Firebase is initialized
     if (window.firebase && window.firebase.database) {
         console.log('Firebase is available, saving to Firebase');
         const db = window.firebase.database();
         const contentRef = db.ref('content/' + contentType);
-        
+
         contentRef.set({
             text: content,
             lastUpdated: new Date().toISOString()
@@ -509,8 +478,8 @@ function saveContentToFirebase(contentType, content) {
             showNotification('Error saving content. Please try again.', 'error');
         });
     } else {
-        console.error('Firebase database not available, content saved to localStorage only');
-        showNotification(`${contentType.charAt(0).toUpperCase() + contentType.slice(1)} content saved locally.`);
+        console.error('Firebase database not available. Content not saved.');
+        showNotification('Content service unavailable. Please retry later.', 'error');
     }
 }
 
@@ -518,13 +487,13 @@ function saveContentToFirebase(contentType, content) {
 // Optimized async version of loadContentFromFirebase
 async function loadContentFromFirebaseAsync() {
     if (isContentLoaded) return; // Prevent duplicate loading
-    
+
     console.log('loadContentFromFirebaseAsync called');
-    
+
     // Check if Firebase is initialized
     if (!window.firebase || !window.firebase.database) {
         console.error('Firebase database not available');
-        loadContentFromLocalStorage();
+        showNotification('Content service unavailable. Please retry later.', 'error');
         return;
     }
 
@@ -532,79 +501,45 @@ async function loadContentFromFirebaseAsync() {
         console.log('Firebase is available, loading content from Firebase');
         const db = window.firebase.database();
         const contentRef = db.ref('content');
-        
+
         const snapshot = await contentRef.once('value');
         const content = snapshot.val();
         console.log('Firebase content loaded:', content);
-        
+
         if (content) {
-            // Process content updates in batches to avoid blocking UI
             const contentUpdates = Object.keys(content).map(contentType => ({
                 type: contentType,
                 data: content[contentType]
             }));
-            
-            // Process updates in small batches
             await processBatchedContentUpdates(contentUpdates);
         } else {
             console.log('No content found in Firebase');
         }
-        
+
         isContentLoaded = true;
     } catch (error) {
         console.error('Error loading content from Firebase:', error);
-        // Fallback to localStorage
-        loadContentFromLocalStorage();
+        showNotification('Error loading content. Please retry later.', 'error');
     }
 }
 
 // Process content updates in batches to prevent UI blocking
 async function processBatchedContentUpdates(contentUpdates) {
     const batchSize = 2; // Process 2 items at a time
-    
+
     for (let i = 0; i < contentUpdates.length; i += batchSize) {
         const batch = contentUpdates.slice(i, i + batchSize);
-        
-        // Process batch
+
         batch.forEach(({ type: contentType, data }) => {
             console.log(`Processing ${contentType} content from Firebase`);
-            
-            // For about/contact, ignore localStorage entirely
-            const allowLocal = (contentType !== 'about' && contentType !== 'contact');
-            const savedRaw = allowLocal ? localStorage.getItem(`content_${contentType}`) : null;
-            if (!allowLocal) {
-                console.log(`localStorage content for ${contentType}: skipped (Firebase-only)`);
-            } else {
-                console.log(`localStorage content for ${contentType}:`, savedRaw !== null ? 'exists' : 'not found');
-            }
-            
-            // Only update if the content element exists
+
             const contentElement = document.getElementById(contentType + 'Content');
             if (contentElement) {
-                // Prefer localStorage content if available; otherwise use Firebase content
-                if (allowLocal && savedRaw !== null && !contentCache.has(contentType)) {
-                    console.log(`Using localStorage content for ${contentType} instead of Firebase`);
-                    let parsed = null;
-                    try {
-                        parsed = JSON.parse(savedRaw);
-                    } catch (e) {
-                        parsed = savedRaw;
-                    }
-                    updateContentElementOptimized(contentType, parsed);
-                } else if (!contentCache.has(contentType)) {
+                if (!contentCache.has(contentType)) {
                     if (data && (typeof data.text === 'string' || typeof data.text === 'object')) {
                         console.log(`Loading ${contentType} content from Firebase`);
                         updateContentElementOptimized(contentType, data.text);
-                        // Cache the content in memory and localStorage
                         contentCache.set(contentType, data.text);
-                        if (allowLocal) {
-                            try {
-                                const toStore = typeof data.text === 'string' ? data.text : JSON.stringify(data.text);
-                                localStorage.setItem(`content_${contentType}`, toStore);
-                            } catch (e) {
-                                console.warn('Failed to cache Firebase content to localStorage:', e);
-                            }
-                        }
                     } else {
                         console.log(`No Firebase text found for ${contentType}`);
                     }
@@ -613,8 +548,7 @@ async function processBatchedContentUpdates(contentUpdates) {
                 console.log(`Content element not found for ${contentType}`);
             }
         });
-        
-        // Yield control to browser between batches
+
         if (i + batchSize < contentUpdates.length) {
             await new Promise(resolve => setTimeout(resolve, 0));
         }
@@ -722,34 +656,8 @@ function loadContentFromFirebase() {
 
 // Function to load content from localStorage (fallback)
 function loadContentFromLocalStorage() {
-    console.log('loadContentFromLocalStorage called');
-    
-    // Find all editable content sections
-    const editableContents = document.querySelectorAll('[id$="Content"]');
-    
-    editableContents.forEach(content => {
-        const contentType = content.id.replace('Content', '');
-        if (contentType === 'about' || contentType === 'contact') {
-            console.log(`Skipping localStorage fallback for ${contentType}; using Firebase only`);
-            return;
-        }
-        const savedRaw = localStorage.getItem(`content_${contentType}`);
-        
-        console.log(`Checking localStorage for ${contentType}:`, savedRaw !== null ? 'found' : 'not found');
-        
-        if (savedRaw !== null) {
-            console.log(`Loading ${contentType} content from localStorage`);
-            let parsed = null;
-            try {
-                parsed = JSON.parse(savedRaw);
-            } catch (e) {
-                parsed = savedRaw;
-            }
-            updateContentElementOptimized(contentType, parsed);
-        } else {
-            console.log(`No saved content found in localStorage for ${contentType}`);
-        }
-    });
+    console.log('localStorage fallback removed; using Firebase-only');
+    // No-op: Firebase is the source of truth; this function remains for compatibility.
 }
 
 // Function to update content element with loaded content (original version for compatibility)
@@ -930,23 +838,17 @@ function createSettingsModal() {
 }
 
 function clearApplicationCache() {
-    // Clear localStorage
-    const keysToRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (key.includes('Content') || key.includes('cache') || key.includes('content_'))) {
-            keysToRemove.push(key);
-        }
+    // Clear in-memory content cache only (Firebase is source of truth)
+    try {
+        contentCache.clear();
+        console.log('Cleared in-memory content cache');
+    } catch (e) {
+        console.warn('Error clearing in-memory cache:', e);
     }
-    
-    keysToRemove.forEach(key => {
-        localStorage.removeItem(key);
-        console.log('Removed from localStorage:', key);
-    });
-    
+
     // Show success notification
     showNotification('Application cache cleared successfully! Page will reload.', 'success');
-    
+
     // Close modal and reload page after a short delay
     setTimeout(() => {
         closeEditModal();
@@ -959,11 +861,11 @@ function showDebugInfo() {
         'Admin Mode': isAdminMode,
         'Edit Mode': isEditMode,
         'Current User': firebase.auth().currentUser ? firebase.auth().currentUser.email : 'Not logged in',
-        'LocalStorage Keys': Object.keys(localStorage).filter(key => key.includes('Content') || key.includes('cache')),
+        'Cached Content Types': Array.from(contentCache.keys()),
         'Current Page': window.location.pathname,
         'Firebase Connected': firebase.apps.length > 0
     };
-    
+
     console.log('Debug Information:', debugInfo);
     showNotification('Debug information logged to console. Press F12 to view.', 'info');
 }

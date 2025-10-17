@@ -8,24 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -34,6 +18,7 @@
     
     <!-- Firebase Configuration (must be loaded first) -->
     <script src="Javascript Styles/FirebaseConfig.js"></script>
+    <script src="Javascript Styles/FirebaseServices.js"></script>
     
     <!-- Application Scripts (loaded after Firebase is initialized) -->
     <script src="Javascript Styles/AuthHandlers.js"></script>
@@ -187,18 +172,8 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if user is authenticated (without adding another auth state listener)
-            const user = firebase.auth().currentUser;
-            const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
-            
-            if (user || isAdminLoggedIn) {
-                // User is signed in or using hardcoded admin credentials
-                loadPreOrders();
-            } else {
-                // Authentication state will be handled by AuthHandlers.js
-                // Just load preorders for now, AuthHandlers will redirect if needed
-                loadPreOrders();
-            }
+            // Auth gating handled by AuthHandlers.js; just load preorders
+            loadPreOrders();
         });
 
         // Function to load pre-orders from Firebase
@@ -217,8 +192,8 @@
             preOrdersRef.on('value', function(snapshot) {
                 const preOrders = snapshot.val();
                 
-                // Debug logging
-                const IS_DEBUG = (localStorage.getItem('debug') === 'true' || /[?&]debug=1/.test(window.location.search));
+                // Debug logging (query param only)
+                const IS_DEBUG = (/[?&]debug=1/.test(window.location.search) || /[?&]debug=true/i.test(window.location.search));
                 if (IS_DEBUG) console.log('Firebase snapshot received:', snapshot.exists());
                 if (IS_DEBUG) console.log('Raw preOrders data:', preOrders);
                 if (IS_DEBUG) console.log('Number of keys in preOrders:', preOrders ? Object.keys(preOrders).length : 0);
@@ -698,8 +673,8 @@
             preOrdersRef.on('value', function(snapshot) {
                 const preOrders = snapshot.val();
                 
-                // Debug logging
-                const IS_DEBUG = (localStorage.getItem('debug') === 'true' || /[?&]debug=1/.test(window.location.search));
+                // Debug logging (query param only)
+                const IS_DEBUG = (/[?&]debug=1/.test(window.location.search) || /[?&]debug=true/i.test(window.location.search));
                 if (IS_DEBUG) console.log('Firebase snapshot received:', snapshot.exists());
                 if (IS_DEBUG) console.log('Raw preOrders data:', preOrders);
                 if (IS_DEBUG) console.log('Number of keys in preOrders:', preOrders ? Object.keys(preOrders).length : 0);

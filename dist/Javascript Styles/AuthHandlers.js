@@ -8,34 +8,13 @@
 // Monitor auth state changes
 auth.onAuthStateChanged((user) => {
     if (user) {
-        // User is signed in through Firebase
         switchToAdminMode();
-        // User is signed in through Firebase
         console.log('AuthHandlers: User signed in, switching to admin mode');
     } else {
-        // Force guest mode on index page regardless of admin status
-        if (window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/')) {
-            setGuestMode();
-            return;
-        }
-        
-        // Check if user is logged in with hardcoded credentials
-        const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
-        if (isAdminLoggedIn) {
-            // Only switch to admin mode on admin-specific pages
-            if (window.location.pathname.includes('preorders.html')) {
-                switchToAdminMode();
-            } else {
-                // For other pages, use guest mode
-                setGuestMode();
-            }
-        } else {
-            // User is signed out
-            setGuestMode();
-            // Redirect to index page if trying to access admin-only pages without authentication
-            if (window.location.pathname.includes('preorders.html')) {
-                window.location.href = 'index.html';
-            }
+        setGuestMode();
+        const path = window.location.pathname || '';
+        if (path.includes('preorders.html') || path.includes('admin-dashboard.html')) {
+            window.location.href = 'index.html';
         }
     }
 });
@@ -106,45 +85,26 @@ function logoutFromFirebase() {
 function switchToAdminMode() {
     console.log('Switching to admin mode...');
     isAdminMode = true;
-    
-    // Set localStorage flag for admin dashboard access
-    localStorage.setItem('isAdminLoggedIn', 'true');
     const authButton = document.getElementById('authButtonText');
     const preOrdersNav = document.getElementById('preOrdersNav');
     const productManagementNav = document.getElementById('productManagementNav');
     const adminButtons = document.querySelectorAll('.admin-buttons');
     const editButtons = document.querySelectorAll('.edit-content-btn');
-    
-    console.log('authButton found:', authButton !== null);
     if (authButton) {
         authButton.textContent = 'Admin Mode';
-        console.log('Set authButton text to:', authButton.textContent);
     }
-    
     if (preOrdersNav) preOrdersNav.style.display = 'block';
     if (productManagementNav) productManagementNav.style.display = 'block';
-    
-    // Add admin-mode class to body to show admin-only elements
     if (document.body) {
         document.body.classList.add('admin-mode');
-        console.log('Added admin-mode class to body');
     }
-    
-    // Update admin button visibility based on current page
     updateAdminButtonVisibility();
-    
-    // Show edit buttons on content pages (these are for content editing, not product management)
     editButtons.forEach(btn => btn.style.display = 'block');
-    
-    console.log('Admin mode set successfully');
     hideLoginModal();
     hideAdminDropdown();
 }
 
 function switchToGuestMode() {
-    // Clear hardcoded admin login flag
-    localStorage.removeItem('isAdminLoggedIn');
-    
     // Update UI immediately
     isAdminMode = false;
     const authButton = document.getElementById('authButtonText');
@@ -152,26 +112,16 @@ function switchToGuestMode() {
     const productManagementNav = document.getElementById('productManagementNav');
     const adminButtons = document.querySelectorAll('.admin-buttons');
     const editButtons = document.querySelectorAll('.edit-content-btn');
-    
     if (authButton) authButton.textContent = 'Log In';
     if (preOrdersNav) preOrdersNav.style.display = 'none';
     if (productManagementNav) productManagementNav.style.display = 'none';
-    
-    // Remove admin-mode class to show guest-only elements
     document.body.classList.remove('admin-mode');
-    
-    // Hide admin buttons
     adminButtons.forEach(btn => btn.style.display = 'none');
     editButtons.forEach(btn => btn.style.display = 'none');
-    
     hideAdminDropdown();
-    
-    // Sign out from Firebase (but don't wait for it to avoid auth loops)
     auth.signOut().catch(error => {
         console.error('Error signing out:', error);
     });
-    
-    // Redirect based on current page
     if (window.location.pathname.includes('preorders.html')) {
         window.location.href = 'index.html';
     }

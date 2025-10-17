@@ -7,33 +7,22 @@ let editingProductId = null;
 let sidebarCategories = [];
 let currentCategory = 'all';
 let pendingCategoryAdds = new Set();
+let glbStore = {};
 
-// Load GLB data from localStorage
+// Load GLB data (in-memory session store)
 function loadGlbData(glbId) {
     try {
-        const savedData = localStorage.getItem('glbData');
-        if (savedData) {
-            const parsedData = JSON.parse(savedData);
-            return parsedData[glbId] || null;
-        }
+        return glbStore[glbId] || null;
     } catch (error) {
         console.warn('Error loading GLB data:', error);
+        return null;
     }
-    return null;
 }
 
-// Save GLB data to localStorage
+// Save GLB data (in-memory session store)
 function saveGlbData(glbId, data) {
     try {
-        let savedData = {};
-        const existing = localStorage.getItem('glbData');
-        if (existing) {
-            savedData = JSON.parse(existing);
-        }
-        
-        savedData[glbId] = data;
-        localStorage.setItem('glbData', JSON.stringify(savedData));
-        
+        glbStore[glbId] = data;
         console.log('✅ GLB data saved:', glbId, data);
         return true;
     } catch (error) {
@@ -45,17 +34,14 @@ function saveGlbData(glbId, data) {
 // Export all GLB data
 function exportAllGlbData() {
     try {
-        const savedData = localStorage.getItem('glbData');
-        if (savedData) {
-            const parsedData = JSON.parse(savedData);
-            const dataStr = JSON.stringify(parsedData, null, 2);
+        const keys = Object.keys(glbStore || {});
+        if (keys.length) {
+            const dataStr = JSON.stringify(glbStore, null, 2);
             const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            
             const link = document.createElement('a');
             link.href = URL.createObjectURL(dataBlob);
             link.download = 'glb-data.json';
             link.click();
-            
             showNotification('GLB data exported successfully!', 'success');
         } else {
             showNotification('No GLB data to export', 'warning');
@@ -72,11 +58,12 @@ function importGlbData(file) {
     reader.onload = function(e) {
         try {
             const importedData = JSON.parse(e.target.result);
-            localStorage.setItem('glbData', JSON.stringify(importedData));
-            
-            // Refresh GLB previews
+            if (importedData && typeof importedData === 'object') {
+                glbStore = importedData;
+            } else {
+                glbStore = {};
+            }
             renderGlbPreview();
-            
             showNotification('GLB data imported successfully!', 'success');
         } catch (error) {
             console.error('❌ Error importing GLB data:', error);
@@ -140,13 +127,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Check if user has admin access
 function checkAdminAccess() {
-    const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
-    const firebaseUser = firebase.auth().currentUser;
-    
-    if (!isAdminLoggedIn && !firebaseUser) {
+    try {
+        const firebaseUser = firebase.auth && firebase.auth().currentUser;
+        if (!firebaseUser) {
+            alert('Access denied. Admin login required.');
+            window.location.href = 'index.html';
+        }
+    } catch (e) {
+        console.warn('Unable to read Firebase auth state:', e);
         alert('Access denied. Admin login required.');
         window.location.href = 'index.html';
-        return;
     }
 }
 
@@ -269,7 +259,7 @@ function filterProducts() {
         
         const matchesCategory = !categoryFilter || product.category === categoryFilter;
         
-        const matchesVisibility = !visibilityFilter || 
+        const matchesVisibility = !visibilityFilter ||
                                 (visibilityFilter === 'visible' && product.visible) ||
                                 (visibilityFilter === 'hidden' && !product.visible);
         
@@ -701,47 +691,50 @@ document.addEventListener('keydown', function(event) {
 // Load sidebar categories (Firebase-backed with local cache fallback)
 function loadSidebarCategories() {
     const fallbackLocal = () => {
-        const saved = localStorage.getItem('sidebarCategories');
-        sidebarCategories = saved ? uniqueCategoriesByName(JSON.parse(saved)) : [];
+        sidebarCategories = [];
         renderSidebar();
         populateCategoryDropdowns();
     };
 
     try {
-        if (typeof getAllCategories === 'function') {
+        if (window.firebaseServices && typeof window.firebaseServices.getAllCategories === 'function') {
             // Initial load from Firebase
-            getAllCategories()
+            window.firebaseServices.getAllCategories()
                 .then(categories => {
                     // Deduplicate by name to prevent double entries
                     sidebarCategories = Array.isArray(categories) ? uniqueCategoriesByName(categories) : [];
-                    // Cache to localStorage for other pages and quick access
-                    localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
+                    // Removed localStorage caching; Firebase is source of truth
                     renderSidebar();
                     renderExistingCategories();
                     populateCategoryDropdowns();
                 })
                 .catch(err => {
-                    console.warn('Failed to load categories from Firebase, using local cache.', err);
-                    fallbackLocal();
+                    console.warn('Failed to load categories from Firebase:', err);
+                    sidebarCategories = [];
+                    renderSidebar();
+                    renderExistingCategories();
+                    populateCategoryDropdowns();
                 });
 
             // Listen for real-time changes so UI stays in sync
-            if (typeof listenForCategoryChanges === 'function') {
-                listenForCategoryChanges(categories => {
-                    // Deduplicate by name to prevent double entries
+            if (typeof window.firebaseServices.listenForCategoryChanges === 'function') {
+                window.firebaseServices.listenForCategoryChanges(categories => {
                     sidebarCategories = Array.isArray(categories) ? uniqueCategoriesByName(categories) : [];
-                    localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
                     renderSidebar();
                     renderExistingCategories();
                     populateCategoryDropdowns();
                 });
             }
         } else {
-            fallbackLocal();
+            sidebarCategories = [];
+            renderSidebar();
+            populateCategoryDropdowns();
         }
     } catch (error) {
         console.error('Error loading sidebar categories:', error);
-        fallbackLocal();
+        sidebarCategories = [];
+        renderSidebar();
+        populateCategoryDropdowns();
     }
 }
 
@@ -818,21 +811,9 @@ function populateCategoryDropdowns() {
     }
 }
 
-// Save sidebar categories to localStorage
+// Save sidebar categories (no-op; Firebase is source of truth)
 function saveSidebarCategories() {
-    localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
-    
-    // Trigger a custom event to notify other windows/tabs about category changes
-    window.dispatchEvent(new CustomEvent('categoriesUpdated', {
-        detail: { categories: sidebarCategories }
-    }));
-    
-    // Also trigger storage event manually for same-window updates
-    window.dispatchEvent(new StorageEvent('storage', {
-        key: 'sidebarCategories',
-        newValue: JSON.stringify(sidebarCategories),
-        storageArea: localStorage
-    }));
+    // Intentionally left blank.
 }
 
 // Setup sidebar management event listeners
@@ -1053,14 +1034,13 @@ async function handleAddCategory(event) {
 
     try {
         await saveCategoryToFirebase(newCategory);
-        // Immediately update local cache and UI for responsiveness
+        // Immediately update in-memory list and UI for responsiveness
         try {
             sidebarCategories = uniqueCategoriesByName([...(Array.isArray(sidebarCategories) ? sidebarCategories : []), newCategory]);
-            localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
             renderSidebar();
             renderExistingCategories();
         } catch (uiErr) {
-            console.warn('Local/UI update failed after Firebase save:', uiErr);
+            console.warn('UI update failed after Firebase save:', uiErr);
         }
         try {
             await firebaseServices.cleanupDuplicateCategories(newCategory.id, normalizedName);
@@ -1071,19 +1051,9 @@ async function handleAddCategory(event) {
         event.target.reset();
     } catch (error) {
         console.error('Error saving category to Firebase:', error);
-        // Fallback: save to local cache and update UI so the user can proceed
-        try {
-            sidebarCategories = uniqueCategoriesByName([...(Array.isArray(sidebarCategories) ? sidebarCategories : []), newCategory]);
-            localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
-            renderSidebar();
-            renderExistingCategories();
-            showNotification(`Saved "${categoryName}" locally (offline mode).`, 'info');
-            event.target.reset();
-        } catch (localErr) {
-            console.error('Local fallback failed:', localErr);
-            showNotification('Failed to save category. Please try again.', 'error');
-            return;
-        }
+        // No local fallback; rely on Firebase as the source of truth
+        showNotification('Failed to save category. Please try again.', 'error');
+        return;
     } finally {
         pendingCategoryAdds.delete(normalizedName);
     }
@@ -1162,7 +1132,6 @@ async function editCategory(categoryId) {
                     try { await deleteCategoryFromFirebase(oldId); } catch (delErr) { console.warn('Failed to delete old category id after edit:', delErr); }
                 }
                 sidebarCategories = uniqueCategoriesByName(sidebarCategories);
-                localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
                 renderSidebar();
                 renderExistingCategories();
                 populateCategoryDropdowns();
@@ -1238,9 +1207,8 @@ async function editCategory(categoryId) {
                 try { await deleteCategoryFromFirebase(oldId); } catch (delErr) { console.warn('Failed to delete old category id after edit:', delErr); }
             }
 
-            // Persist and re-render with a deduplicated snapshot
+            // Re-render with a deduplicated snapshot
             sidebarCategories = uniqueCategoriesByName(sidebarCategories);
-            localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
             renderSidebar();
             renderExistingCategories();
             populateCategoryDropdowns();
@@ -1277,7 +1245,6 @@ async function deleteCategory(categoryId) {
             return;
         }
         sidebarCategories = sidebarCategories.filter(cat => cat.id !== categoryId);
-        localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
         if (currentCategory === categoryId) {
             filterByCategory('all');
         } else {
@@ -1324,9 +1291,8 @@ async function deleteCategory(categoryId) {
             return;
         }
 
-        // Update local cache/UI after successful deletion
+        // Update UI after successful deletion
         sidebarCategories = sidebarCategories.filter(cat => cat.id !== categoryId);
-        localStorage.setItem('sidebarCategories', JSON.stringify(sidebarCategories));
 
         // If currently viewing this category, switch to all products
         if (typeof currentCategory !== 'undefined' && currentCategory === categoryId) {

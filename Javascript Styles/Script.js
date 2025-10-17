@@ -4,40 +4,15 @@
 
 // Credential saving and loading functions
 function saveCredentials(email, password) {
-    if (document.getElementById('rememberMeCheckbox').checked) {
-        localStorage.setItem('savedEmail', email);
-        localStorage.setItem('savedPassword', password);
-        localStorage.setItem('rememberMe', 'true');
-    } else {
-        // Clear saved credentials if remember me is unchecked
-        localStorage.removeItem('savedEmail');
-        localStorage.removeItem('savedPassword');
-        localStorage.removeItem('rememberMe');
-    }
+    // No-op: credentials are not persisted client-side.
 }
 
 function loadSavedCredentials() {
-    const rememberMe = localStorage.getItem('rememberMe');
-    if (rememberMe === 'true') {
-        const savedEmail = localStorage.getItem('savedEmail');
-        const savedPassword = localStorage.getItem('savedPassword');
-        
-        if (savedEmail && savedPassword) {
-            const emailInput = document.getElementById('modalEmailInput');
-            const passwordInput = document.getElementById('modalPasswordInput');
-            const rememberCheckbox = document.getElementById('rememberMeCheckbox');
-            
-            if (emailInput) emailInput.value = savedEmail;
-            if (passwordInput) passwordInput.value = savedPassword;
-            if (rememberCheckbox) rememberCheckbox.checked = true;
-        }
-    }
+    // No-op: no persisted credentials to load.
 }
 
 function clearSavedCredentials() {
-    localStorage.removeItem('savedEmail');
-    localStorage.removeItem('savedPassword');
-    localStorage.removeItem('rememberMe');
+    // No-op: no persisted credentials to clear.
 }
 
 // Initialize page
