@@ -23,8 +23,19 @@ function initializeEventListeners() {
         loginForm.addEventListener('submit', async function(event) {
             event.preventDefault();
             
-            const email = loginForm.querySelector('input[type="email"]').value;
-            const password = loginForm.querySelector('input[type="password"]').value;
+            // Robust input selection: support multiple selectors and guard against null
+            const emailInput = loginForm.querySelector('input[type="email"], #modalEmailInput, input[name="email"]');
+            const passwordInput = loginForm.querySelector('input[type="password"], #modalPasswordInput, input[name="password"]');
+            if (!emailInput || !passwordInput) {
+                console.error('Login form inputs not found:', {
+                    hasEmail: !!emailInput,
+                    hasPassword: !!passwordInput
+                });
+                showLoginErrorModal('Login form is missing email or password field.');
+                return;
+            }
+            const email = (emailInput.value || '').trim();
+            const password = passwordInput.value || '';
             const submitBtn = loginForm.querySelector('button[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = true;

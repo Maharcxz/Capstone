@@ -450,15 +450,15 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
-/* Make Order Details Close button match Cancel button styling */
-#orderDetailsModal .modal-footer .admin-btn {
+/* Make Order Details Close button match Cancel button styling (exclude Send Mail) */
+#orderDetailsModal .modal-footer .admin-btn:not(.send-mail-btn) {
     background: linear-gradient(135deg, #2f3136 0%, #262a2f 100%);
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-#orderDetailsModal .modal-footer .admin-btn:hover {
+#orderDetailsModal .modal-footer .admin-btn:not(.send-mail-btn):hover {
     background: linear-gradient(135deg, #3a3e44 0%, #2f3439 100%);
     border-color: rgba(255, 255, 255, 0.22);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
@@ -2463,4 +2463,20 @@
 .modal-body.confirm-center .confirmation-message,
 .modal-body.confirm-center .confirmation-container {
     text-align: center;
+}
+
+/* Send Mail button styles (moved from preorders.html) */
+.admin-btn.send-mail-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+}
+.admin-btn.send-mail-btn:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+}
+.admin-btn.send-mail-btn svg {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    color: #ffffff;
 }
