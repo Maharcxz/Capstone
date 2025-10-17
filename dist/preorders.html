@@ -378,8 +378,30 @@
             if (!subjectEl || !messageEl || !templateEl) return;
 
             subjectEl.value = getDefaultEmailSubject(order);
-            // Pre-fill message with default template (detailed)
-            messageEl.value = `Hi ${((order.firstName || '') + ' ' + (order.lastName || '')).trim() || 'Customer'},\n\nThank you for your pre-order.\nProduct: ${order.productName || order.frameName || 'N/A'}\nOrder Date: ${document.getElementById('modal-order-date').textContent}\nStatus: ${(order.status || 'pending').toUpperCase()}${order.notes ? `\nNotes: ${order.notes}` : ''}\n\nIf you have any questions, reply to this email or contact us via our website.\n\nBest regards,\nTrinity Optimum Vision Center`;
+            // Compose formatted date with en dash
+            const rawDate = order.date || order.timestamp;
+            let formattedDateDash = document.getElementById('modal-order-date')?.textContent || 'N/A';
+            try {
+                let dateObj;
+                if (rawDate) {
+                    if (typeof rawDate === 'number') {
+                        dateObj = new Date(rawDate < 1e12 ? rawDate * 1000 : rawDate);
+                    } else {
+                        dateObj = new Date(rawDate);
+                    }
+                }
+                if (dateObj && !isNaN(dateObj.getTime())) {
+                    const dateStr = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                    const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                    formattedDateDash = `${dateStr} – ${timeStr}`;
+                }
+            } catch (_) {}
+            const productBase = order.productName || order.frameName || 'N/A';
+            const modelNo = order.modelNumber || order.modelNo || order.model || order.frameModel || '';
+            const productLine = modelNo ? `${productBase} (Model No. ${modelNo})` : productBase;
+
+            // Pre-fill message with requested template
+            messageEl.value = `Hi ${((order.firstName || '') + ' ' + (order.lastName || '')).trim() || 'Customer'},\n\nThank you for choosing Trinity Optimum Vision Center ! We’re excited to let you know that your pre-order has been successfully placed. Below are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n\nYour item is now queued for processing. We’ll notify you once it’s ready for pickup or delivery.\n\nIf you have any questions or changes to your order, feel free to reply to this message.\n\n— Trinity Optimum Vision Center`;
             templateEl.value = 'default';
 
             templateEl.onchange = function() {
@@ -400,7 +422,7 @@
                 } else if (tpl === 'completed') {
                     messageEl.value = `Hi ${((order.firstName || '') + ' ' + (order.lastName || '')).trim() || 'Customer'},\n\nYour order for ${order.productName || order.frameName || 'your selected frame'} has been marked Completed.\n\nThank you for choosing Trinity Optimum Vision Center.\n\n— Trinity Optimum Vision Center`;
                 } else {
-                    messageEl.value = `Hi ${((order.firstName || '') + ' ' + (order.lastName || '')).trim() || 'Customer'},\n\nThank you for your pre-order.\nProduct: ${order.productName || order.frameName || 'N/A'}\nOrder Date: ${document.getElementById('modal-order-date').textContent}\nStatus: ${(order.status || 'pending').toUpperCase()}${order.notes ? `\nNotes: ${order.notes}` : ''}\n\nIf you have any questions, reply to this email or contact us via our website.\n\nBest regards,\nTrinity Optimum Vision Center`;
+                    messageEl.value = `Hi ${((order.firstName || '') + ' ' + (order.lastName || '')).trim() || 'Customer'},\n\nThank you for choosing Trinity Optimum Vision Center ! We’re excited to let you know that your pre-order has been successfully placed. Below are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n\nYour item is now queued for processing. We’ll notify you once it’s ready for pickup or delivery.\n\nIf you have any questions or changes to your order, feel free to reply to this message.\n\n— Trinity Optimum Vision Center`;
                 }
             };
         }
@@ -415,9 +437,10 @@
         function composeOrderEmailHtml(order) {
             const fullName = `${(order.firstName || '').trim()} ${(order.lastName || '').trim()}`.trim() || 'Customer';
             const productName = order.productName || order.frameName || 'your selected frame';
-            const status = (order.status || 'pending').toUpperCase();
+            const modelNo = order.modelNumber || order.modelNo || order.model || order.frameModel || '';
+            const productLine = modelNo ? `${productName} (Model No. ${modelNo})` : productName;
             const rawDate = order.date || order.timestamp;
-            let formattedDate = 'N/A';
+            let formattedDateDash = 'N/A';
             if (rawDate) {
                 let dateObj;
                 if (typeof rawDate === 'number') {
@@ -426,38 +449,20 @@
                     dateObj = new Date(rawDate);
                 }
                 if (!isNaN(dateObj.getTime())) {
-                    formattedDate = dateObj.toLocaleString('en-US', {
-                        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                    });
+                    const dateStr = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                    const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                    formattedDateDash = `${dateStr} – ${timeStr}`;
                 }
             }
-            const notes = (order.notes && order.notes.trim()) ? order.notes.trim() : null;
             return `
                 <div style="font-family:Poppins,Arial,sans-serif; color:#333; line-height:1.6;">
-                  <h2 style="margin:0 0 12px;">Trinity Optimum Vision Center</h2>
                   <p>Hi ${fullName},</p>
-                  <p>Thank you for your pre-order. Here are your order details:</p>
-                  <table style="border-collapse:collapse; width:100%; max-width:600px;">
-                    <tr>
-                      <td style="padding:8px; border:1px solid #eee; font-weight:600;">Product</td>
-                      <td style="padding:8px; border:1px solid #eee;">${productName}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding:8px; border:1px solid #eee; font-weight:600;">Order Date</td>
-                      <td style="padding:8px; border:1px solid #eee;">${formattedDate}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding:8px; border:1px solid #eee; font-weight:600;">Status</td>
-                      <td style="padding:8px; border:1px solid #eee;">${status}</td>
-                    </tr>
-                    ${notes ? `
-                    <tr>
-                      <td style="padding:8px; border:1px solid #eee; font-weight:600;">Notes</td>
-                      <td style="padding:8px; border:1px solid #eee;">${notes}</td>
-                    </tr>` : ''}
-                  </table>
-                  <p style="margin-top:16px;">If you have any questions, reply to this email or contact us via our website.</p>
-                  <p style="margin-top:24px;">Best regards,<br/>Trinity Optimum Vision Center</p>
+                  <p>Thank you for choosing Trinity Optimum Vision Center ! We’re excited to let you know that your pre-order has been successfully placed. Below are the details of your order:</p>
+                  <p><strong>Product Name:</strong> ${productLine}</p>
+                  <p><strong>Order Date:</strong> ${formattedDateDash}</p>
+                  <p>Your item is now queued for processing. We’ll notify you once it’s ready for pickup or delivery.</p>
+                  <p>If you have any questions or changes to your order, feel free to reply to this message.</p>
+                  <p>— Trinity Optimum Vision Center</p>
                 </div>
             `;
         }
@@ -465,10 +470,11 @@
         // Compose plain text message based on template
         function composePlainTextMessage(order, templateId) {
             const name = `${(order.firstName || '').trim()} ${(order.lastName || '').trim()}`.trim() || 'Customer';
-            const product = order.productName || order.frameName || 'your selected frame';
-            const statusText = (order.status || 'pending').toUpperCase();
+            const productBase = order.productName || order.frameName || 'your selected frame';
+            const modelNo = order.modelNumber || order.modelNo || order.model || order.frameModel || '';
+            const productLine = modelNo ? `${productBase} (Model No. ${modelNo})` : productBase;
             const rawDate = order.date || order.timestamp;
-            let formattedDate = document.getElementById('modal-order-date')?.textContent || 'N/A';
+            let formattedDateDash = document.getElementById('modal-order-date')?.textContent || 'N/A';
             if (rawDate) {
                 let dateObj;
                 if (typeof rawDate === 'number') {
@@ -477,20 +483,20 @@
                     dateObj = new Date(rawDate);
                 }
                 if (!isNaN(dateObj.getTime())) {
-                    formattedDate = dateObj.toLocaleString('en-US', {
-                        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                    });
+                    const dateStr = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                    const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                    formattedDateDash = `${dateStr} – ${timeStr}`;
                 }
             }
             const notes = (order.notes && order.notes.trim()) ? order.notes.trim() : '';
             if (templateId === 'simple') {
-                return `Hi ${name},\n\nThanks for your pre-order of ${product} on ${formattedDate}. Current status: ${statusText}.\n${notes ? `Notes: ${notes}\n` : ''}\nWe’ll keep you updated. Reply if you need anything.\n\n— Trinity Optimum Vision Center`;
+                return `Hi ${name},\n\nThanks for your pre-order of ${productBase} on ${formattedDateDash}. Current status: ${(order.status || 'pending').toUpperCase()}.\n${notes ? `Notes: ${notes}\n` : ''}\nWe’ll keep you updated. Reply if you need anything.\n\n— Trinity Optimum Vision Center`;
             }
             if (templateId === 'completed') {
-                return `Hi ${name},\n\nYour order for ${product} has been marked Completed on ${formattedDate}.\n${notes ? `Notes: ${notes}\n` : ''}\nThank you for choosing Trinity Optimum Vision Center.\n\n— Trinity Optimum Vision Center`;
+                return `Hi ${name},\n\nYour order for ${productBase} has been marked Completed on ${formattedDateDash}.\n${notes ? `Notes: ${notes}\n` : ''}\nThank you for choosing Trinity Optimum Vision Center.\n\n— Trinity Optimum Vision Center`;
             }
-            // default detailed summary
-            return `Hi ${name},\n\nThank you for your pre-order.\nProduct: ${product}\nOrder Date: ${formattedDate}\nStatus: ${statusText}\n${notes ? `Notes: ${notes}\n` : ''}\nWe’ll keep you updated. Reply if you need anything.\n\n— Trinity Optimum Vision Center`;
+            // default detailed summary (requested wording)
+            return `Hi ${name},\n\nThank you for choosing Trinity Optimum Vision Center ! We’re excited to let you know that your pre-order has been successfully placed. Below are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n\nYour item is now queued for processing. We’ll notify you once it’s ready for pickup or delivery.\n\nIf you have any questions or changes to your order, feel free to reply to this message.\n\n— Trinity Optimum Vision Center`;
         }
 
         // Open Gmail compose with prefilled fields; fallback to mailto
@@ -508,7 +514,7 @@
         }
 
         // Try sending via local API first; fallback to Gmail compose
-        async function trySendViaAPI(to, subject, bodyText) {
+        async function trySendViaAPI(to, subject, bodyText, htmlContent) {
             const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
             const API_URL = isLocal
                 ? 'http://localhost:3000/api/send-email'
@@ -517,7 +523,7 @@
                 const resp = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ to, subject, text: bodyText })
+                    body: JSON.stringify({ to, subject, text: bodyText, html: htmlContent })
                 });
                 if (!resp.ok) throw new Error(await resp.text());
                 const data = await resp.json();
@@ -547,13 +553,14 @@
                 const templateId = (document.getElementById('emailTemplateSelect') || {}).value || 'default';
                 const subject = subjectInput.trim() || getDefaultEmailSubject(order);
                 const bodyText = (messageInput.trim()) ? messageInput.trim() : composePlainTextMessage(order, templateId);
+                const htmlBody = composeTemplateHtml(order, templateId);
 
                 if (sendBtn) {
                     sendBtn.disabled = true;
                     sendBtn.textContent = 'Sending...';
                 }
 
-                const sent = await trySendViaAPI(order.email, subject, bodyText);
+                const sent = await trySendViaAPI(order.email, subject, bodyText, htmlBody);
                 if (sent) {
                     openConfirmModal({
                         title: 'Email Sent',
