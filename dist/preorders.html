@@ -341,9 +341,10 @@
             }
         }
 
-        // Default subject
+        // Default subject includes pickup availability
         function getDefaultEmailSubject(order) {
-            return 'Your Pre-Order Details - Trinity Optimum Vision Center';
+            const productName = order.productName || order.frameName || 'your order';
+            return `${productName} is available for pickup at the store - Trinity Optimum Vision Center`;
         }
 
         // Compose template variants
@@ -408,11 +409,13 @@
 
             templateEl.onchange = function() {
                 const tpl = templateEl.value;
-                // Update subject when template changes
+                // Update subject when template changes (include pickup availability)
                 if (tpl === 'completed') {
-                    subjectEl.value = 'Your Order Has Been Completed - Trinity Optimum Vision Center';
+                    const productName = order.productName || order.frameName || 'your order';
+                    subjectEl.value = `${productName} is available for pickup at the store - Trinity Optimum Vision Center`;
                 } else if (tpl === 'simple') {
-                    subjectEl.value = 'Your Pre-Order Update';
+                    const productName = order.productName || order.frameName || 'your order';
+                    subjectEl.value = `Pre-Order Update: ${productName} is available for pickup at the store`;
                 } else {
                     subjectEl.value = getDefaultEmailSubject(order);
                 }
@@ -529,7 +532,28 @@
             }
         }
 
-        // Send email to customer by opening Gmail compose
+        // Try sending via local API first; fallback to Gmail compose
+        async function trySendViaAPI(to, subject, bodyText) {
+            const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+            const API_URL = isLocal
+                ? 'http://localhost:3000/api/send-email'
+                : '/.netlify/functions/send-email';
+            try {
+                const resp = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ to, subject, text: bodyText })
+                });
+                if (!resp.ok) throw new Error(await resp.text());
+                const data = await resp.json();
+                return !!(data && data.ok);
+            } catch (e) {
+                console.warn('Email API failed, falling back to Gmail:', e);
+                return false;
+            }
+        }
+
+        // Send email to customer (API first, Gmail fallback)
         async function sendMailToCustomer() {
             const sendBtn = document.getElementById('sendMailButton');
             try {
@@ -549,12 +573,23 @@
                 const subject = subjectInput.trim() || getDefaultEmailSubject(order);
                 const bodyText = (messageInput.trim()) ? messageInput.trim() : composePlainTextMessage(order, templateId);
 
-                // Disable button while opening
                 if (sendBtn) {
                     sendBtn.disabled = true;
-                    sendBtn.textContent = 'Opening Gmail...';
+                    sendBtn.textContent = 'Sending...';
                 }
-                openGmailCompose(order.email, subject, bodyText);
+
+                const sent = await trySendViaAPI(order.email, subject, bodyText);
+                if (sent) {
+                    openConfirmModal({
+                        title: 'Email Sent',
+                        message: 'Your message was sent via the local email API.',
+                        confirmText: 'OK',
+                        showCancel: false
+                    });
+                } else {
+                    if (sendBtn) sendBtn.textContent = 'Opening Gmail...';
+                    openGmailCompose(order.email, subject, bodyText);
+                }
             } catch (err) {
                 openConfirmModal({
                     title: 'Email Error',
