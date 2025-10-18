@@ -3,19 +3,23 @@
 // currentEditTarget is declared in ContentEditingFunc.js
 
 // Credential saving and loading functions
+// No-op stub: credentials are not persisted client-side
 function saveCredentials(email, password) {
     // No-op: credentials are not persisted client-side.
 }
 
+// No-op stub: no persisted credentials to load
 function loadSavedCredentials() {
     // No-op: no persisted credentials to load.
 }
 
+// No-op stub: no persisted credentials to clear
 function clearSavedCredentials() {
     // No-op: no persisted credentials to clear.
 }
 
 // Mark the current page's nav link as active
+// Highlight current page link (call on DOMContentLoaded)
 function setActiveNavLink() {
     try {
         const currentFile = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();

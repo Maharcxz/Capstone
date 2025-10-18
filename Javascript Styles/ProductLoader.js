@@ -1,9 +1,13 @@
 // Product Loader for Homepage
 // Dynamically loads and displays products from Firebase
 
+// State: all products loaded from Firebase
 let allProductsData = [];
+// State: products after applying filters
 let filteredProductsData = [];
+// State: currently selected frame category
 let currentCategory = 'All Frames';
+// State: product id currently shown in modal
 let currentProductId = null; // Track currently viewed product in modal
 
 // Initialize product loading when page loads
@@ -20,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Load products from Firebase
+// Fetch products from Firebase and render the grid
 async function loadProductsFromDatabase() {
     try {
         if (typeof getAllProducts === 'function') {
@@ -38,6 +43,7 @@ async function loadProductsFromDatabase() {
 }
 
 // Fallback to show some sample products if database fails
+// Fallback sample data when database is unavailable
 function loadFallbackProducts() {
     allProductsData = [
         {
@@ -73,6 +79,7 @@ function loadFallbackProducts() {
 }
 
 // Render products in the grid
+// Render product cards and admin controls in the grid
 function renderProductGrid() {
     const productGrid = document.querySelector('.product-grid');
     if (!productGrid) return;
@@ -132,7 +139,7 @@ function renderProductGrid() {
     }
 }
 
-// Filter products by category
+// Select category and update UI
 function selectFrameCategory(category) {
     currentCategory = category;
     applyCurrentFilters();
@@ -160,12 +167,12 @@ function applyCurrentFilters() {
     
     // Apply search filter
     const searchInput = document.getElementById('frameSearchInput');
-    if (searchInput && searchInput.value.trim()) {
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        filtered = filtered.filter(product => 
-            product.title.toLowerCase().includes(searchTerm) ||
-            (product.description && product.description.toLowerCase().includes(searchTerm))
-        );
+     if (searchInput && searchInput.value.trim()) {
+         const searchTerm = searchInput.value.toLowerCase().trim();
+         filtered = filtered.filter(product => 
+             product.title.toLowerCase().includes(searchTerm) ||
+             (product.description && product.description.toLowerCase().includes(searchTerm))
+         );
     }
     
     filteredProductsData = filtered;
@@ -173,15 +180,18 @@ function applyCurrentFilters() {
 }
 
 // Search functionality
+// Trigger filter update based on search input
 function searchProducts() {
     applyCurrentFilters();
 }
 
 // Admin functions for homepage product management
+// Navigate to admin edit view for a product
 function editProductFromHomepage(productId) {
     window.location.href = `admin-dashboard.html?edit=${productId}`;
 }
 
+// Delete product and show feedback notification
 async function deleteProductFromHomepage(productId, productTitle) {
     try {
         if (typeof deleteProductFromFirebase === 'function') {
@@ -197,6 +207,7 @@ async function deleteProductFromHomepage(productId, productTitle) {
     }
 }
 
+// Toggle product visibility and persist change
 async function toggleProductVisibilityFromHomepage(productId, currentVisibility) {
     try {
         if (typeof getProductById === 'function' && typeof saveProductToFirebase === 'function') {
@@ -254,6 +265,7 @@ function showHomepageNotification(message, type = 'info') {
 }
 
 // Utility function to escape HTML
+// Escape HTML to prevent injection in titles/descriptions
 function escapeHtml(text) {
     const map = {
         '&': '&amp;',
@@ -275,6 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Product Detail Modal Functions
+// Open product detail modal and render content
 function openProductDetailModal(productId) {
     const product = allProductsData.find(p => p.id === productId);
     if (!product) return;
@@ -362,6 +375,7 @@ function openProductDetailModal(productId) {
     document.getElementById('productDetailModal').style.display = 'flex';
 }
 
+// Set main image in product modal
 function setMainImage(imageSrc, index) {
     document.getElementById('mainProductImage').src = imageSrc;
     
@@ -372,6 +386,7 @@ function setMainImage(imageSrc, index) {
 }
 
 // Function to format product description as structured HTML
+// Format description as HTML list/paragraphs
 function formatDescriptionAsHTML(description) {
     // Create a structured HTML from description text
     let html = '';
@@ -474,6 +489,7 @@ function formatDescriptionAsHTML(description) {
     return html;
 }
 
+// Close product detail modal
 function closeProductDetailModal() {
     document.getElementById('productDetailModal').style.display = 'none';
 }
@@ -506,6 +522,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Inventory Management Functions
 
 // Update stock display in modal
+// Update stock label styling and text
 function updateStockDisplay(stock) {
     const stockQuantityElement = document.getElementById('stockQuantity');
     const stockDisplayElement = document.getElementById('stockDisplay');
@@ -527,6 +544,7 @@ function updateStockDisplay(stock) {
 
 
 // Initialize admin stock controls
+// Admin-only stock controls setup
 function initializeAdminStockControls(stock) {
     const adminStockInput = document.getElementById('adminStockInput');
     
@@ -540,6 +558,7 @@ function initializeAdminStockControls(stock) {
 
 
 // Update pre-order button state
+// Update preorder button state and label
 function updatePreorderButton(stock) {
     const preorderBtn = document.getElementById('preorderBtn');
     
@@ -557,6 +576,7 @@ function updatePreorderButton(stock) {
 }
 
 // Handle pre-order
+// Navigate to preorder flow or disable when out of stock
 function handlePreOrder() {
     const product = allProductsData.find(p => p.id === currentProductId);
     
@@ -577,6 +597,7 @@ function handlePreOrder() {
 }
 
 // Update product stock (Admin function)
+// Update product stock in database (admin only)
 async function updateProductStock() {
     if (!currentProductId) {
         showStatusModal('No product selected.', 'error');
@@ -621,6 +642,7 @@ async function updateProductStock() {
 }
 
 // Reduce stock after successful pre-order
+// Reduce stock after preorder and show feedback
 async function reduceProductStock(productId, quantity) {
     try {
         const product = allProductsData.find(p => p.id === productId);
@@ -652,6 +674,7 @@ async function reduceProductStock(productId, quantity) {
 }
 
 // Close status modal when clicking outside of the content
+// Attach status modal close/cancel handlers
 (function attachStatusModalHandlers() {
     const modal = document.getElementById('statusModal');
     if (modal) {
@@ -670,6 +693,7 @@ async function reduceProductStock(productId, quantity) {
 })();
 
 // Export functions to global scope
+// Expose homepage functions globally
 window.selectFrameCategory = selectFrameCategory;
 window.searchProducts = searchProducts;
 window.editProductFromHomepage = editProductFromHomepage;
@@ -684,6 +708,7 @@ window.reduceProductStock = reduceProductStock;
 window.showStatusModal = showStatusModal;
 window.closeStatusModal = closeStatusModal;
 
+// Show a status modal with message and style
 function showStatusModal(message, type = 'info') {
     const modal = document.getElementById('statusModal');
     const titleEl = document.getElementById('statusModalTitle');
@@ -713,6 +738,7 @@ function showStatusModal(message, type = 'info') {
     modal.classList.add('show');
 }
 
+// Close the status modal
 function closeStatusModal() {
     const modal = document.getElementById('statusModal');
     if (modal) {

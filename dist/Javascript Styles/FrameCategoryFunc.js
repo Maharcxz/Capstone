@@ -1,4 +1,5 @@
 // Frame category selection
+// Select category, update UI, and filter products
 function selectFrameCategory(category) {
     const frameTypeTitle = document.getElementById('frameTypeTitle');
     if (frameTypeTitle) {
@@ -8,6 +9,7 @@ function selectFrameCategory(category) {
     filterProductsByCategory(category);
 }
 
+// Placeholder filter: show all products for selected category
 function filterProductsByCategory(category) {
     const productCards = document.querySelectorAll('.product-card');
     productCards.forEach(card => {

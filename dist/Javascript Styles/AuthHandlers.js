@@ -19,6 +19,7 @@ auth.onAuthStateChanged((user) => {
     }
 });
 
+// Handle auth button click; toggles login modal or admin menu
 function handleAuthClick() {
     console.log('handleAuthClick called, isAdminMode:', isAdminMode);
     if (isAdminMode) {
@@ -30,6 +31,7 @@ function handleAuthClick() {
     }
 }
 
+// Open login modal and preload saved credentials if available
 function showLoginModal() {
     const loginModal = document.getElementById('loginModalOverlay');
     if (loginModal) {
@@ -41,6 +43,7 @@ function showLoginModal() {
     }
 }
 
+// Close login modal overlay
 function hideLoginModal() {
     const loginModal = document.getElementById('loginModalOverlay');
     if (loginModal) {
@@ -48,6 +51,7 @@ function hideLoginModal() {
     }
 }
 
+// Toggle visibility of the admin dropdown panel
 function toggleAdminDropdown() {
     console.log('toggleAdminDropdown called, isAdminMode:', isAdminMode);
     const dropdown = document.getElementById('adminDropdown');
@@ -59,6 +63,7 @@ function toggleAdminDropdown() {
     }
 }
 
+// Sign in using Firebase email/password and enable admin mode
 function loginWithFirebase(email, password) {
     auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
@@ -73,6 +78,7 @@ function loginWithFirebase(email, password) {
         });
 }
 
+// Sign out from Firebase and revert to guest mode
 function logoutFromFirebase() {
     auth.signOut().then(() => {
         // Sign-out successful
@@ -82,6 +88,7 @@ function logoutFromFirebase() {
     });
 }
 
+// Enable admin UI, update nav, and mark admin mode
 function switchToAdminMode() {
     console.log('Switching to admin mode...');
     isAdminMode = true;
@@ -104,6 +111,7 @@ function switchToAdminMode() {
     hideAdminDropdown();
 }
 
+// Disable admin UI, hide protected nav, and enforce guest state
 function switchToGuestMode() {
     // Update UI immediately
     isAdminMode = false;
@@ -127,6 +135,7 @@ function switchToGuestMode() {
     }
 }
 
+// Initialize guest mode UI without triggering sign-out
 function setGuestMode() {
     isAdminMode = false;
     const authButton = document.getElementById('authButtonText');
@@ -149,6 +158,7 @@ function setGuestMode() {
     console.log('Guest mode set successfully');
 }
 
+// Hide admin dropdown if open
 function hideAdminDropdown() {
     const dropdown = document.getElementById('adminDropdown');
     if (dropdown) {

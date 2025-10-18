@@ -1,6 +1,8 @@
 // Sidebar functions
 let hoverTimeout;
 
+// Toggle sidebar panel and overlay
+// Toggle sidebar panel and overlay visibility
 function toggleSidebar() {
     const sidebar = document.getElementById('frameSidebar');
     const mainContent = document.getElementById('mainContent');
@@ -11,6 +13,8 @@ function toggleSidebar() {
     if (overlay) overlay.classList.toggle('active');
 }
 
+// Open sidebar and activate overlay
+// Open sidebar and activate overlay
 function openSidebar() {
     const sidebar = document.getElementById('frameSidebar');
     const mainContent = document.getElementById('mainContent');
@@ -21,6 +25,8 @@ function openSidebar() {
     if (overlay) overlay.classList.add('active');
 }
 
+// Close sidebar and remove overlay
+// Close sidebar and remove overlay
 function closeSidebar() {
     const sidebar = document.getElementById('frameSidebar');
     const mainContent = document.getElementById('mainContent');
@@ -32,6 +38,7 @@ function closeSidebar() {
 }
 
 // Initialize hover/touch/click functionality for responsiveness
+// Initialize hover/touch/click handlers for sidebar
 function initializeSidebarHover() {
     const frameTypesMenu = document.getElementById('frameTypesMenu');
     const sidebar = document.getElementById('frameSidebar');

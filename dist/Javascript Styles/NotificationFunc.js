@@ -1,4 +1,5 @@
 // Notifications functionality
+// Toggle notification panel visibility
 function toggleNotifications() {
     const panel = document.getElementById('notificationsPanel');
     if (panel) {
@@ -8,11 +9,13 @@ function toggleNotifications() {
 }
 
 // Pre-order notifications functionality
+// Toggle pre-order notifications panel visibility
 function togglePreorderNotifications() {
     // Navigate to pre-orders page to view new orders
     window.location.href = 'preorders.html';
 }
 
+// Update badge count for pre-order notifications
 function updatePreorderNotificationBadge() {
     const badge = document.getElementById('preorderNotificationBadge');
     
@@ -41,6 +44,7 @@ function updatePreorderNotificationBadge() {
         });
 }
 
+// Hide notifications panel
 function hideNotifications() {
     const panel = document.getElementById('notificationsPanel');
     if (panel) {
@@ -48,6 +52,7 @@ function hideNotifications() {
     }
 }
 
+// Add new pre-order notification and refresh badges
 function addPreOrderNotification(frameName, customerName, preOrderId) {
     const notification = {
         preOrderId: preOrderId || null,
@@ -70,6 +75,7 @@ function addPreOrderNotification(frameName, customerName, preOrderId) {
         });
 }
 
+// Update unread notifications badge count
 function updateNotificationBadge() {
     const badge = document.getElementById('notificationBadge');
     
@@ -96,6 +102,7 @@ function updateNotificationBadge() {
         });
 }
 
+// Render unread notifications list UI
 function updateNotificationsList() {
     const list = document.getElementById('notificationsList');
     if (!list) return;
@@ -127,6 +134,7 @@ function updateNotificationsList() {
         });
 }
 
+// Mark notification as read and refresh UI
 function markNotificationAsRead(notificationId, evt) {
     if (evt) evt.stopPropagation();
     if (!notificationId) return;
@@ -143,6 +151,7 @@ function markNotificationAsRead(notificationId, evt) {
         });
 }
 
+// Open details modal for selected notification
 function showNotificationDetails(notificationId) {
     // Get notification details from Firebase notifications collection
     firebaseServices.db.ref('notifications/' + notificationId).once('value')
@@ -171,6 +180,7 @@ function showNotificationDetails(notificationId) {
         });
 }
 
+// Build and show confirmation/details modal
 function showConfirmationModal(notification, preOrder) {
     const overlay = document.createElement('div');
     overlay.className = 'confirmation-modal-overlay';
@@ -224,6 +234,7 @@ function showConfirmationModal(notification, preOrder) {
     setTimeout(() => overlay.classList.add('active'), 10);
 }
 
+// Close and remove confirmation modal overlay
 function hideConfirmationModal() {
     const modal = document.querySelector('.confirmation-modal-overlay');
     if (modal) {
@@ -232,6 +243,7 @@ function hideConfirmationModal() {
     }
 }
 
+// Format timestamp for compact list display
 function formatNotificationTime(timestamp) {
     const date = new Date(timestamp);
     const now = new Date();
@@ -243,6 +255,7 @@ function formatNotificationTime(timestamp) {
     return `${Math.floor(diffInMinutes / 1440)}d ago`;
 }
 
+// Format timestamp for detailed modal view
 function formatDetailedTime(timestamp) {
     const date = new Date(timestamp);
     return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});

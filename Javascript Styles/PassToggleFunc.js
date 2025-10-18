@@ -1,3 +1,4 @@
+// Toggle password input visibility (show/hide)
 function togglePassword() {
     const passwordInput = document.getElementById('modalPasswordInput') || document.getElementById('passwordInput') || document.getElementById('password');
     const passwordToggle = document.querySelector('.password-toggle');

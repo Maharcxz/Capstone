@@ -1317,8 +1317,10 @@ async function deleteCategory(categoryId) {
 }
 
 // Multiple Image Management Functions
+// Image preview store
 let productImages = [];
 
+// Handle image file input and add to preview
 function handleFileUpload(event) {
     const files = event.target.files;
     let invalidCount = 0;
@@ -1346,6 +1348,7 @@ function handleFileUpload(event) {
     }
 }
 
+// Add image from URL input
 function addImageUrl() {
     const urlInput = document.getElementById('productImageUrl');
     const url = urlInput.value.trim();
@@ -1395,6 +1398,7 @@ function addImageUrl() {
     testImg.src = url;
 }
 
+// Push image entry into preview list
 function addImageToPreview(src, name) {
     const imageId = Date.now() + Math.random();
     const imageData = {
@@ -1407,11 +1411,13 @@ function addImageToPreview(src, name) {
     renderImagePreview();
 }
 
+// Remove image from preview store
 function removeImage(imageId) {
     productImages = productImages.filter(img => img.id !== imageId);
     renderImagePreview();
 }
 
+// Move image up in preview order
 function moveImageUp(imageId) {
     const index = productImages.findIndex(img => img.id === imageId);
     if (index > 0) {
@@ -1420,6 +1426,7 @@ function moveImageUp(imageId) {
     }
 }
 
+// Move image down in preview order
 function moveImageDown(imageId) {
     const index = productImages.findIndex(img => img.id === imageId);
     if (index < productImages.length - 1) {
@@ -1428,6 +1435,7 @@ function moveImageDown(imageId) {
     }
 }
 
+// Render image preview grid with controls
 function renderImagePreview() {
     const container = document.getElementById('imagePreviewGrid');
     
@@ -1451,14 +1459,17 @@ function renderImagePreview() {
     `).join('');
 }
 
+// Clear all image previews
 function clearAllImages() {
     productImages = [];
     renderImagePreview();
 }
 
 // GLB File Management Functions
+// GLB file preview store
 let productGlbFiles = [];
 
+// Handle GLB file input and add to preview
 function handleGlbFileUpload(event) {
     const files = event.target.files;
     for (let i = 0; i < files.length; i++) {
@@ -1473,6 +1484,7 @@ function handleGlbFileUpload(event) {
     event.target.value = '';
 }
 
+// Add GLB model from URL input with validation
 function addGlbUrl() {
     const urlInput = document.getElementById('productGlbUrl');
     const url = urlInput.value.trim();
@@ -1501,6 +1513,7 @@ function addGlbUrl() {
     urlInput.value = '';
 }
 
+// Push GLB entry into preview list
 function addGlbFileToPreview(src, name) {
     const glbId = 'glb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     const fileSize = src instanceof File ? formatFileSize(src.size) : 'Unknown size';
@@ -1520,11 +1533,13 @@ function addGlbFileToPreview(src, name) {
     renderGlbPreview();
 }
 
+// Remove GLB model from preview list
 function removeGlbFile(glbId) {
     productGlbFiles = productGlbFiles.filter(glb => glb.id !== glbId);
     renderGlbPreview();
 }
 
+// Move GLB model up in list order
 function moveGlbFileUp(glbId) {
     const index = productGlbFiles.findIndex(glb => glb.id === glbId);
     if (index > 0) {
@@ -1533,6 +1548,7 @@ function moveGlbFileUp(glbId) {
     }
 }
 
+// Move GLB model down in list order
 function moveGlbFileDown(glbId) {
     const index = productGlbFiles.findIndex(glb => glb.id === glbId);
     if (index < productGlbFiles.length - 1) {
@@ -1541,6 +1557,7 @@ function moveGlbFileDown(glbId) {
     }
 }
 
+// Render 3D model list with controls
 function renderGlbPreview() {
     const container = document.getElementById('glbPreviewGrid');
     if (!container) return;
@@ -1585,6 +1602,7 @@ function renderGlbPreview() {
 }
 
 // Get face anchor name from index
+// Map face anchor index to human-readable name
 function getFaceAnchorName(anchorIndex) {
     const anchors = {
         168: 'Face Center',
@@ -1597,11 +1615,13 @@ function getFaceAnchorName(anchorIndex) {
     return anchors[anchorIndex] || `Anchor ${anchorIndex}`;
 }
 
+// Clear all GLB files from preview store
 function clearAllGlbFiles() {
     productGlbFiles = [];
     renderGlbPreview();
 }
 
+// Format bytes into human-readable file size
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;

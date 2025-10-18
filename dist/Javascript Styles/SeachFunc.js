@@ -1,4 +1,5 @@
 // Search functionality
+// Bind live search input and filter product cards
 function initializeSearch() {
     const searchInput = document.getElementById('frameSearchInput');
     if (searchInput) {

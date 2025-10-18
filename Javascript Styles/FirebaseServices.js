@@ -5,8 +5,11 @@
         return;
     }
 
+    // Realtime Database instance
     const db = firebase.database();
+    // Reference: notifications collection
     const notificationsRef = db.ref('notifications');
+    // Reference: pre-orders collection
     const preOrdersRef = db.ref('preOrders');
 
     // --- Category Services ---
@@ -214,7 +217,7 @@
         });
     }
 
-    // Expose the services to the global window object
+    // Expose service functions and references to global window
     window.firebaseServices = {
         getAllCategories,
         listenForCategoryChanges,

@@ -6,6 +6,7 @@ let contentCache = new Map(); // Cache for loaded content
 let isContentLoaded = false; // Flag to prevent duplicate loading
 
 // Initialize admin mode based on login status
+// Initialize content editing controls and attach handlers
 document.addEventListener('DOMContentLoaded', function() {
     // Firebase-only: no localStorage cache preload
     showCachedContentImmediately();
@@ -40,6 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Show cached content immediately to reduce perceived loading time
+// Display cached content instantly to reduce perceived load time
 function showCachedContentImmediately() {
     try {
         // Render any content already in memory cache (session-only)
@@ -54,6 +56,7 @@ function showCachedContentImmediately() {
     }
 }
 
+// Inject edit buttons next to editable sections in admin mode
 function addEditButtons() {
     // Find all editable content sections
     const editableContents = document.querySelectorAll('[id$="Content"]');
@@ -86,6 +89,7 @@ function addEditButtons() {
     });
 }
 
+// Open modal for editing the selected content section
 function openEditModal(contentType) {
     if (!isAdminMode) return;
     
@@ -147,6 +151,7 @@ function openEditModal(contentType) {
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
 
+// Build and show modal for editing Contact page content
 function createContactEditModal() {
     // Parse current contact content to populate form fields
     const contactElement = document.getElementById('contactContent');
@@ -383,6 +388,7 @@ function saveContactEditedContent() {
     closeEditModal();
 }
 
+// Build and show modal for editing About page content
 function createAboutEditModal() {
     const aboutElement = document.getElementById('aboutContent');
     let currentContent = aboutElement ? aboutElement.innerHTML : '';

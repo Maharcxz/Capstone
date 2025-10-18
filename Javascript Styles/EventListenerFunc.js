@@ -1,4 +1,6 @@
 // Event listeners initialization
+// Bind global UI event listeners
+// Bind global UI event listeners (dropdowns, forms, navigation)
 function initializeEventListeners() {
     // Close dropdowns when clicking outside
     document.addEventListener('click', function(event) {
@@ -132,10 +134,12 @@ function initializeEventListeners() {
 }
 
 // Utility functions
+// Navigate to public home page
 function navigateToHome() {
     window.location.href = 'index.html';
 }
 
+// Navigate to admin-only preorders page
 function navigateToPreorders() {
     try {
         window.location.href = 'preorders.html';
@@ -146,6 +150,7 @@ function navigateToPreorders() {
     }
 }
 
+// Navigate to admin dashboard product management
 function navigateToProductManagement() {
     try {
         window.location.href = 'admin-dashboard.html';
@@ -157,15 +162,18 @@ function navigateToProductManagement() {
 }
 
 // Admin functions for future expansion
+// Enable admin UI and switch to admin mode
 function enableAdminMode() {
     switchToAdminMode();
 }
 
+// Update frame card UI with provided details
 function updateFrameDetails(frameId, details) {
     console.log('Updating frame:', frameId, details);
 }
 
 // Modal for login error feedback
+// Display login error message in modal
 function showLoginErrorModal(message) {
     // Remove any existing instance to ensure retrigger works reliably
     const existing = document.getElementById('loginErrorModalOverlay');

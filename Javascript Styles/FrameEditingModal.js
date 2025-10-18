@@ -1,4 +1,5 @@
 // Frame Edit Modal functionality
+// Open frame editing modal and populate current values
 function openFrameEditModal(editButton) {
     if (!isAdminMode) return;
     
@@ -36,6 +37,7 @@ function openFrameEditModal(editButton) {
     modal.style.display = 'flex';
 }
 
+// Close frame edit modal and clear editing state
 function closeFrameEditModal() {
     const modal = document.getElementById('frameEditModalOverlay');
     if (modal) {
@@ -45,6 +47,7 @@ function closeFrameEditModal() {
     }
 }
 
+// Apply edits to card and close modal
 function saveFrameEdit() {
     const modal = document.getElementById('frameEditModalOverlay');
     const nameInput = document.getElementById('frameNameInput');

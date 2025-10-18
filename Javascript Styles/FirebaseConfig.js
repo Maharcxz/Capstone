@@ -12,26 +12,27 @@ const firebaseConfig = {
   measurementId: "G-L5CLTDK74K"
 };
 
-// Initialize Firebase
+// Initialize Firebase app with project configuration
 const app = firebase.initializeApp(firebaseConfig);
 
 // Initialize Firebase services
 const auth = firebase.auth();
 const db = firebase.database();
 
-// Global admin mode state
+// Global admin mode state flag
+// Global flag for enabling admin UI controls
 let isAdminMode = false;
 
-// Reference to pre-orders collection in the database
+// Database reference: pre-orders
 const preOrdersRef = db.ref('preOrders');
 
-// Reference to products collection in the database
+// Database reference: products
 const productsRef = db.ref('products');
 
-// Reference to categories collection in the database
+// Database reference: categories
 const categoriesRef = db.ref('categories');
 
-// Reference to notifications collection in the database
+// Database reference: notifications
 const notificationsRef = db.ref('notifications');
 
 // Function to save pre-order to Firebase and attach confirmation details on the same record
@@ -77,6 +78,7 @@ function listenForNewPreOrders(callback) {
 }
 
 // Product Management Functions
+// Create or update a product in the database
 function saveProductToFirebase(product) {
     if (product.id) {
         // Update existing product
@@ -87,6 +89,7 @@ function saveProductToFirebase(product) {
     }
 }
 
+// Fetch all products and include record ids
 async function getAllProducts() {
     const snapshot = await productsRef.once('value');
     const products = [];
@@ -100,6 +103,7 @@ async function getAllProducts() {
     return products;
 }
 
+// Fetch a single product by its id
 async function getProductById(productId) {
     const snapshot = await productsRef.child(productId).once('value');
     const product = snapshot.val();
@@ -109,10 +113,12 @@ async function getProductById(productId) {
     return product;
 }
 
+// Delete a product by id
 function deleteProductFromFirebase(productId) {
     return productsRef.child(productId).remove();
 }
 
+// Listen for product collection changes and emit array of products
 function listenForProductChanges(callback) {
     productsRef.on('value', snapshot => {
         const products = [];
@@ -126,6 +132,7 @@ function listenForProductChanges(callback) {
 }
 
 // Inventory helpers
+// Atomically decrement product stock using a transaction
 async function decrementProductStock(productId, qty = 1) {
     const amount = parseInt(qty, 10);
     const safeAmount = Number.isFinite(amount) && amount > 0 ? amount : 1;
@@ -139,6 +146,7 @@ async function decrementProductStock(productId, qty = 1) {
     return { productId, committed: result.committed, newStock: result.snapshot && result.snapshot.val() };
 }
 
+// Decrement stock by product title (find then update)
 async function decrementProductStockByTitle(title, qty = 1) {
     if (!title) throw new Error('Product title is required');
     // Find product by exact title match
@@ -158,6 +166,7 @@ async function decrementProductStockByTitle(title, qty = 1) {
 }
 
 // Category Management Functions
+// Create or update a category; ensure id exists
 function saveCategoryToFirebase(category) {
     if (category.id) {
         // Use deterministic id for categories
@@ -170,6 +179,7 @@ function saveCategoryToFirebase(category) {
     }
 }
 
+// Fetch all categories and include record ids
 async function getAllCategories() {
     const snapshot = await categoriesRef.once('value');
     const categories = [];
@@ -196,6 +206,7 @@ async function categoryNameExists(name) {
     return exists;
 }
 
+// Remove duplicate categories with matching normalized names
 async function cleanupDuplicateCategories(preferredId, normalizedName) {
     const target = (normalizedName || '').trim().toLowerCase();
     const snapshot = await categoriesRef.once('value');
@@ -213,10 +224,12 @@ async function cleanupDuplicateCategories(preferredId, normalizedName) {
     }
 }
 
+// Delete a category by id
 function deleteCategoryFromFirebase(categoryId) {
     return categoriesRef.child(categoryId).remove();
 }
 
+// Listen for category collection changes and emit array of categories
 function listenForCategoryChanges(callback) {
     categoriesRef.on('value', snapshot => {
         const categories = [];
@@ -261,6 +274,8 @@ function onAuthStateChanged(callback) {
 }
 
 // Export Firebase services and functions
+// Expose Firebase helpers and references globally
+// Global export of Firebase helpers and DB references
 window.firebaseServices = {
     auth,
     db,
