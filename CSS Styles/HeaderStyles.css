@@ -1,4 +1,5 @@
 /* Header Styles */
+/* Header container: vertical layout and spacing */
 .header {
     display: flex;
     flex-direction: column;
@@ -7,6 +8,7 @@
     position: relative;
 }
 
+/* Logo area: center alignment and spacing */
 .logo {
     text-align: center;
     margin-bottom: 20px;
@@ -25,6 +27,7 @@
     font-weight: normal;
 }
 
+/* Main navigation bar: layout, gradient, and glass effect */
 .nav {
     display: flex;
     align-items: center;
@@ -57,11 +60,13 @@
     pointer-events: none;
 }
 
+/* Left-side nav links container */
 .nav-left {
     display: flex;
     gap: 30px;
 }
 
+/* Navigation link styles and interactive transitions */
 .nav-link {
     color: white;
     text-decoration: none;
@@ -117,12 +122,14 @@
     left: 100%;
 }
 
+/* Right-side controls: login and icons */
 .nav-right {
     display: flex;
     align-items: center;
     gap: 20px;
 }
 
+/* Primary login button styling and interactions */
 .login-btn {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -180,6 +187,7 @@
     transition: all 0.1s ease;
 }
 
+/* Navigation icon group spacing */
 .nav-icons {
     display: flex;
     gap: 15px;
@@ -278,6 +286,7 @@
 }
 
 /* Admin Navigation Area Styles */
+/* Admin toolbar container */
 .admin-nav-area {
     background: 
         linear-gradient(135deg, rgba(84, 0, 0, 0.4) 0%, rgba(139, 0, 0, 0.3) 50%, rgba(84, 0, 0, 0.4) 100%),
@@ -330,6 +339,7 @@
     letter-spacing: 1px;
 }
 
+/* Admin quick actions layout */
 .admin-nav {
     display: flex;
     gap: 20px;
@@ -337,6 +347,7 @@
     justify-content: center;
 }
 
+/* Individual admin nav link button */
 .admin-nav-link {
     display: flex;
     align-items: center;

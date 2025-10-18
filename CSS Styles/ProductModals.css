@@ -1,4 +1,5 @@
 /* Modal Base Styles */
+/* Modal overlay container and backdrop */
 .modal {
     display: none;
     position: fixed;
@@ -21,11 +22,13 @@
     display: flex;
 }
 
+/* Fade-in animation for modal overlay */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
 }
 
+/* Modal content surface and layout */
 .modal-content {
     background: linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%);
     border-radius: 12px;
@@ -43,6 +46,7 @@
     overflow-y: auto;
 }
 
+/* Slide-in animation for modal content */
 @keyframes slideIn {
     from { 
         transform: translateY(-50px) scale(0.9);
@@ -65,6 +69,7 @@
     text-align: center;
 }
 
+/* Modal header bar and title */
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -85,6 +90,7 @@
     letter-spacing: 0.5px;
 }
 
+/* Close button styling for generic modals */
 .close-modal {
     background: none;
     border: none;
@@ -111,6 +117,7 @@
 .product-modal .close-btn { display: none !important; }
 
 /* Product Detail Modal Styles */
+/* Product detail modal container size */
 .product-detail-modal {
     width: 900px;
     max-width: 95vw;
@@ -161,6 +168,7 @@
     transform: rotate(90deg);
 }
 
+/* Product detail content grid layout */
 .product-detail-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -172,6 +180,7 @@
     color: white;
 }
 
+/* Product images column */
 .product-images-section {
     display: flex;
     flex-direction: column;
@@ -179,6 +188,7 @@
     padding: 0;
 }
 
+/* Main product image frame */
 .main-image-container {
     width: 100%;
     height: 400px;
@@ -211,6 +221,7 @@
     justify-content: center;
 }
 
+/* Thumbnail image styling */
 .thumbnail-image {
     width: 60px;
     height: 60px;
@@ -238,6 +249,7 @@
     padding: 20px;
 }
 
+/* Product info column */
 .product-info-section {
     display: flex;
     flex-direction: column;
@@ -310,6 +322,7 @@
     line-height: 1.8;
 }
 
+/* Action buttons row in detail modal */
 .product-actions {
     display: flex;
     gap: 15px;
@@ -366,6 +379,7 @@
 }
 
 /* Stock Information Styles */
+/* Stock info container */
 .stock-info {
     margin: 15px 0 10px 0;
     padding: 10px 16px;
@@ -392,6 +406,7 @@
 }
 
 /* Quantity Selector Styles */
+/* Quantity selector section */
 .quantity-section {
     margin: 25px 0;
 }
@@ -404,6 +419,7 @@
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+/* Quantity control strip */
 .quantity-selector {
     display: flex;
     align-items: center;
@@ -427,6 +443,7 @@
     mask-composite: exclude;
 }
 
+/* Quantity adjustment buttons */
 .quantity-btn {
     background: linear-gradient(145deg, #540000, #8B0000);
     color: white;
@@ -492,6 +509,7 @@
     box-shadow: none;
 }
 
+/* Quantity input field */
 #quantityInput {
     width: 40px;
     height: 28px;

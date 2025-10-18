@@ -1,4 +1,5 @@
 /* Confirmation Modal Styles */
+/* Overlay container for confirmation modal */
 .confirmation-modal-overlay {
     position: fixed;
     top: 0;
@@ -15,11 +16,13 @@
     transition: opacity 0.3s ease;
 }
 
+/* Active state shows overlay */
 .confirmation-modal-overlay.active {
     opacity: 1;
 }
 
 /* Confirmation Modal Styles */
+/* Modal content container */
 .confirmation-modal {
     background: linear-gradient(135deg, #2c1810, #1a0f0a);
     border-radius: 12px;
@@ -32,10 +35,12 @@
     transition: transform 0.3s ease;
 }
 
+/* Reveal animation for modal when overlay active */
 .confirmation-modal-overlay.active .confirmation-modal {
     transform: translateY(0);
 }
 
+/* Modal header bar and title area */
 .confirmation-modal-header {
     display: flex;
     justify-content: space-between;
@@ -59,6 +64,7 @@
     width: 100%;
 }
 
+/* Modal close button */
 .close-confirmation {
     background: none;
     border: none;
@@ -83,6 +89,7 @@
     transform: translateY(-50%) rotate(90deg);
 }
 
+/* Content section heading */
 .confirmation-modal-content h4 {
     color: white;
     font-size: 20px;
@@ -91,6 +98,7 @@
     letter-spacing: 1px;
 }
 
+/* Body text inside modal */
 .confirmation-modal-content p {
     color: rgba(255, 255, 255, 0.9);
     font-size: 14px;
@@ -98,6 +106,7 @@
     margin: 0 0 20px 0;
 }
 
+/* Timestamp footer in modal */
 .confirmation-modal-time {
     color: rgba(255, 255, 255, 0.6);
     font-size: 12px;
@@ -107,12 +116,14 @@
 }
 
 /* Confirmation Page Styles */
+/* Confirmation page content wrapper */
 .confirmation-content {
     max-width: 1000px;
     margin: 0 auto;
     padding: 2.5rem 2rem 3rem;
 }
 
+/* Page title style */
 .confirmation-page-title {
     font-family: 'Poppins', sans-serif;
     font-size: 3rem;
@@ -124,6 +135,7 @@
     text-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
 }
 
+/* Card-like container for details */
 .confirmation-container {
     background: rgba(0, 0, 0, 0.28);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -133,11 +145,13 @@
     box-shadow: 0 10px 34px rgba(0, 0, 0, 0.35);
 }
 
+/* Grid layout for message sections */
 .confirmation-message {
     display: grid;
     gap: 1.25rem;
 }
 
+/* Primary thank-you text */
 .thank-you-message {
     color: rgba(255, 255, 255, 0.95);
     font-size: 1.125rem;
@@ -145,6 +159,7 @@
     letter-spacing: 0.02em;
 }
 
+/* Details text under thank-you */
 .confirmation-details {
     color: rgba(255, 255, 255, 0.9);
     font-size: 1rem;
@@ -153,6 +168,7 @@
     letter-spacing: 0.02em;
 }
 
+/* Secondary notification text */
 .notification-text {
     color: rgba(255, 255, 255, 0.85);
     font-size: 0.95rem;

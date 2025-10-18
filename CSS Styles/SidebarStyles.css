@@ -1,4 +1,5 @@
 /* Sidebar Overlay */
+/* Overlay behind sidebar to dim background */
 .sidebar-overlay {
     position: fixed;
     top: 0;
@@ -21,6 +22,7 @@
 }
 
 /* Sidebar Styles */
+/* Sidebar panel container and slide-in behavior */
 .sidebar {
     position: fixed;
     top: 0;
@@ -42,10 +44,12 @@
     transform: translateX(0); /* Slide in from left */
 }
 
+/* Inner sidebar content padding */
 .sidebar-content {
     padding: 20px;
 }
 
+/* Sidebar category link styling */
 .frame-category {
     display: block;
     color: white;

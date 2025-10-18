@@ -1,4 +1,5 @@
 /* Frame Edit Modal */
+/* Overlay container for frame edit modal */
 .frame-edit-modal-overlay {
     position: fixed;
     top: 0;
@@ -13,10 +14,12 @@
     z-index: 2000;
 }
 
+/* Active state shows modal overlay */
 .frame-edit-modal-overlay.active {
     display: flex;
 }
 
+/* Modal surface for frame editing */
 .frame-edit-modal {
     background: #540000;
     border-radius: 20px;
@@ -27,6 +30,7 @@
     border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
+/* Header bar and title */
 .frame-edit-header {
     display: flex;
     justify-content: space-between;
@@ -44,6 +48,7 @@
     letter-spacing: 2px;
 }
 
+/* Close button for frame edit modal */
 .close-frame-edit {
     background: none;
     border: none;
@@ -57,12 +62,14 @@
     color: #FFD700;
 }
 
+/* Modal content layout container */
 .frame-edit-content {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
+/* Form field group */
 .frame-edit-field {
     display: flex;
     flex-direction: column;
@@ -76,6 +83,7 @@
     letter-spacing: 1px;
 }
 
+/* Input field styling */
 .frame-input {
     padding: 12px 15px;
     background: rgba(139, 0, 0, 0.8);
@@ -87,6 +95,7 @@
     transition: all 0.3s ease;
 }
 
+/* Focus state for input */
 .frame-input:focus {
     border-color: #FFD700;
     background: rgba(139, 0, 0, 1);
@@ -96,6 +105,7 @@
     color: rgba(255, 255, 255, 0.5);
 }
 
+/* Action buttons row */
 .frame-edit-actions {
     display: flex;
     gap: 15px;
@@ -103,7 +113,9 @@
     justify-content: center;
 }
 
-.enable-preorder-btn, .save-frame-btn {
+/* Primary actions: enable preorder & save */
+.enable-preorder-btn, /* Save frame button */
+.save-frame-btn {
     padding: 14px 24px;
     border-radius: 25px;
     font-size: 14px;
@@ -118,6 +130,7 @@
     flex: 1;
 }
 
+/* Sweep shine effect overlay on buttons */
 .enable-preorder-btn::before, .save-frame-btn::before {
     content: '';
     position: absolute;
@@ -129,16 +142,19 @@
     transition: left 0.5s ease;
 }
 
+/* Sweep animation on hover */
 .enable-preorder-btn:hover::before, .save-frame-btn:hover::before {
     left: 100%;
 }
 
+/* Enable preorder button */
 .enable-preorder-btn {
     background: linear-gradient(135deg, #540000 0%, #6d0000 50%, #540000 100%);
     color: white;
     box-shadow: 0 6px 20px rgba(84, 0, 0, 0.3);
 }
 
+/* Hover effect for enable preorder */
 .enable-preorder-btn:hover {
     background: linear-gradient(135deg, #6d0000 0%, #8a0000 50%, #6d0000 100%);
     transform: translateY(-2px) scale(1.02);
@@ -152,6 +168,7 @@
     box-shadow: 0 6px 20px rgba(122, 0, 0, 0.3);
 }
 
+/* Hover effect for save button */
 .save-frame-btn:hover {
     background: linear-gradient(135deg, #9d0000 0%, #b30000 50%, #9d0000 100%);
     transform: translateY(-2px) scale(1.02);
@@ -159,16 +176,19 @@
     border-color: rgba(255, 255, 255, 0.5);
 }
 
+/* Active press state for buttons */
 .enable-preorder-btn:active, .save-frame-btn:active {
     transform: translateY(0) scale(1);
     transition: all 0.1s ease;
 }
 
 /* Guest-only elements (hide pre-order in admin mode) */
+/* Guest-only elements show by default */
 .guest-only {
     display: block;
 }
 
+/* Hide guest-only elements in admin mode */
 .admin-mode .guest-only {
     display: none;
 }

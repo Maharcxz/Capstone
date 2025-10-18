@@ -1,4 +1,5 @@
 /* Product Grid */
+/* Product grid layout container */
 .product-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -6,6 +7,7 @@
     padding: 0;
 }
 
+/* Individual product card container */
 .product-card {
     background-color: white;
     border: 3px solid white;
@@ -16,6 +18,7 @@
     position: relative;
 }
 
+/* Card shine sweep overlay */
 .product-card::before {
     content: '';
     position: absolute;
@@ -39,6 +42,7 @@
     left: 100%;
 }
 
+/* Product image area container */
 .product-image {
     background-color: #000000;
     height: 250px;
@@ -62,6 +66,7 @@
     opacity: 0.7;
 }
 
+/* Info section: title, price, stock */
 .product-info {
     padding: 15px;
     color: #333;
@@ -71,6 +76,7 @@
     text-align: center;
 }
 
+/* Title and price row layout */
 .product-title-price-row {
     display: flex;
     justify-content: space-between;
@@ -90,6 +96,7 @@
     text-align: left;
 }
 
+/* Price and stock column */
 .price-stock-container {
     display: flex;
     flex-direction: column;
@@ -107,6 +114,7 @@
     white-space: nowrap;
 }
 
+/* Stock status text */
 .product-stock {
     font-size: 12px;
     font-weight: 600;
@@ -132,6 +140,7 @@
     color: #6d0000;
 }
 
+/* Action buttons row */
 .product-buttons {
     display: flex;
     gap: 12px;
@@ -139,6 +148,7 @@
     width: 100%;
 }
 
+/* Virtual try-on primary button */
 .virtual-try-btn {
     flex: 1;
     background: linear-gradient(135deg, #540000 0%, #6d0000 100%);
@@ -203,6 +213,7 @@
 }
 
 /* Pre-order button specific styling - now using same red color as Virtual Try-On */
+/* Pre-order button variant */
 .virtual-try-btn.preorder-btn {
     background: linear-gradient(135deg, #540000 0%, #6d0000 100%);
     box-shadow: 0 4px 12px rgba(84, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -240,6 +251,7 @@
     box-shadow: 0 4px 12px rgba(84, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(84, 0, 0, 0.2);
 }
 
+/* Disabled button state */
 .virtual-try-btn.disabled {
     background: #666 !important;
     color: #999 !important;
@@ -252,6 +264,7 @@
     transform: none !important;
 }
 
+/* Responsive breakpoints for grid and UI */
 /* Responsive Design */
 @media (min-width: 1200px) {
     .nav {

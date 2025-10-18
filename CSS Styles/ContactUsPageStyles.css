@@ -1,4 +1,5 @@
 /* Contact Us Page Styles */
+/* Main content wrapper for Contact page */
 .contact-content {
     max-width: 800px;
     margin: 0 auto;
@@ -6,6 +7,7 @@
     line-height: 1.6;
 }
 
+/* Contact page title styling */
 .contact-title {
     font-size: 36px;
     font-weight: normal;
@@ -25,6 +27,7 @@
     margin-bottom: 25px;
 }
 
+/* Intro description paragraph */
 .contact-description {
     font-size: 18px;
     margin-bottom: 40px;
@@ -32,6 +35,7 @@
     line-height: 1.8;
 }
 
+/* Contact info list section */
 .contact-info {
     margin-bottom: 40px;
 }
@@ -63,6 +67,7 @@
     left: 0;
 }
 
+/* Business hours section */
 .business-hours {
     margin-bottom: 40px;
 }
@@ -81,6 +86,7 @@
     line-height: 1.6;
 }
 
+/* Footer note at bottom */
 .contact-footer {
     font-size: 18px;
     color: white;

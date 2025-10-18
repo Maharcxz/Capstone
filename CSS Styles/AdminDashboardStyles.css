@@ -1,5 +1,6 @@
 /* Admin Dashboard Styles */
 
+/* Dashboard container and overall layout */
 .admin-dashboard {
     width: 100%;
     max-width: 1100px;
@@ -8,12 +9,14 @@
     box-sizing: border-box;
 }
 
+/* Dashboard header section container */
 .dashboard-header {
     text-align: center;
     margin-bottom: 40px;
     width: 100%;
 }
 
+/* Main dashboard title style */
 .dashboard-title {
     font-family: 'Poppins', sans-serif;
     font-size: 3rem;
@@ -24,6 +27,7 @@
     font-weight: 600;
 }
 
+/* Dashboard subtitle style */
 .dashboard-subtitle {
     color: rgba(255, 255, 255, 0.85);
     font-size: 1.2rem;
@@ -34,6 +38,7 @@
 }
 
 /* Toolbar Section */
+/* Primary admin toolbar container */
 .toolbar-section {
     display: flex;
     justify-content: space-between;
@@ -51,6 +56,7 @@
     box-sizing: border-box;
 }
 
+/* Left-side toolbar controls group */
 .toolbar-left {
     display: flex;
     gap: 12px;
@@ -61,6 +67,7 @@
     width: auto;
 }
 
+/* Sidebar toggle button styling */
 .sidebar-toggle-btn {
     display: flex;
     align-items: center;
@@ -98,6 +105,7 @@
 }
 
 /* Search Input */
+/* Search input wrapper and positioning */
 .search-container {
     position: relative;
     display: flex;
@@ -113,6 +121,7 @@
     pointer-events: none;
 }
 
+/* Search text input appearance */
 .search-input {
     background: rgba(255, 255, 255, 0.08);
     border: 2px solid rgba(255, 255, 255, 0.15);
@@ -144,6 +153,7 @@
 }
 
 /* Filter Select */
+/* Filter dropdown styling */
 .filter-select {
     background: rgba(255, 255, 255, 0.08);
     border: 2px solid rgba(255, 255, 255, 0.15);
@@ -189,6 +199,7 @@
 }
 
 /* Add Category Button */
+/* Button style for adding categories */
 .add-category-btn {
     background: linear-gradient(135deg, #0d4f4f 0%, #0d6d6d 100%);
     color: white;
@@ -239,6 +250,7 @@
 }
 
 /* Add Product Button */
+/* Button style for adding products */
 .add-product-btn {
     background: linear-gradient(135deg, #540000 0%, #6d0000 100%);
     color: white;

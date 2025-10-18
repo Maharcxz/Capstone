@@ -1,10 +1,12 @@
 /* Admin Styles */
+/* Auth controls wrapper in admin header */
 .auth-section {
     position: relative;
     overflow: visible !important;
     z-index: 2500;
 }
 
+/* Admin dropdown container */
 .admin-dropdown {
     position: absolute;
     top: 100%;
@@ -22,6 +24,7 @@
     animation: dropdownSlide 0.2s ease-out;
 }
 
+/* Dropdown slide-down animation */
 @keyframes dropdownSlide {
     from {
         opacity: 0;
@@ -33,6 +36,7 @@
     }
 }
 
+/* Dropdown slide-up animation */
 @keyframes dropdownSlideUp {
     from {
         opacity: 0;
@@ -44,10 +48,12 @@
     }
 }
 
+/* Active state displays dropdown */
 .admin-dropdown.active {
     display: block;
 }
 
+/* Dropdown item button */
 .dropdown-item {
     background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(247, 147, 30, 0.05) 100%);
     border: 1px solid rgba(255, 107, 53, 0.2);
@@ -69,6 +75,7 @@
     box-shadow: 0 2px 8px rgba(255, 107, 53, 0.1);
 }
 
+/* Glossy sweep overlay on item */
 .dropdown-item::before {
     content: '';
     position: absolute;
@@ -80,6 +87,7 @@
     transition: left 0.5s;
 }
 
+/* Hover effects for dropdown item */
 .dropdown-item:hover {
     background: linear-gradient(135deg, rgba(84, 0, 0, 0.2) 0%, rgba(109, 0, 0, 0.15) 100%);
     color: #000000;
@@ -96,6 +104,7 @@
     transform: translateX(1px) scale(0.98);
 }
 
+/* Icon styling in dropdown item */
 .dropdown-icon {
     font-size: 18px;
     width: 20px;
@@ -110,6 +119,7 @@
     color: rgba(0, 0, 0, 0.9);
 }
 
+/* Divider line between items */
 .dropdown-divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.15), transparent);
@@ -127,6 +137,7 @@
     background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.05), transparent);
 }
 
+/* Emphasized logout dropdown item */
 .dropdown-item.logout-item {
     color: #fff;
     border: 2px solid #dc3545;
@@ -175,6 +186,7 @@
     color: #fff;
 }
 
+/* Admin header buttons row */
 .admin-buttons {
     display: flex;
     gap: 8px;
@@ -183,6 +195,7 @@
 }
 
 /* Edit button - Teal theme matching Add Category */
+/* Base admin button style */
 .admin-btn {
     background: linear-gradient(135deg, #0d4f4f 0%, #0d6d6d 100%);
     color: white;
@@ -230,6 +243,7 @@
 }
 
 /* Delete button - Dark red theme matching Add Product */
+/* Delete button variant */
 .admin-btn.delete-btn {
     background: linear-gradient(135deg, #540000 0%, #6d0000 100%);
     box-shadow: 0 4px 15px rgba(84, 0, 0, 0.3);
@@ -241,6 +255,7 @@
 }
 
 /* Hide/Visible button - Complementary orange theme */
+/* Visibility toggle button variant */
 .admin-btn.visible-btn {
     background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
     box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
