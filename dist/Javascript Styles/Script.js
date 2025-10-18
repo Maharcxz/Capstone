@@ -15,6 +15,25 @@ function clearSavedCredentials() {
     // No-op: no persisted credentials to clear.
 }
 
+// Mark the current page's nav link as active
+function setActiveNavLink() {
+    try {
+        const currentFile = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+        const links = document.querySelectorAll('.nav .nav-left .nav-link');
+        links.forEach(link => {
+            const href = (link.getAttribute('href') || '').split('/').pop().toLowerCase();
+            if (!href) return;
+            if (href === currentFile) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+    } catch (e) {
+        console.warn('setActiveNavLink failed:', e);
+    }
+}
+
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
     // Load saved credentials if available
@@ -30,6 +49,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial UI updates
     updateNotificationBadge();
     initializeEventListeners();
+
+    // Set persistent active state for the current nav item
+    setActiveNavLink();
     
     // Authentication state is handled by AuthHandlers.js
     // No need for duplicate auth state listener here
