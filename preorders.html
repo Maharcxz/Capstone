@@ -215,7 +215,9 @@
                     // Display orders based on current filter
                     displayFilteredOrders();
                     
-                    // Update counters
+                    // Update counters (reset per snapshot to avoid accumulation on updates)
+                    pendingOrders = 0;
+                    completedOrders = 0;
                     preOrdersArray.forEach(order => {
                         if (order.status === 'completed') {
                             completedOrders++;
@@ -616,6 +618,7 @@
         
         // Reusable Confirmation Modal logic
         let currentConfirmHandler = null;
+        let isConfirmingAction = false;
         
         function openConfirmModal({ title = 'Confirm Action', message = '', confirmText = 'Confirm', confirmClass = '', showCancel = true }) {
             const modal = document.getElementById('confirmActionModal');
@@ -635,11 +638,22 @@
             // Toggle cancel button visibility for info-only modals
             cancelBtn.style.display = showCancel ? '' : 'none';
             
-            // Bind actions
-            confirmBtn.onclick = function() {
+            // Bind actions with single-click guard
+            confirmBtn.onclick = async function() {
+                if (isConfirmingAction) return;
+                isConfirmingAction = true;
+                confirmBtn.disabled = true;
                 try {
-                    if (typeof currentConfirmHandler === 'function') currentConfirmHandler();
+                    if (typeof currentConfirmHandler === 'function') {
+                        const result = currentConfirmHandler();
+                        // Await promise-returning handlers
+                        if (result && typeof result.then === 'function') {
+                            await result;
+                        }
+                    }
                 } finally {
+                    confirmBtn.disabled = false;
+                    isConfirmingAction = false;
                     closeConfirmActionModal();
                 }
             };
@@ -894,17 +908,42 @@
         
         // Function to delete order
         function deleteOrder(orderId) {
-            currentConfirmHandler = function() {
-                const preOrdersRef = firebase.database().ref('preOrders/' + orderId);
-                preOrdersRef.remove()
-                    .then(() => {
-                        console.log(`Order ${orderId} deleted successfully`);
-                        // UI will update via Firebase listener
-                    })
-                    .catch(error => {
-                        console.error('Error deleting order:', error);
-                        alert('Error deleting order: ' + error.message);
-                    });
+            currentConfirmHandler = async function() {
+                try {
+                    const preOrdersRef = firebase.database().ref('preOrders/' + orderId);
+                    await preOrdersRef.remove();
+                    console.log(`Order ${orderId} deleted successfully`);
+                    
+                    // Also remove any notifications linked to this pre-order
+                    try {
+                        const notifQuery = firebase.database().ref('notifications').orderByChild('preOrderId').equalTo(orderId);
+                        const snapshot = await notifQuery.once('value');
+                        const removals = [];
+                        snapshot.forEach(child => {
+                            removals.push(child.ref.remove());
+                        });
+                        await Promise.all(removals);
+                        
+                        // Refresh notification UI/badge
+                        if (typeof updateNotificationBadge === 'function') {
+                            updateNotificationBadge();
+                        }
+                        if (typeof updateNotificationsList === 'function') {
+                            updateNotificationsList();
+                        }
+                        console.log(`Removed ${removals.length} notification(s) for deleted order ${orderId}`);
+                    } catch (notifErr) {
+                        console.error('Failed to remove notifications for deleted order:', notifErr);
+                    }
+                    
+                    // Reload orders list
+                    if (typeof loadPreOrders === 'function') {
+                        loadPreOrders();
+                    }
+                } catch (error) {
+                    console.error('Error deleting order:', error);
+                    alert('Error deleting order: ' + error.message);
+                }
             };
             
             openConfirmModal({

@@ -245,6 +245,7 @@
     <script>
         let allFrameNames = [];
         let isDropdownVisible = false;
+        let isSubmitting = false;
         
         document.addEventListener('DOMContentLoaded', function() {
             const preorderForm = document.getElementById('preorderForm');
@@ -268,8 +269,17 @@
             autoFillFrameName();
             
             if (preorderForm) {
-                preorderForm.addEventListener('submit', function(e) {
+                preorderForm.addEventListener('submit', async function(e) {
                     e.preventDefault();
+
+                    if (isSubmitting) return;
+                    isSubmitting = true;
+
+                    const submitBtn = preorderForm.querySelector('.submit-btn');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.textContent = 'Submitting...';
+                    }
                     
                     // Get form values
                     const firstName = document.getElementById('firstName').value;
@@ -290,6 +300,11 @@
                             fm.textContent = 'Please enter a valid Philippine mobile number (09XXXXXXXXX or 639XXXXXXXXX).';
                             fm.className = 'form-message error';
                         }
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Submit';
+                        }
+                        isSubmitting = false;
                         return;
                     }
 
@@ -315,67 +330,72 @@
                         formMessage.className = 'form-message info';
                     }
 
-                    firebaseServices.savePreOrderToFirebase(preOrder)
-                        .then(({ key }) => {
-                            console.log('Pre-order saved successfully with ID:', key);
+                    try {
+                        const { key } = await firebaseServices.savePreOrderToFirebase(preOrder);
+                        console.log('Pre-order saved successfully with ID:', key);
 
-                            if (formMessage) {
-                                formMessage.textContent = 'Pre-order submitted successfully!';
-                                formMessage.className = 'form-message success';
+                        if (formMessage) {
+                            formMessage.textContent = 'Pre-order submitted successfully!';
+                            formMessage.className = 'form-message success';
+                        }
+
+                        // Create a notification entry (stored in notifications collection) and link to this pre-order
+                        try {
+                            if (typeof addPreOrderNotification === 'function') {
+                                const customerName = `${firstName} ${lastName}`.trim();
+                                addPreOrderNotification(preOrder.frameName || 'Titanium Slim Frame', customerName, key);
                             }
+                        } catch (err) {
+                            console.warn('Notification creation failed:', err);
+                        }
 
-                            // Create a notification entry (stored in notifications collection) and link to this pre-order
-                            try {
-                                if (typeof addPreOrderNotification === 'function') {
-                                    const customerName = `${firstName} ${lastName}`.trim();
-                                    addPreOrderNotification(preOrder.frameName || 'Titanium Slim Frame', customerName, key);
+                        // Decrement product stock based on the pre-ordered quantity
+                        try {
+                            const qtyNum = parseInt(preOrder.quantity, 10) || 1;
+                            if (window.firebaseServices) {
+                                if (preOrder.productId && typeof window.firebaseServices.decrementProductStock === 'function') {
+                                    window.firebaseServices.decrementProductStock(preOrder.productId, qtyNum)
+                                        .then(res => {
+                                            console.log('Stock decremented by ID for', preOrder.frameName, '->', res);
+                                        })
+                                        .catch(err => {
+                                            console.warn('Failed to decrement stock by ID:', err);
+                                        });
+                                } else if (typeof window.firebaseServices.decrementProductStockByTitle === 'function') {
+                                    window.firebaseServices.decrementProductStockByTitle(preOrder.frameName, qtyNum)
+                                        .then(res => {
+                                            console.log('Stock decremented by title for', preOrder.frameName, '->', res);
+                                        })
+                                        .catch(err => {
+                                            console.warn('Failed to decrement stock by title:', err);
+                                        });
                                 }
-                            } catch (err) {
-                                console.warn('Notification creation failed:', err);
                             }
+                        } catch (err) {
+                            console.warn('Unexpected error while decrementing stock:', err);
+                        }
 
-                            // Decrement product stock based on the pre-ordered quantity
-                            try {
-                                const qtyNum = parseInt(preOrder.quantity, 10) || 1;
-                                if (window.firebaseServices) {
-                                    if (preOrder.productId && typeof window.firebaseServices.decrementProductStock === 'function') {
-                                        window.firebaseServices.decrementProductStock(preOrder.productId, qtyNum)
-                                            .then(res => {
-                                                console.log('Stock decremented by ID for', preOrder.frameName, '->', res);
-                                            })
-                                            .catch(err => {
-                                                console.warn('Failed to decrement stock by ID:', err);
-                                            });
-                                    } else if (typeof window.firebaseServices.decrementProductStockByTitle === 'function') {
-                                        window.firebaseServices.decrementProductStockByTitle(preOrder.frameName, qtyNum)
-                                            .then(res => {
-                                                console.log('Stock decremented by title for', preOrder.frameName, '->', res);
-                                            })
-                                            .catch(err => {
-                                                console.warn('Failed to decrement stock by title:', err);
-                                            });
-                                    }
-                                }
-                            } catch (err) {
-                                console.warn('Unexpected error while decrementing stock:', err);
-                            }
+                        // Reset form
+                        document.getElementById('preorderForm').reset();
 
-                            // Reset form
-                            document.getElementById('preorderForm').reset();
+                        // Redirect to confirmation page after a short delay
+                        setTimeout(() => {
+                            window.location.href = `preorder-confirmation.html?frameName=${encodeURIComponent(preOrder.frameName)}`;
+                        }, 500);
+                    } catch (error) {
+                        console.error('Error saving pre-order:', error);
 
-                            // Redirect to confirmation page after a short delay
-                            setTimeout(() => {
-                                window.location.href = `preorder-confirmation.html?frameName=${encodeURIComponent(preOrder.frameName)}`;
-                            }, 500);
-                        })
-                        .catch((error) => {
-                            console.error('Error saving pre-order:', error);
-
-                            if (formMessage) {
-                                formMessage.textContent = 'Error submitting pre-order. Please try again.';
-                                formMessage.className = 'form-message error';
-                            }
-                        });
+                        if (formMessage) {
+                            formMessage.textContent = 'Error submitting pre-order. Please try again.';
+                            formMessage.className = 'form-message error';
+                        }
+                    } finally {
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Submit';
+                        }
+                        isSubmitting = false;
+                    }
                 });
             }
         });
