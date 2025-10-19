@@ -2,14 +2,14 @@
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyB7eVqS_oUDh6lRFmLaqCV6Pd_PsZq35RQ",
-  authDomain: "capstonewebsite-12387.firebaseapp.com",
-  databaseURL: "https://capstonewebsite-12387-default-rtdb.firebaseio.com",
-  projectId: "capstonewebsite-12387",
-  storageBucket: "capstonewebsite-12387.firebasestorage.app",
-  messagingSenderId: "665697001145",
-  appId: "1:665697001145:web:4fe1e428d2f8f5d6c34568",
-  measurementId: "G-L5CLTDK74K"
+  apiKey: "AIzaSyCcdh1nLW7F0uLzQl4Z-z3MSY-RbNWk8VI",
+  authDomain: "capsproj2-41755.firebaseapp.com",
+  databaseURL: "https://capsproj2-41755-default-rtdb.firebaseio.com",
+  projectId: "capsproj2-41755",
+  storageBucket: "capsproj2-41755.firebasestorage.app",
+  messagingSenderId: "301105414149",
+  appId: "1:301105414149:web:ea70a9a1cc81f0850a9c6c",
+  measurementId: "G-QR06PRLLKK"
 };
 
 // Initialize Firebase app with project configuration

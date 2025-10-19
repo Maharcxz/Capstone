@@ -8,7 +8,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     <!-- Firebase SDK -->
@@ -894,17 +909,72 @@
         
         // Function to delete order
         function deleteOrder(orderId) {
-            currentConfirmHandler = function() {
-                const preOrdersRef = firebase.database().ref('preOrders/' + orderId);
-                preOrdersRef.remove()
-                    .then(() => {
-                        console.log(`Order ${orderId} deleted successfully`);
-                        // UI will update via Firebase listener
-                    })
-                    .catch(error => {
-                        console.error('Error deleting order:', error);
-                        alert('Error deleting order: ' + error.message);
-                    });
+            currentConfirmHandler = async function() {
+                try {
+                    const preOrdersRef = firebase.database().ref('preOrders/' + orderId);
+
+                    // Fetch order details first for fallback cleanup of older notifications
+                    let orderData = null;
+                    try {
+                        const snap = await preOrdersRef.once('value');
+                        orderData = snap.val() || null;
+                    } catch (err) {
+                        console.warn('Failed to fetch order before deletion:', err);
+                    }
+
+                    // Remove the pre-order record
+                    await preOrdersRef.remove();
+                    console.log(`Order ${orderId} deleted successfully`);
+                    
+                    // Also remove any notifications linked to this pre-order
+                    try {
+                        const notificationsRef = firebase.database().ref('notifications');
+
+                        // Primary removal by preOrderId
+                        const byIdSnap = await notificationsRef.orderByChild('preOrderId').equalTo(orderId).once('value');
+                        const deleteIds = [];
+                        byIdSnap.forEach(child => deleteIds.push(child.key));
+
+                        // Fallback removal for older notifications without preOrderId
+                        if (orderData) {
+                            const allSnap = await notificationsRef.once('value');
+                            const all = allSnap.val() || {};
+                            const customerFull = `${(orderData.firstName || '').trim()} ${(orderData.lastName || '').trim()}`.trim().toLowerCase();
+                            const productName = ((orderData.productName || orderData.frameName || '')).trim().toLowerCase();
+
+                            for (const [id, n] of Object.entries(all)) {
+                                const nCustomer = (n.customerName || '').trim().toLowerCase();
+                                const nFrame = (n.frameName || '').trim().toLowerCase();
+                                const linked =
+                                    (n.preOrderId === orderId) ||
+                                    (customerFull && nCustomer === customerFull && (!productName || nFrame === productName));
+                                if (linked) deleteIds.push(id);
+                            }
+                        }
+
+                        const uniqueIds = Array.from(new Set(deleteIds));
+                        await Promise.all(uniqueIds.map(id => notificationsRef.child(id).remove()));
+                        
+                        // Refresh notification UI/badge
+                        if (typeof updateNotificationBadge === 'function') {
+                            updateNotificationBadge();
+                        }
+                        if (typeof updateNotificationsList === 'function') {
+                            updateNotificationsList();
+                        }
+                        console.log(`Removed ${uniqueIds.length} notification(s) for deleted order ${orderId}`);
+                    } catch (notifErr) {
+                        console.error('Failed to remove notifications for deleted order:', notifErr);
+                    }
+                    
+                    // Reload orders list
+                    if (typeof loadPreOrders === 'function') {
+                        loadPreOrders();
+                    }
+                } catch (error) {
+                    console.error('Error deleting order:', error);
+                    alert('Error deleting order: ' + error.message);
+                }
             };
             
             openConfirmModal({
