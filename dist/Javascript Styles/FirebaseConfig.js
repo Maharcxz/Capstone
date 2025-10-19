@@ -2,15 +2,18 @@
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyB7eVqS_oUDh6lRFmLaqCV6Pd_PsZq35RQ",
-  authDomain: "capstonewebsite-12387.firebaseapp.com",
-  databaseURL: "https://capstonewebsite-12387-default-rtdb.firebaseio.com",
-  projectId: "capstonewebsite-12387",
-  storageBucket: "capstonewebsite-12387.firebasestorage.app",
-  messagingSenderId: "665697001145",
-  appId: "1:665697001145:web:4fe1e428d2f8f5d6c34568",
-  measurementId: "G-L5CLTDK74K"
+  apiKey: "AIzaSyBXD_LjPJCrPMHUEMT-VBAt-WqooXH_w2w",
+  authDomain: "finalcaps2-1b3dc.firebaseapp.com",
+  databaseURL: "https://finalcaps2-1b3dc-default-rtdb.firebaseio.com",
+  projectId: "finalcaps2-1b3dc",
+  storageBucket: "finalcaps2-1b3dc.appspot.com",
+  messagingSenderId: "60099182181",
+  appId: "1:60099182181:web:83de041276daf6d847508c",
+  measurementId: "G-66ZK8TXQ5Z"
 };
+
+// Sanitize databaseURL just in case
+firebaseConfig.databaseURL = (firebaseConfig.databaseURL || '').replace(/`/g, '').trim();
 
 // Initialize Firebase app with project configuration
 const app = firebase.initializeApp(firebaseConfig);

@@ -613,14 +613,21 @@ async function updateProductStock() {
         showStatusModal('Please enter a valid stock quantity (0 or greater).', 'error');
         return;
     }
-    
+
+    // Check for unchanged stock before making any update
+    const product = allProductsData.find(p => p.id === currentProductId);
+    const currentStock = product ? (product.stock || 0) : null;
+    if (currentStock !== null && currentStock === newStock) {
+        showStatusModal('Stock value is unchanged.', 'info');
+        return;
+    }
+
     try {
         // Update product in Firebase
         const productRef = firebase.database().ref(`products/${currentProductId}`);
         await productRef.update({ stock: newStock });
         
         // Update local data
-        const product = allProductsData.find(p => p.id === currentProductId);
         if (product) {
             product.stock = newStock;
         }
