@@ -5,6 +5,9 @@
 let allProductsData = [];
 // State: products after applying filters
 let filteredProductsData = [];
+// Pagination state
+let currentPage = 1;
+const PAGE_SIZE = 9;
 // State: currently selected frame category
 let currentCategory = 'All Frames';
 // State: product id currently shown in modal
@@ -93,8 +96,20 @@ function renderProductGrid() {
         `;
         return;
     }
+
+    // Calculate total pages based on PAGE_SIZE and current filtered products
+    const totalPages = Math.max(1, Math.ceil(filteredProductsData.length / PAGE_SIZE));
+    // Clamp current page within valid range
+    if (currentPage < 1) currentPage = 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    // Slice products for the current page
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    const endIndex = startIndex + PAGE_SIZE;
+    const pageProducts = filteredProductsData.slice(startIndex, endIndex);
     
-    productGrid.innerHTML = filteredProductsData.map(product => `
+    // Render current page products
+    productGrid.innerHTML = pageProducts.map(product => `
         <div class="product-card" onclick="openProductDetailModal('${product.id}')" style="cursor: pointer;">
             <div class="product-image">
                 ${product.image ? 
@@ -132,6 +147,23 @@ function renderProductGrid() {
             </div>
         </div>
     `).join('');
+    
+    // Pagination controls (show only if more than 9 products)
+    if (totalPages > 1) {
+        const paginationHtml = `
+            <div class="pagination" style="grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 16px;">
+                <button class="page-btn" onclick="prevPage()" ${currentPage === 1 ? 'disabled' : ''} style="padding: 6px 10px;">Prev</button>
+                ${Array.from({ length: totalPages }, (_, i) => {
+                    const page = i + 1;
+                    const isActive = page === currentPage;
+                    return `<button class="page-btn ${isActive ? 'active' : ''}" onclick="goToPage(${page})" style="padding: 6px 10px; ${isActive ? 'background:#444;color:#fff;' : ''}">${page}</button>`;
+                }).join('')}
+                <button class="page-btn" onclick="nextPage()" ${currentPage === totalPages ? 'disabled' : ''} style="padding: 6px 10px;">Next</button>
+            </div>
+        `;
+
+        productGrid.innerHTML += paginationHtml;
+    }
     
     // Ensure admin buttons are properly hidden/shown based on current page and admin status
     if (typeof updateAdminButtonVisibility === 'function') {
@@ -703,6 +735,26 @@ async function reduceProductStock(productId, quantity) {
 // Expose homepage functions globally
 window.selectFrameCategory = selectFrameCategory;
 window.searchProducts = searchProducts;
+window.goToPage = function(page) {
+    const totalPages = Math.max(1, Math.ceil(filteredProductsData.length / PAGE_SIZE));
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+    currentPage = page;
+    renderProductGrid();
+};
+window.prevPage = function() {
+    if (currentPage > 1) {
+        currentPage--;
+        renderProductGrid();
+    }
+};
+window.nextPage = function() {
+    const totalPages = Math.max(1, Math.ceil(filteredProductsData.length / PAGE_SIZE));
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderProductGrid();
+    }
+};
 window.editProductFromHomepage = editProductFromHomepage;
 window.deleteProductFromHomepage = deleteProductFromHomepage;
 window.toggleProductVisibilityFromHomepage = toggleProductVisibilityFromHomepage;

@@ -8,22 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+
 
 
     <!-- Firebase SDK -->
@@ -230,7 +215,9 @@
                     // Display orders based on current filter
                     displayFilteredOrders();
                     
-                    // Update counters
+                    // Update counters (reset per snapshot to avoid accumulation on updates)
+                    pendingOrders = 0;
+                    completedOrders = 0;
                     preOrdersArray.forEach(order => {
                         if (order.status === 'completed') {
                             completedOrders++;
@@ -631,6 +618,7 @@
         
         // Reusable Confirmation Modal logic
         let currentConfirmHandler = null;
+        let isConfirmingAction = false;
         
         function openConfirmModal({ title = 'Confirm Action', message = '', confirmText = 'Confirm', confirmClass = '', showCancel = true }) {
             const modal = document.getElementById('confirmActionModal');
@@ -650,11 +638,22 @@
             // Toggle cancel button visibility for info-only modals
             cancelBtn.style.display = showCancel ? '' : 'none';
             
-            // Bind actions
-            confirmBtn.onclick = function() {
+            // Bind actions with single-click guard
+            confirmBtn.onclick = async function() {
+                if (isConfirmingAction) return;
+                isConfirmingAction = true;
+                confirmBtn.disabled = true;
                 try {
-                    if (typeof currentConfirmHandler === 'function') currentConfirmHandler();
+                    if (typeof currentConfirmHandler === 'function') {
+                        const result = currentConfirmHandler();
+                        // Await promise-returning handlers
+                        if (result && typeof result.then === 'function') {
+                            await result;
+                        }
+                    }
                 } finally {
+                    confirmBtn.disabled = false;
+                    isConfirmingAction = false;
                     closeConfirmActionModal();
                 }
             };
