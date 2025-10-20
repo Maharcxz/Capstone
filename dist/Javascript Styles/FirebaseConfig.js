@@ -87,8 +87,17 @@ function saveProductToFirebase(product) {
         // Update existing product
         return productsRef.child(product.id).set(product);
     } else {
-        // Create new product
-        return productsRef.push(product);
+        // Create new product with deterministic ID to avoid duplicates on rapid clicks
+        const slug = (s) => String(s || '').toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+        const t = slug(product.title);
+        const c = slug(product.category);
+        const id = c ? `${c}-${t}` : t;
+        const safeId = id || `product-${Date.now()}`;
+        product.id = safeId;
+        return productsRef.child(safeId).set(product);
     }
 }
 

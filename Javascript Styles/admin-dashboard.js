@@ -8,6 +8,13 @@ let sidebarCategories = [];
 let currentCategory = 'all';
 let pendingCategoryAdds = new Set();
 let glbStore = {};
+let isSavingProduct = false;
+
+// Helper to reliably find the product submit button even if it's outside the form
+function getProductSubmitBtn() {
+    return document.querySelector('#productForm button[type="submit"]') ||
+           document.querySelector('button[type="submit"][form="productForm"]');
+}
 
 // Load GLB data (in-memory session store)
 function loadGlbData(glbId) {
@@ -286,6 +293,11 @@ function openAddProductModal() {
     clearAllImages(); // Clear any existing images
     clearAllGlbFiles(); // Clear any existing 3D models
     document.getElementById('productModal').classList.add('active');
+    const submitBtn = getProductSubmitBtn();
+    if (submitBtn) {
+        submitBtn.textContent = 'Save Product';
+        submitBtn.dataset.mode = 'create';
+    }
 }
 
 // Open modal for editing existing product
@@ -345,6 +357,11 @@ async function editProduct(productId) {
         }
         
         document.getElementById('productModal').classList.add('active');
+        const submitBtn = getProductSubmitBtn();
+        if (submitBtn) {
+            submitBtn.textContent = 'Update Product';
+            submitBtn.dataset.mode = 'update';
+        }
     } catch (error) {
         console.error('Error loading product for editing:', error);
         showNotification('Error loading product', 'error');
@@ -355,6 +372,14 @@ async function editProduct(productId) {
 function closeProductModal() {
     document.getElementById('productModal').classList.remove('active');
     editingProductId = null;
+    const submitBtn = getProductSubmitBtn();
+    if (submitBtn) {
+        submitBtn.textContent = 'Save Product';
+        submitBtn.dataset.mode = 'create';
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('disabled', 'loading');
+        submitBtn.removeAttribute('aria-busy');
+    }
     clearAllImages(); // Clear images when closing modal
     clearAllGlbFiles(); // Clear .glb files when closing modal
 }
@@ -391,71 +416,89 @@ function normalizeExternalUrl(url) {
 // Handle product form submission
 async function handleProductSubmit(event) {
     event.preventDefault();
-    // Surface current auth state for clearer diagnostics
-    try {
-        const firebaseUser = firebase.auth && firebase.auth().currentUser;
-        if (!firebaseUser) {
-            console.warn('No Firebase user is authenticated. Writes may be blocked by database rules.');
-        }
-    } catch (e) {
-        console.warn('Unable to read Firebase auth state:', e);
-    }
-    
-    // Get images from the productImages array
-    const images = productImages.map(img => img.src);
-    
-    // Get .glb files from the productGlbFiles array
-    // Only persist real URLs (skip temporary blob: URLs from local File previews)
-    const glbFiles = productGlbFiles
-        .map(glb => {
-            const rawUrl = typeof glb.src === 'string' ? glb.src : '';
-            const normalizedUrl = normalizeExternalUrl(rawUrl);
-            return {
-                url: normalizedUrl,
-                name: glb.name,
-                size: glb.size
-            };
-        })
-        .filter(glb => typeof glb.url === 'string' && glb.url.trim() && !glb.url.startsWith('blob:'));
-    
-    // Debug logging
-    console.log('Product Images Array:', productImages);
-    console.log('Extracted Images:', images);
-    console.log('Images Length:', images.length);
-    console.log('Product GLB Files Array:', productGlbFiles);
-    console.log('Extracted GLB Files:', glbFiles);
-    console.log('GLB Files Length:', glbFiles.length);
-    // Images are optional: allow saving without images
-    // (Product cards already show a placeholder when no image is provided)
-    
-    const formData = {
-        title: document.getElementById('productTitle').value.trim(),
-        description: document.getElementById('productDescription').value.trim(),
-        price: parseFloat(document.getElementById('productPrice').value),
-        category: document.getElementById('productCategory').value,
-        stock: parseInt(document.getElementById('productStock').value) || 0,
-        images: images, // Store multiple images
-        image: images[0] || '', // Keep first image for backward compatibility (optional)
-        glbFiles: glbFiles, // Store .glb files
-        visible: true, // Default to visible since we removed the checkbox
-        updatedAt: new Date().toISOString()
-    };
-    
-    // Validation
-    if (!formData.title || !formData.category || isNaN(formData.price) || formData.price < 0 || isNaN(formData.stock) || formData.stock < 0) {
-        showNotification('Please fill in all required fields correctly', 'error');
+
+    // Prevent double submissions
+    if (isSavingProduct) {
+        showNotification('Already saving, please wait...', 'info');
         return;
     }
-    
+    isSavingProduct = true;
+
+    const submitBtn = (event && event.submitter) ? event.submitter : getProductSubmitBtn();
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('loading');
+        submitBtn.dataset.originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Saving...';
+        submitBtn.setAttribute('aria-busy', 'true');
+    }
+
     try {
+        // Surface current auth state for clearer diagnostics
+        try {
+            const firebaseUser = firebase.auth && firebase.auth().currentUser;
+            if (!firebaseUser) {
+                console.warn('No Firebase user is authenticated. Writes may be blocked by database rules.');
+            }
+        } catch (e) {
+            console.warn('Unable to read Firebase auth state:', e);
+        }
+        
+        // Get images from the productImages array
+        const images = productImages.map(img => img.src);
+        
+        // Get .glb files from the productGlbFiles array
+        // Only persist real URLs (skip temporary blob: URLs from local File previews)
+        const glbFiles = productGlbFiles
+            .map(glb => {
+                const rawUrl = typeof glb.src === 'string' ? glb.src : '';
+                const normalizedUrl = normalizeExternalUrl(rawUrl);
+                return {
+                    url: normalizedUrl,
+                    name: glb.name,
+                    size: glb.size
+                };
+            })
+            .filter(glb => typeof glb.url === 'string' && glb.url.trim() && !glb.url.startsWith('blob:'));
+        
+        // Debug logging
+        console.log('Product Images Array:', productImages);
+        console.log('Extracted Images:', images);
+        console.log('Images Length:', images.length);
+        console.log('Product GLB Files Array:', productGlbFiles);
+        console.log('Extracted GLB Files:', glbFiles);
+        console.log('GLB Files Length:', glbFiles.length);
+        // Images are optional: allow saving without images
+        // (Product cards already show a placeholder when no image is provided)
+        
+        const formData = {
+            title: document.getElementById('productTitle').value.trim(),
+            description: document.getElementById('productDescription').value.trim(),
+            price: parseFloat(document.getElementById('productPrice').value),
+            category: document.getElementById('productCategory').value,
+            stock: parseInt(document.getElementById('productStock').value) || 0,
+            images: images, // Store multiple images
+            image: images[0] || '', // Keep first image for backward compatibility (optional)
+            glbFiles: glbFiles, // Store .glb files
+            visible: true, // Default to visible since we removed the checkbox
+            updatedAt: new Date().toISOString()
+        };
+        
+        // Validation
+        if (!formData.title || !formData.category || isNaN(formData.price) || formData.price < 0 || isNaN(formData.stock) || formData.stock < 0) {
+            showNotification('Please fill in all required fields correctly', 'error');
+            return;
+        }
+        
         if (editingProductId) {
             // Update existing product
             formData.id = editingProductId;
             await saveProductToFirebase(formData);
             showNotification('Product updated successfully', 'success');
         } else {
-            // Create new product
+            // Create new product with a deterministic ID to avoid duplicates
             formData.createdAt = new Date().toISOString();
+            formData.id = generateProductId(formData.title, formData.category);
             await saveProductToFirebase(formData);
             showNotification('Product added successfully', 'success');
         }
@@ -472,6 +515,17 @@ async function handleProductSubmit(event) {
         if (msg && /PERMISSION_DENIED|permission|auth/i.test(msg)) {
             showNotification('Please log in with your Firebase admin account and retry.', 'error');
         }
+    } finally {
+        // Always release the submission lock and restore button state
+        isSavingProduct = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('loading');
+            submitBtn.textContent = submitBtn.dataset.originalText || 'Save Product';
+            submitBtn.removeAttribute('aria-busy');
+        }
+        // Best-effort refresh of the products list
+        try { await loadProducts(); } catch (e) {}
     }
 }
 
@@ -1073,6 +1127,18 @@ function generateCategoryId(name) {
         .replace(/[^a-z0-9]/g, '-')
         .replace(/-+/g, '-')
         .replace(/^-|-$/g, '');
+}
+
+// Generate a stable product ID from title and category
+function generateProductId(title, category) {
+    const slug = (s) => String(s || '').toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    const t = slug(title);
+    const c = slug(category);
+    const id = c ? `${c}-${t}` : t;
+    return id || `product-${Date.now()}`;
 }
 
 // Render existing categories in modal
