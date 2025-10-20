@@ -4,9 +4,9 @@
 const firebaseConfig = {
   apiKey: "AIzaSyBXD_LjPJCrPMHUEMT-VBAt-WqooXH_w2w",
   authDomain: "finalcaps2-1b3dc.firebaseapp.com",
-  databaseURL: "https://finalcaps2-1b3dc-default-rtdb.firebaseio.com",
+  databaseURL: " `https://finalcaps2-1b3dc-default-rtdb.firebaseio.com` ",
   projectId: "finalcaps2-1b3dc",
-  storageBucket: "finalcaps2-1b3dc.appspot.com",
+  storageBucket: "finalcaps2-1b3dc.firebasestorage.app",
   messagingSenderId: "60099182181",
   appId: "1:60099182181:web:83de041276daf6d847508c",
   measurementId: "G-66ZK8TXQ5Z"

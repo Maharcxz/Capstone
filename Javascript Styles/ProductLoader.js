@@ -148,14 +148,14 @@ function renderProductGrid() {
     // Pagination controls (show only if more than 9 products)
     if (totalPages > 1) {
         const paginationHtml = `
-            <div class="pagination" style="grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 16px;">
-                <button class="page-btn" onclick="prevPage()" ${currentPage === 1 ? 'disabled' : ''} style="padding: 6px 10px;">Prev</button>
+            <div class="pagination">
+                <button class="page-btn" onclick="prevPage()" ${currentPage === 1 ? 'disabled' : ''}>Prev</button>
                 ${Array.from({ length: totalPages }, (_, i) => {
                     const page = i + 1;
                     const isActive = page === currentPage;
-                    return `<button class="page-btn ${isActive ? 'active' : ''}" onclick="goToPage(${page})" style="padding: 6px 10px; ${isActive ? 'background:#444;color:#fff;' : ''}">${page}</button>`;
+                    return `<button class="page-btn ${isActive ? 'active' : ''}" onclick="goToPage(${page})">${page}</button>`;
                 }).join('')}
-                <button class="page-btn" onclick="nextPage()" ${currentPage === totalPages ? 'disabled' : ''} style="padding: 6px 10px;">Next</button>
+                <button class="page-btn" onclick="nextPage()" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>
             </div>
         `;
 
