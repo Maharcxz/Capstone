@@ -11,7 +11,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- CSS -->
+    <!-- CSS -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     <!-- A-Frame and MindAR -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
@@ -228,14 +244,32 @@
              }, 3000);
          }
          
-         // Hide loading overlay when AR is ready
+         // Hide loading overlay when AR is ready and report errors
          document.addEventListener('DOMContentLoaded', function() {
              const loadingOverlay = document.getElementById('loadingOverlay');
-             
-             // Simulate AR initialization
-             setTimeout(() => {
-                 loadingOverlay.style.display = 'none';
-             }, 2000);
+             const sceneEl = document.querySelector('a-scene');
+
+             if (sceneEl) {
+                 sceneEl.addEventListener('arReady', () => {
+                     if (loadingOverlay) loadingOverlay.style.display = 'none';
+                     showStatus('Camera ready', 'success');
+                 });
+                 sceneEl.addEventListener('arError', (event) => {
+                     if (loadingOverlay) loadingOverlay.style.display = 'none';
+                     const errMsg = event?.detail?.error || 'Failed to start camera';
+                     showStatus(errMsg + ' — try HTTPS or check permissions', 'error');
+                     console.error('MindAR arError:', event);
+                 });
+                 sceneEl.addEventListener('loaded', () => {
+                     const arSystem = sceneEl.systems && sceneEl.systems['mindar-face-system'];
+                     if (arSystem && typeof arSystem.start === 'function') {
+                         try { arSystem.start(); } catch (e) { console.warn('arSystem.start failed', e); }
+                     }
+                 });
+             } else {
+                 // Fallback: hide overlay after a short delay to unblock UI
+                 setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 2000);
+             }
          });
 
          // Normalize external URLs from common providers to direct links
