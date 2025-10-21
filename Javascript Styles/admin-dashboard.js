@@ -396,7 +396,11 @@ function normalizeExternalUrl(url) {
     if (u.includes('dropbox.com')) {
         try {
             const dbUrl = new URL(u);
+            // Force direct download and swap to direct content host
             dbUrl.searchParams.set('dl', '1');
+            if (dbUrl.hostname.endsWith('dropbox.com')) {
+                dbUrl.hostname = 'dl.dropboxusercontent.com';
+            }
             return dbUrl.toString();
         } catch (e) {}
     }
@@ -1553,29 +1557,40 @@ function handleGlbFileUpload(event) {
 // Add GLB model from URL input with validation
 function addGlbUrl() {
     const urlInput = document.getElementById('productGlbUrl');
-    const url = urlInput.value.trim();
+    const rawUrl = urlInput.value.trim();
     
-    if (!url) {
-        showNotification('Please enter a .glb file URL', 'error');
+    if (!rawUrl) {
+        showNotification('Please enter a 3D model URL', 'error');
         return;
     }
     
     // Validate URL format
     try {
-        new URL(url);
+        new URL(rawUrl);
     } catch (e) {
         showNotification('Please enter a valid URL', 'error');
         return;
     }
     
-    // Check if it's likely a .glb file URL
-    if (!url.toLowerCase().endsWith('.glb')) {
-        showNotification('URL must point to a .glb file', 'error');
-        return;
+    // Normalize common provider links (Drive/Dropbox/GitHub) to direct URLs
+    const normalizedUrl = normalizeExternalUrl(rawUrl);
+    const lower = normalizedUrl.toLowerCase();
+    
+    const isGlbExt = lower.endsWith('.glb');
+    const isKnownProvider =
+        lower.includes('drive.google.com') ||
+        lower.includes('dropbox.com') ||
+        lower.includes('dl.dropboxusercontent.com') ||
+        lower.includes('github.com') ||
+        lower.includes('raw.githubusercontent.com');
+    
+    // Allow .glb or known provider links; warn for others but still add
+    if (!isGlbExt && !isKnownProvider) {
+        showNotification('URL added. Ensure it points to a GLB or direct download.', 'warning');
     }
     
-    addGlbFileToPreview(url, 'GLB Model from URL');
-    showNotification('GLB file added successfully', 'success');
+    addGlbFileToPreview(normalizedUrl, '3D Model from URL');
+    showNotification('3D model URL added successfully', 'success');
     urlInput.value = '';
 }
 
