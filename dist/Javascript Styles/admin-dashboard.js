@@ -458,19 +458,19 @@ async function handleProductSubmit(event) {
         
         // Build final GLB files list: upload local files to Firebase Storage (with timeouts)
         const withTimeout = (promise, ms, label) => new Promise((resolve, reject) => {
-            const t = setTimeout(() => reject(new Error(label || `Timeout after ${ms}ms`)), ms);
-            promise.then(v => { clearTimeout(t); resolve(v); }).catch(e => { clearTimeout(t); reject(e); });
-        });
-        const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
-            try {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            } catch (e) { reject(e); }
-        });
-        const finalGlbFiles = [];
-        for (const glb of productGlbFiles) {
+             const t = setTimeout(() => reject(new Error(label || `Timeout after ${ms}ms`)), ms);
+             promise.then(v => { clearTimeout(t); resolve(v); }).catch(e => { clearTimeout(t); reject(e); });
+         });
+         const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
+             try {
+                 const reader = new FileReader();
+                 reader.onload = () => resolve(reader.result);
+                 reader.onerror = reject;
+                 reader.readAsDataURL(file);
+             } catch (e) { reject(e); }
+         });
+         const finalGlbFiles = [];
+         for (const glb of productGlbFiles) {
             if (glb && glb.file instanceof File) {
                 // Upload the local file to Firebase Storage
                 const baseName = (glb.name || glb.file.name || 'model');
@@ -478,22 +478,22 @@ async function handleProductSubmit(event) {
                 const storagePath = `glb/${productId}/${Date.now()}-${safeName}`;
                 try {
                     const storageRefFactory = firebase.storage && firebase.storage().ref ? firebase.storage().ref : null;
-                    let url = null;
-                    if (storageRefFactory) {
-                        const ref = storageRefFactory(storagePath);
-                        const snap = await withTimeout(ref.put(glb.file), 20000, 'Upload timed out');
-                        url = await withTimeout(snap.ref.getDownloadURL(), 10000, 'Download URL timed out');
-                    } else {
-                        console.warn('Firebase Storage not available, storing GLB inline as data URL');
-                        url = await withTimeout(readFileAsDataUrl(glb.file), 15000, 'Data URL timed out');
-                    }
-                    finalGlbFiles.push({ url, name: baseName, size: glb.size });
+                 let url = null;
+                 if (storageRefFactory) {
+                     const ref = storageRefFactory(storagePath);
+                     const snap = await withTimeout(ref.put(glb.file), 20000, 'Upload timed out');
+                     url = await withTimeout(snap.ref.getDownloadURL(), 10000, 'Download URL timed out');
+                 } else {
+                     console.warn('Firebase Storage not available, storing GLB inline as data URL');
+                     url = await withTimeout(readFileAsDataUrl(glb.file), 15000, 'Data URL timed out');
+                 }
+                 finalGlbFiles.push({ url, name: baseName, size: glb.size });
                 } catch (e) {
                     console.error('Failed to upload GLB to Storage:', storagePath, e);
                     try {
                         const dataUrl = await withTimeout(readFileAsDataUrl(glb.file), 15000, 'Data URL timed out');
-                        finalGlbFiles.push({ url: dataUrl, name: baseName, size: glb.size });
-                    } catch (e2) {
+                         finalGlbFiles.push({ url: dataUrl, name: baseName, size: glb.size });
+                     } catch (e2) {
                         showNotification(`Failed to attach 3D model: ${baseName}`, 'error');
                     }
                 }

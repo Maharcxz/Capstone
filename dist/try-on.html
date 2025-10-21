@@ -11,23 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- CSS -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    <!-- CSS -->
     
     <!-- A-Frame and MindAR -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
@@ -454,5 +438,47 @@
       window.addEventListener('resize', updateHeaderHeightVar);
       window.addEventListener('orientationchange', updateHeaderHeightVar);
      </script>
+
+     <!-- Proactively request camera permission on page load -->
+     <script>
+     (function() {
+       async function requestCameraPermission() {
+         const overlay = document.getElementById('loadingOverlay');
+         try {
+           // Trigger browser permission prompt immediately.
+           const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+           // Close the temporary stream so MindAR can take control of the camera.
+           stream.getTracks().forEach(t => t.stop());
+           if (overlay) overlay.style.display = 'block'; // keep overlay until AR ready
+           showStatus('Camera permission granted', 'success');
+         } catch (err) {
+           // Show explicit UI to ask user for permission with a retry button
+           if (overlay) {
+             overlay.style.display = 'flex';
+             overlay.innerHTML = `
+               <div class="loading-spinner"></div>
+               <p>Please allow camera access to start.</p>
+               <button id="requestPermissionBtn" class="dropdown-btn" style="margin-top:12px;">Enable Camera</button>
+             `;
+           }
+           showStatus('Camera permission required — click Enable Camera', 'warning');
+           const btn = document.getElementById('requestPermissionBtn');
+           if (btn) {
+             btn.addEventListener('click', requestCameraPermission, { once: true });
+           }
+           console.warn('getUserMedia error:', err);
+         }
+       }
+
+       document.addEventListener('DOMContentLoaded', function() {
+         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+           requestCameraPermission();
+         } else {
+           showStatus('Camera API not available in this browser', 'error');
+         }
+       });
+     })();
+     </script>
+     
  </body>
-  </html>
+ </html>
