@@ -20,6 +20,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
     
     <!-- Firebase Configuration -->
     <script src="Javascript Styles/FirebaseConfig.js"></script>
@@ -258,6 +259,13 @@
                                 <button type="button" class="add-url-btn" onclick="addGlbUrl()">Add URL</button>
                             </div>
                             <small class="form-help-text">Add .glb files by URL one at a time</small>
+                        </div>
+                        
+                        <!-- New: Upload GLB files from device -->
+                        <div class="upload-option">
+                            <label class="form-label" for="productGlbFiles">Upload .glb file(s)</label>
+                            <input type="file" class="form-input" id="productGlbFiles" accept=".glb" multiple onchange="handleGlbFileUpload(event)">
+                            <small class="form-help-text">Select one or more .glb files from your device</small>
                         </div>
                     </div>
                     
