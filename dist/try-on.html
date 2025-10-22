@@ -255,15 +255,15 @@
                      if (loadingOverlay) {
                          loadingOverlay.style.display = 'flex';
                          loadingOverlay.innerHTML = `
-                           <div class="loading-spinner"></div>
+                           <div class=\"loading-spinner\"></div>
                            <p>Camera failed to start. Check permissions and HTTPS.</p>
-                           <button id="retryCameraBtn" class="dropdown-btn" style="margin-top:12px;">Retry Camera</button>
+                           <button id=\"reloadCameraBtn\" class=\"dropdown-btn\" style=\"margin-top:12px;\">Reload Camera</button>
                          `;
                      }
                      const errMsg = event?.detail?.error || 'Failed to start camera';
                      showStatus(errMsg, 'error');
                      console.error('MindAR arError:', event);
-                     const btn = document.getElementById('retryCameraBtn');
+                     const btn = document.getElementById('reloadCameraBtn');
                      if (btn) btn.addEventListener('click', () => {
                          try {
                              const arSystem = sceneEl.systems && sceneEl.systems['mindar-face-system'];
@@ -274,9 +274,10 @@
                                  video.srcObject = null;
                              }
                          } catch (e) {
-                             console.warn('retry cleanup error', e);
+                             console.warn('reload cleanup error', e);
                          }
-                         startAR();
+                         // Full reload ensures Emscripten Module is reinitialized cleanly
+                         location.reload();
                      }, { once: true });
                  });
                  sceneEl.addEventListener('loaded', startAR);
