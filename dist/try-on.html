@@ -234,22 +234,52 @@
              const sceneEl = document.querySelector('a-scene');
 
              if (sceneEl) {
+                 let arStarting = false;
+                 let arStarted = false;
+                 const startAR = () => {
+                     const arSystem = sceneEl.systems && sceneEl.systems['mindar-face-system'];
+                     if (!arSystem || typeof arSystem.start !== 'function') return;
+                     if (arStarting || arStarted) return;
+                     arStarting = true;
+                     try { arSystem.start(); } catch (e) { console.warn('arSystem.start failed', e); }
+                     arStarting = false;
+                 };
+
                  sceneEl.addEventListener('arReady', () => {
+                     arStarted = true;
                      if (loadingOverlay) loadingOverlay.style.display = 'none';
                      showStatus('Camera ready', 'success');
                  });
                  sceneEl.addEventListener('arError', (event) => {
-                     if (loadingOverlay) loadingOverlay.style.display = 'none';
-                     const errMsg = event?.detail?.error || 'Failed to start camera';
-                     showStatus(errMsg + ' — try HTTPS or check permissions', 'error');
-                     console.error('MindAR arError:', event);
-                 });
-                 sceneEl.addEventListener('loaded', () => {
-                     const arSystem = sceneEl.systems && sceneEl.systems['mindar-face-system'];
-                     if (arSystem && typeof arSystem.start === 'function') {
-                         try { arSystem.start(); } catch (e) { console.warn('arSystem.start failed', e); }
+                     arStarted = false;
+                     if (loadingOverlay) {
+                         loadingOverlay.style.display = 'flex';
+                         loadingOverlay.innerHTML = `
+                           <div class="loading-spinner"></div>
+                           <p>Camera failed to start. Check permissions and HTTPS.</p>
+                           <button id="retryCameraBtn" class="dropdown-btn" style="margin-top:12px;">Retry Camera</button>
+                         `;
                      }
+                     const errMsg = event?.detail?.error || 'Failed to start camera';
+                     showStatus(errMsg, 'error');
+                     console.error('MindAR arError:', event);
+                     const btn = document.getElementById('retryCameraBtn');
+                     if (btn) btn.addEventListener('click', () => {
+                         try {
+                             const arSystem = sceneEl.systems && sceneEl.systems['mindar-face-system'];
+                             if (arSystem && typeof arSystem.stop === 'function') arSystem.stop();
+                             const video = arSystem && arSystem.video;
+                             if (video && video.srcObject) {
+                                 video.srcObject.getTracks().forEach(t => t.stop());
+                                 video.srcObject = null;
+                             }
+                         } catch (e) {
+                             console.warn('retry cleanup error', e);
+                         }
+                         startAR();
+                     }, { once: true });
                  });
+                 sceneEl.addEventListener('loaded', startAR);
              } else {
                  // Fallback: hide overlay after a short delay to unblock UI
                  setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 2000);
@@ -480,5 +510,41 @@
      })();
      </script>
      
- </body>
- </html>
+     <!-- Ensure camera stream is released on refresh/tab hide to prevent blue screen -->
+     <script>
+     (function() {
+       function stopMindARAndReleaseCamera() {
+         const sceneEl = document.querySelector('a-scene');
+         if (!sceneEl) return;
+         const arSystem = sceneEl.systems && sceneEl.systems['mindar-face-system'];
+         try {
+           if (arSystem && typeof arSystem.stop === 'function') {
+             arSystem.stop();
+           }
+           const video = arSystem && arSystem.video;
+           if (video && video.srcObject) {
+             try {
+               video.srcObject.getTracks().forEach(t => t.stop());
+               video.srcObject = null;
+             } catch (e) {
+               console.warn('Failed to stop camera tracks', e);
+             }
+           }
+         } catch (e) {
+           console.warn('MindAR cleanup error', e);
+         }
+       }
+
+       // When the page is being hidden or closed, release camera promptly.
+       window.addEventListener('beforeunload', stopMindARAndReleaseCamera);
+       window.addEventListener('pagehide', stopMindARAndReleaseCamera);
+       document.addEventListener('visibilitychange', function() {
+         if (document.hidden) {
+           stopMindARAndReleaseCamera();
+         }
+       });
+     })();
+     </script>
+     
+   </body>
+   </html>
