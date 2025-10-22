@@ -178,19 +178,25 @@
                             <div class="form-field">
                                 <label class="field-label">Full Name</label>
                                 <div class="name-inputs">
-                                    <input type="text" placeholder="First Name" class="name-input" name="firstName" id="firstName" required>
-                                    <input type="text" placeholder="Last Name" class="name-input" name="lastName" id="lastName" required>
+                                    <input type="text" placeholder="First Name" class="name-input" name="firstName" id="firstName" required aria-invalid="false" aria-describedby="firstNameError" autocomplete="given-name">
+                                    <input type="text" placeholder="Last Name" class="name-input" name="lastName" id="lastName" required aria-invalid="false" aria-describedby="lastNameError" autocomplete="family-name">
+                                </div>
+                                <div class="field-errors">
+                                    <span class="input-error" id="firstNameError" role="alert" aria-live="polite"></span>
+                                    <span class="input-error" id="lastNameError" role="alert" aria-live="polite"></span>
                                 </div>
                             </div>
                             
                             <div class="form-field">
-                                <label class="field-label">Email</label>
-                                <input type="email" placeholder="email@example.com" class="full-input" name="email" id="email" required>
+                                <label class="field-label" for="email">Email</label>
+                                <input type="email" placeholder="email@gmail.com" class="full-input" name="email" id="email" required aria-invalid="false" aria-describedby="emailError" pattern="^[A-Za-z0-9._%+-]+@gmail\\.com$" title="Enter a valid Gmail address ending with @gmail.com">
+                                <span class="input-error" id="emailError" role="alert" aria-live="polite"></span>
                             </div>
                             
                             <div class="form-field">
-                                <label class="field-label">Phone Number</label>
-                                <input type="tel" placeholder="+63" class="full-input" name="phone" id="phone" required inputmode="numeric" autocomplete="tel" maxlength="12" pattern="^(?:639\d{9}|09\d{9})$" title="Enter a valid PH mobile number: 09XXXXXXXXX or 639XXXXXXXXX">
+                                <label class="field-label" for="phone">Phone Number</label>
+                                <input type="tel" class="full-input" name="phone" id="phone" required inputmode="numeric" autocomplete="tel" maxlength="13" pattern="^\\+639\\d{9}$" title="Enter a valid PH mobile number starting with +63 followed by 10 digits" aria-invalid="false" aria-describedby="phoneError" value="+63">
+                                <span class="input-error" id="phoneError" role="alert" aria-live="polite"></span>
                             </div>
                             
                             <div class="form-field">
@@ -202,8 +208,9 @@
                             </div>
                             
                             <div class="form-field">
-                                <label class="field-label">Quantity</label>
-                                <select class="quantity-select" name="quantity" id="quantity" required>
+                                <label class="field-label" for="quantity">Quantity</label>
+                                <p class="field-note" id="quantityGuidance">Standard orders limited to 5 items. For pre-orders up to 10 items, please specify in Additional Notes.</p>
+                                <select class="quantity-select" name="quantity" id="quantity" required aria-describedby="quantityError" aria-invalid="false">
                                     <option value="1" selected>1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
@@ -213,8 +220,9 @@
                                     <option value="7">7</option>
                                     <option value="8">8</option>
                                     <option value="9">9</option>
-                                    <option value="10">10+</option>
+                                    <option value="10">10</option>
                                 </select>
+                                <span class="input-error" id="quantityError" role="alert" aria-live="polite"></span>
                             </div>
                         </div>
                         
@@ -250,14 +258,174 @@
         document.addEventListener('DOMContentLoaded', function() {
             const preorderForm = document.getElementById('preorderForm');
             const phoneInput = document.getElementById('phone');
-            
-            // Enforce digits-only input for phone field
-            if (phoneInput) {
-                phoneInput.addEventListener('input', function(e) {
-                    const digitsOnly = e.target.value.replace(/\D/g, '');
-                    e.target.value = digitsOnly;
+            const emailInput = document.getElementById('email');
+            const firstNameInput = document.getElementById('firstName');
+            const lastNameInput = document.getElementById('lastName');
+            const quantityInput = document.getElementById('quantity');
+            const notesInput = document.getElementById('notes');
+            const submitBtnGlobal = preorderForm ? preorderForm.querySelector('.submit-btn') : null;
+
+            function setValidity(input, isValid, errorEl, message='') {
+                input.classList.remove('input-valid','input-invalid');
+                input.setAttribute('aria-invalid', String(!isValid));
+                if (isValid) {
+                    input.classList.add('input-valid');
+                    if (errorEl) errorEl.textContent = '';
+                } else {
+                    input.classList.add('input-invalid');
+                    if (errorEl) errorEl.textContent = message || 'Invalid input';
+                }
+                updateSubmitState();
+            }
+
+            function updateSubmitState() {
+                if (!submitBtnGlobal) return;
+                const baseValid = isValidName(firstNameInput.value) &&
+                                  isValidName(lastNameInput.value) &&
+                                  isValidGmail(emailInput.value) &&
+                                  isValidPhone(phoneInput.value);
+                const qtyVal = quantityInput ? parseInt(quantityInput.value, 10) : 1;
+                const notesVal = notesInput ? (notesInput.value || '').trim() : '';
+                const quantityOk = isQuantityValid(qtyVal, notesVal);
+                submitBtnGlobal.disabled = !(baseValid && quantityOk) || isSubmitting;
+            }
+
+            function isValidGmail(val) {
+                return /^[A-Za-z0-9._%+-]+@gmail\.com$/.test(val.trim());
+            }
+            function isValidName(val) {
+                return /^[A-Za-z\s\-'.,]+$/.test(val.trim()) && val.trim().length > 0;
+            }
+            function isValidPhone(val) {
+                return /^\+639\d{9}$/.test(val.trim());
+            }
+
+            // Pre-order keywords and quantity validation
+            const preOrderKeywordsRegex = /\b(pre[\s-]?order|preorder|special order|bulk order|advance order|advanced order)\b/i;
+            function hasPreOrderKeyword(notes) {
+                return preOrderKeywordsRegex.test((notes || '').toLowerCase());
+            }
+            function isQuantityValid(qty, notes) {
+                if (!Number.isFinite(qty)) qty = parseInt(qty, 10);
+                if (Number.isNaN(qty) || qty < 1 || qty > 10) return false;
+                if (qty <= 5) return true;
+                return hasPreOrderKeyword(notes);
+            }
+
+            // Name: block digits and invalid chars, show message
+            [firstNameInput, lastNameInput].forEach((inp, idx) => {
+                if (!inp) return;
+                const errEl = document.getElementById(idx === 0 ? 'firstNameError' : 'lastNameError');
+                inp.addEventListener('input', () => {
+                    // remove any digits
+                    const cleaned = inp.value.replace(/[0-9]/g,'');
+                    if (cleaned !== inp.value) {
+                        const pos = inp.selectionStart;
+                        inp.value = cleaned;
+                        try { inp.setSelectionRange(Math.max((pos || 1) - 1, 0), Math.max((pos || 1) - 1, 0)); } catch {}
+                    }
+                    const valid = isValidName(inp.value);
+                    setValidity(inp, valid, errEl, "Only letters, spaces, hyphen(-), apostrophe('), comma, and period are allowed.");
+                });
+            });
+
+            // Email: real-time Gmail check
+            if (emailInput) {
+                const emailErr = document.getElementById('emailError');
+                emailInput.addEventListener('input', () => {
+                    const valid = isValidGmail(emailInput.value);
+                    setValidity(emailInput, valid, emailErr, 'Email must end with @gmail.com');
                 });
             }
+
+            // Phone: lock +63 prefix and digits-only after, 10 digits, start with 9
+            if (phoneInput) {
+                const phoneErr = document.getElementById('phoneError');
+                const prefix = '+63';
+
+                function enforcePrefix() {
+                    if (!phoneInput.value || !phoneInput.value.startsWith(prefix)) {
+                        const digits = phoneInput.value.replace(/\D/g,'');
+                        phoneInput.value = prefix + digits;
+                    }
+                }
+
+                phoneInput.addEventListener('focus', () => {
+                    if (!phoneInput.value) phoneInput.value = prefix;
+                    setTimeout(() => {
+                        if ((phoneInput.selectionStart || 0) < prefix.length) {
+                            try { phoneInput.setSelectionRange(prefix.length, prefix.length); } catch {}
+                        }
+                    }, 0);
+                });
+
+                phoneInput.addEventListener('keydown', (e) => {
+                    const caret = phoneInput.selectionStart || 0;
+                    // prevent backspacing or moving into the prefix
+                    if ((e.key === 'Backspace' && caret <= prefix.length) ||
+                        (e.key === 'ArrowLeft' && caret <= prefix.length)) {
+                        e.preventDefault();
+                    }
+                });
+
+                phoneInput.addEventListener('input', () => {
+                    enforcePrefix();
+                    // keep only digits after prefix, max 10
+                    const tail = phoneInput.value.slice(prefix.length).replace(/\D/g,'').slice(0,10);
+                    phoneInput.value = prefix + tail;
+
+                    // Validity: must be +639XXXXXXXXX, 10 digits, start with 9
+                    let message = '';
+                    let valid = false;
+                    if (tail.length === 0) {
+                        message = 'Enter 10 digits after +63';
+                    } else if (!/^9/.test(tail)) {
+                        message = 'Number must start with 9 after +63';
+                    } else if (tail.length < 10) {
+                        message = `Enter ${10 - tail.length} more digit(s)`;
+                    } else {
+                        valid = true;
+                    }
+                    setValidity(phoneInput, valid, phoneErr, message);
+                });
+
+                // Initialize state
+                enforcePrefix();
+                phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            // Quantity and Notes: enforce policy
+            function validateQuantityAndNotes() {
+                if (!quantityInput) return;
+                const qty = parseInt(quantityInput.value, 10);
+                const notesVal = notesInput ? (notesInput.value || '').trim() : '';
+                const errEl = document.getElementById('quantityError');
+                let msg = '';
+                let valid = false;
+                if (Number.isNaN(qty) || qty < 1 || qty > 10) {
+                    msg = 'Quantity must be between 1 and 10.';
+                } else if (qty <= 5) {
+                    valid = true;
+                } else if (qty >= 6 && qty <= 10) {
+                    if (!hasPreOrderKeyword(notesVal)) {
+                        msg = 'Orders above 5 require "pre-order" note in Additional Notes.';
+                    } else {
+                        valid = true;
+                    }
+                }
+                setValidity(quantityInput, valid, errEl, msg);
+            }
+            if (quantityInput) {
+                quantityInput.addEventListener('change', validateQuantityAndNotes);
+                quantityInput.addEventListener('input', validateQuantityAndNotes);
+            }
+            if (notesInput) {
+                notesInput.addEventListener('input', validateQuantityAndNotes);
+            }
+
+            // Initialize submit state once
+            validateQuantityAndNotes();
+            updateSubmitState();
             
             // Load frame names from database
             loadFrameNames();
@@ -291,13 +459,19 @@
                     const prescription = document.getElementById('prescription').value;
                     const notes = document.getElementById('notes').value;
                     
-                    // Validate PH mobile number: allow formats 09XXXXXXXXX or 639XXXXXXXXX
+                    // Validate all fields before submit
                     const normalizedPhone = phone.replace(/\D/g, '');
-                    const isValidPHMobile = /^(?:639\d{9}|09\d{9})$/.test(normalizedPhone);
-                    if (!isValidPHMobile) {
-                        const fm = document.getElementById('formMessage');
+                    const fm = document.getElementById('formMessage');
+                    const qtyNum = parseInt(quantity, 10) || 1;
+                    const quantityOk = isQuantityValid(qtyNum, notes);
+                    const allValid = isValidName(firstName) && isValidName(lastName) && isValidGmail(email) && /^\+639\d{9}$/.test(phone.trim()) && quantityOk;
+                    if (!allValid) {
+                        if (!quantityOk) {
+                            const qErr = document.getElementById('quantityError');
+                            setValidity(document.getElementById('quantity'), false, qErr, (qtyNum < 1 || qtyNum > 10) ? 'Quantity must be between 1 and 10.' : 'Orders above 5 require "pre-order" note in Additional Notes.');
+                        }
                         if (fm) {
-                            fm.textContent = 'Please enter a valid Philippine mobile number (09XXXXXXXXX or 639XXXXXXXXX).';
+                            fm.textContent = 'Please correct the highlighted fields before submitting.';
                             fm.className = 'form-message error';
                         }
                         if (submitBtn) {
@@ -308,6 +482,9 @@
                         return;
                     }
 
+                    const isSpecialPreOrder = qtyNum > 5 && qtyNum <= 10 && hasPreOrderKeyword(notes);
+                    const orderType = isSpecialPreOrder ? 'pre-order' : 'standard';
+
                     // Create pre-order object
                     const preOrder = {
                         firstName: firstName,
@@ -316,9 +493,11 @@
                         phone: normalizedPhone,
                         frameName: frameName,
                         productId: (new URLSearchParams(window.location.search)).get('productId') || null,
-                        quantity: quantity,
+                        quantity: qtyNum,
                         prescription: prescription,
                         notes: notes,
+                        orderType: orderType,
+                        specialRequestKeywordsMatched: isSpecialPreOrder,
                         date: new Date().toISOString(),
                         status: 'pending'
                     };
@@ -375,12 +554,39 @@
                             console.warn('Unexpected error while decrementing stock:', err);
                         }
 
+                        // Automated email confirmation for special pre-orders
+                        if (orderType === 'pre-order') {
+                            try {
+                                const emailHtml = `
+                                    <div style="font-family:Poppins,Arial,sans-serif; color:#333; line-height:1.6;">
+                                        <p>Hi ${preOrder.firstName} ${preOrder.lastName},</p>
+                                        <p>We received your <strong>pre-order request</strong> for <strong>${preOrder.frameName || 'selected frame'}</strong> (Quantity: ${preOrder.quantity}).</p>
+                                        <p>We will confirm availability and timeline shortly. If you have additional details, simply reply to this email.</p>
+                                        ${preOrder.notes ? `<p><strong>Your Notes:</strong> ${preOrder.notes}</p>` : ''}
+                                        <p>— Trinity Optimum Vision Center</p>
+                                    </div>`;
+                                await fetch('/.netlify/functions/send-email', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        to: preOrder.email,
+                                        subject: `Pre-Order Request Received: ${preOrder.frameName || 'Your Selection'}`,
+                                        html: emailHtml,
+                                        text: `Hi ${preOrder.firstName} ${preOrder.lastName},\n\nWe received your pre-order request for ${preOrder.frameName || 'selected frame'} (Quantity: ${preOrder.quantity}). We will confirm availability and timeline shortly.\n\n— Trinity Optimum Vision Center`
+                                    })
+                                });
+                                console.log('Auto pre-order confirmation sent to', preOrder.email);
+                            } catch (mailErr) {
+                                console.warn('Failed to send auto pre-order email:', mailErr);
+                            }
+                        }
+
                         // Reset form
                         document.getElementById('preorderForm').reset();
 
                         // Redirect to confirmation page after a short delay
                         setTimeout(() => {
-                            window.location.href = `preorder-confirmation.html?frameName=${encodeURIComponent(preOrder.frameName)}`;
+                            window.location.href = `preorder-confirmation.html?frameName=${encodeURIComponent(preOrder.frameName)}&quantity=${encodeURIComponent(preOrder.quantity)}&orderType=${encodeURIComponent(orderType)}`;
                         }, 500);
                     } catch (error) {
                         console.error('Error saving pre-order:', error);

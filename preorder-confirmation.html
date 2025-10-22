@@ -194,12 +194,24 @@
             // Get URL parameters
             const urlParams = new URLSearchParams(window.location.search);
             const frameName = urlParams.get('frameName');
+            const quantity = parseInt(urlParams.get('quantity'), 10);
+            const orderType = urlParams.get('orderType') || 'standard';
             
             // Update thank you message if frame name is provided
             if (frameName) {
                 const thankYouMessage = document.getElementById('thankYouMessage');
                 if (thankYouMessage) {
                     thankYouMessage.textContent = `Thank you for your interest in the "${frameName}".`;
+                }
+            }
+
+            // Tailor details based on order type and quantity
+            const detailsEl = document.querySelector('.confirmation-details');
+            if (detailsEl) {
+                if (orderType === 'pre-order' && Number.isFinite(quantity)) {
+                    detailsEl.textContent = `We’ve recorded your pre-order request for ${quantity} item(s). We’ll confirm availability and timeline shortly.`;
+                } else {
+                    detailsEl.textContent = `Your order request has been recorded. Standard orders are limited to 5 items. If you plan to pre-order 5 frames, please include details in Additional Notes.`;
                 }
             }
         });

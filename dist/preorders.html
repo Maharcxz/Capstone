@@ -305,6 +305,10 @@
             statusElement.textContent = status.charAt(0).toUpperCase() + status.slice(1);
             statusElement.style.color = status === 'completed' ? '#28a745' : '#ffc107';
             statusElement.style.fontWeight = '600';
+
+            // Quantity and Type
+            document.getElementById('modal-order-quantity').textContent = order.quantity || 1;
+            document.getElementById('modal-order-type').textContent = order.orderType || ((order.quantity || 1) > 5 ? 'pre-order' : 'standard');
             
             // Prescription Details section removed
             
@@ -819,6 +823,14 @@
                 statusEl.textContent = `Status: ${order.status || 'Pending'}`;
                 infoDiv.appendChild(statusEl);
 
+                const qtyEl = document.createElement('p');
+                qtyEl.textContent = `Quantity: ${order.quantity || 1}`;
+                infoDiv.appendChild(qtyEl);
+
+                const typeEl = document.createElement('p');
+                typeEl.textContent = `Type: ${order.orderType || ((order.quantity || 1) > 5 ? 'pre-order' : 'standard')}`;
+                infoDiv.appendChild(typeEl);
+
                 // Actions section
                 const actionsDiv = document.createElement('div');
                 actionsDiv.className = 'preorder-actions';
@@ -1076,6 +1088,14 @@
                     <div class="detail-row">
                         <span class="detail-label">Status:</span>
                         <span id="modal-order-status"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Quantity:</span>
+                        <span id="modal-order-quantity"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Type:</span>
+                        <span id="modal-order-type"></span>
                     </div>
                 </div>
                 
