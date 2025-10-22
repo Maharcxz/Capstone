@@ -350,6 +350,16 @@
     transform: translateY(-1px);
 }
 
+/* Field guidance note base style */
+.field-note {
+    font-size: 12px;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 8px 0 8px 4px; /* top-right-bottom-left */
+    line-height: 1.4;
+    text-align: left;
+}
+
 .form-actions {
     display: flex;
     gap: 1.2rem;
@@ -612,9 +622,11 @@
     /* Subtle field guidance notes */
     .field-note {
         font-size: 12px;
+        font-style: italic;
         color: rgba(255, 255, 255, 0.75);
-        margin: 6px 0 8px;
+        margin: 8px 0 8px 4px;
         line-height: 1.4;
+        text-align: left;
     }
     
     /* Autocomplete responsive styles */

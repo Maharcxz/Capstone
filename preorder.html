@@ -216,7 +216,7 @@
                                     <option value="4">4</option>
                                     <option value="5">5</option>
                                 </select>
-                                <p class="field-note" id="quantityGuidance">If you want to pre-order 5 frames, please include details in the Additional Notes section.</p>
+                                <p class="field-note" id="quantityGuidance">If you want to pre-order more than 5 frames, please include details in the Additional Notes section.</p>
                                 <span class="input-error" id="quantityError" role="alert" aria-live="polite"></span>
                             </div>
                         </div>
@@ -395,8 +395,10 @@
                 const errEl = document.getElementById('quantityError');
                 let msg = '';
                 let valid = false;
-                if (Number.isNaN(qty) || qty < 1 || qty > 5) {
-                    msg = 'Quantity must be between 1 and 5.';
+                if (Number.isNaN(qty) || qty < 1) {
+                    msg = 'Please enter a valid quantity.';
+                } else if (qty > 5) {
+                    msg = 'Maximum order quantity is 5 frames';
                 } else {
                     valid = true;
                 }
@@ -455,7 +457,8 @@
                     if (!allValid) {
                         if (!quantityOk) {
                             const qErr = document.getElementById('quantityError');
-                            setValidity(document.getElementById('quantity'), false, qErr, 'Quantity must be between 1 and 5.');
+                            const msg = (qtyNum > 5) ? 'Maximum order quantity is 5 frames' : 'Please enter a valid quantity.';
+                            setValidity(document.getElementById('quantity'), false, qErr, msg);
                         }
                         if (fm) {
                             fm.textContent = 'Please correct the highlighted fields before submitting.';

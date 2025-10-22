@@ -8,7 +8,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -209,18 +223,13 @@
                             
                             <div class="form-field">
                                 <label class="field-label" for="quantity">Quantity</label>
-                                <p class="field-note" id="quantityGuidance">Standard orders limited to 5 items. For pre-orders up to 10 items, please specify in Additional Notes.</p>
+                                <p class="field-note" id="quantityGuidance">If you want to pre-order more than 5 frames, please include details in the Additional Notes section.</p>
                                 <select class="quantity-select" name="quantity" id="quantity" required aria-describedby="quantityError" aria-invalid="false">
                                     <option value="1" selected>1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
                                     <option value="4">4</option>
                                     <option value="5">5</option>
-                                    <option value="6">6</option>
-                                    <option value="7">7</option>
-                                    <option value="8">8</option>
-                                    <option value="9">9</option>
-                                    <option value="10">10</option>
                                 </select>
                                 <span class="input-error" id="quantityError" role="alert" aria-live="polite"></span>
                             </div>
@@ -402,16 +411,12 @@
                 const errEl = document.getElementById('quantityError');
                 let msg = '';
                 let valid = false;
-                if (Number.isNaN(qty) || qty < 1 || qty > 10) {
-                    msg = 'Quantity must be between 1 and 10.';
-                } else if (qty <= 5) {
+                if (Number.isNaN(qty) || qty < 1) {
+                    msg = 'Please enter a valid quantity.';
+                } else if (qty > 5) {
+                    msg = 'Maximum order quantity is 5 frames';
+                } else {
                     valid = true;
-                } else if (qty >= 6 && qty <= 10) {
-                    if (!hasPreOrderKeyword(notesVal)) {
-                        msg = 'Orders above 5 require "pre-order" note in Additional Notes.';
-                    } else {
-                        valid = true;
-                    }
                 }
                 setValidity(quantityInput, valid, errEl, msg);
             }
@@ -468,7 +473,8 @@
                     if (!allValid) {
                         if (!quantityOk) {
                             const qErr = document.getElementById('quantityError');
-                            setValidity(document.getElementById('quantity'), false, qErr, (qtyNum < 1 || qtyNum > 10) ? 'Quantity must be between 1 and 10.' : 'Orders above 5 require "pre-order" note in Additional Notes.');
+                            const msg = (qtyNum > 5) ? 'Maximum order quantity is 5 frames' : 'Please enter a valid quantity.';
+                            setValidity(document.getElementById('quantity'), false, qErr, msg);
                         }
                         if (fm) {
                             fm.textContent = 'Please correct the highlighted fields before submitting.';
@@ -482,7 +488,7 @@
                         return;
                     }
 
-                    const isSpecialPreOrder = qtyNum > 5 && qtyNum <= 10 && hasPreOrderKeyword(notes);
+                    const isSpecialPreOrder = qtyNum === 5 && hasPreOrderKeyword(notes);
                     const orderType = isSpecialPreOrder ? 'pre-order' : 'standard';
 
                     // Create pre-order object
