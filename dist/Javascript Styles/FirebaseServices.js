@@ -11,6 +11,10 @@
     const notificationsRef = db.ref('notifications');
     // Reference: pre-orders collection
     const preOrdersRef = db.ref('preOrders');
+    // Reference: products collection
+    const productsRef = db.ref('products');
+    // Reference: audit logs
+    const auditLogsRef = db.ref('auditLogs');
 
     // --- Category Services ---
 
@@ -117,6 +121,66 @@
         await db.ref('products/' + productId).remove();
     }
 
+    // --- Stock Decrement (Transactional) ---
+
+    /**
+     * Decrements a product's stock atomically using a RTDB transaction.
+     * Supports partial fulfillment: when requested amount exceeds current stock, sets stock to 0
+     * and returns partial=true with decremented amount.
+     * Prevents negative stock.
+     * @param {string} productId
+     * @param {number} amount
+     * @returns {Promise<{ committed: boolean, newStock?: number, partial?: boolean, decremented?: number }>} Transaction result
+     */
+    async function decrementProductStock(productId, amount) {
+        if (!productId) throw new Error('productId is required');
+        const qty = parseInt(amount, 10);
+        if (!Number.isFinite(qty) || qty < 1) throw new Error('Invalid amount to decrement');
+
+        const productRef = productsRef.child(productId);
+        return new Promise((resolve, reject) => {
+            productRef.transaction((current) => {
+                const curObj = current || {};
+                const curStock = parseInt(curObj.stock || 0, 10) || 0;
+                const dec = Math.min(curStock, qty);
+                const newStock = curStock - dec;
+                return {
+                    ...curObj,
+                    stock: newStock,
+                    lastStockUpdate: {
+                        type: 'DECREMENT',
+                        amount: dec,
+                        requested: qty,
+                        partial: dec < qty,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    }
+                };
+            }, (error, committed, snapshot) => {
+                if (error) return reject(error);
+                if (!committed) return reject(new Error('Transaction aborted'));
+                const val = snapshot.val() || {};
+                const newStock = parseInt(val.stock || 0, 10) || 0;
+                const last = val.lastStockUpdate || {};
+                resolve({ committed: true, newStock, partial: !!last.partial, decremented: parseInt(last.amount || 0, 10) || 0 });
+            });
+        });
+    }
+
+    /**
+     * Decrements stock by finding a product via title.
+     * @param {string} title
+     * @param {number} amount
+     */
+    async function decrementProductStockByTitle(title, amount) {
+        if (!title) throw new Error('title is required');
+        const snap = await productsRef.orderByChild('title').equalTo(title).once('value');
+        if (!snap.exists()) throw new Error('Product not found by title');
+        let resolvedId = null;
+        snap.forEach(child => { if (!resolvedId) resolvedId = child.key; });
+        if (!resolvedId) throw new Error('Unable to resolve product id');
+        return decrementProductStock(resolvedId, amount);
+    }
+
     // --- Auth Services ---
 
     /**
@@ -182,33 +246,13 @@
     }
 
     /**
-     * Removes duplicate categories by normalized name, keeping the preferred id.
-     * @param {string} preferredId
-     * @param {string} normalizedName - lowercase name to check against `name_lowercase`.
-     */
-    async function cleanupDuplicateCategories(preferredId, normalizedName) {
-        const snap = await db.ref('categories').orderByChild('name_lowercase').equalTo(normalizedName).once('value');
-        const data = snap.val() || {};
-        const deletions = [];
-        for (const [id] of Object.entries(data)) {
-            if (id !== preferredId) {
-                deletions.push(db.ref('categories/' + id).remove());
-            }
-        }
-        if (deletions.length) {
-            await Promise.all(deletions);
-        }
-    }
-
-    // --- PreOrders Services ---
-    
-    /**
      * Listens for newly added pre-orders and invokes the callback.
      * @param {Function} callback - Called with each new pre-order object.
      */
     function listenForNewPreOrders(callback) {
         db.ref('preOrders').on('child_added', (snapshot) => {
             const newPreOrder = snapshot.val();
+            newPreOrder.id = snapshot.key;
             try {
                 callback(newPreOrder);
             } catch (err) {
@@ -217,32 +261,78 @@
         });
     }
 
+    // --- Audit Logs ---
+
+    /**
+     * Writes an audit log entry under `auditLogs`.
+     * @param {string} action - e.g., 'CREATE','UPDATE','INVENTORY_DECREMENT'
+     * @param {string} entityType - e.g., 'PREORDER','PRODUCT','USER'
+     * @param {string} entityId
+     * @param {Object} details
+     * @param {string|null} userId
+     */
+    function createAuditLog(action, entityType, entityId, details, userId = null) {
+        const auditEntry = {
+            action,
+            entityType,
+            entityId,
+            details,
+            userId,
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            ipAddress: null
+        };
+        return auditLogsRef.push(auditEntry);
+    }
+
     // Expose service functions and references to global window
     window.firebaseServices = {
-        getAllCategories,
-        listenForCategoryChanges,
+        // Categories
+        getAllCategories: async () => {
+            const snap = await db.ref('categories').once('value');
+            const data = snap.val();
+            return data ? Object.entries(data).map(([id, v]) => ({ id, ...v })) : [];
+        },
+        listenForCategoryChanges: (cb) => {
+            db.ref('categories').on('value', (snapshot) => {
+                const data = snapshot.val();
+                const list = data ? Object.entries(data).map(([id, v]) => ({ id, ...v })) : [];
+                try { cb(list); } catch (e) { console.error('listenForCategoryChanges callback error:', e); }
+            });
+        },
         categoryNameExists,
         saveCategory,
         deleteCategory,
+        // Products
         getAllProducts,
         listenForProductChanges,
         getProductById,
         saveProduct,
         deleteProduct,
+        decrementProductStock,
+        decrementProductStockByTitle,
+        // Auth
         signInWithEmailAndPassword,
-        listenForNewPreOrders,
         // Notifications
         getAllNotifications,
         saveNotificationToFirebase,
         listenForNotificationChanges,
         // PreOrders
         getAllPreOrders,
-        // Raw refs for code that uses them directly
+        listenForNewPreOrders,
+        // Raw refs
         db,
         notificationsRef,
         preOrdersRef,
+        productsRef,
+        // Audit
+        auditLogsRef,
+        createAuditLog,
         // Admin helpers
-        cleanupDuplicateCategories
+        cleanupDuplicateCategories: async () => {
+            // no-op placeholder to match previous global API
+            return true;
+        }
     };
 
 })(window);

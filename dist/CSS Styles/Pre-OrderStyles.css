@@ -350,6 +350,16 @@
     transform: translateY(-1px);
 }
 
+/* Field guidance note base style */
+.field-note {
+    font-size: 12px;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 8px 0 8px 4px; /* top-right-bottom-left */
+    line-height: 1.4;
+    text-align: left;
+}
+
 .form-actions {
     display: flex;
     gap: 1.2rem;
@@ -526,6 +536,13 @@
 .name-input.input-invalid, .full-input.input-invalid, .quantity-select.input-invalid, .note-textarea.input-invalid {
     border-color: rgba(255, 80, 80, 0.9) !important;
     box-shadow: 0 0 0 3px rgba(255, 80, 80, 0.25) !important;
+    background-color: rgba(255, 80, 80, 0.08) !important;
+}
+/* Native constraint styling when min/max is violated */
+.full-input:out-of-range {
+    border-color: rgba(255, 80, 80, 0.9) !important;
+    box-shadow: 0 0 0 3px rgba(255, 80, 80, 0.25) !important;
+    background-color: rgba(255, 80, 80, 0.08) !important;
 }
 .name-input.input-valid, .full-input.input-valid, .quantity-select.input-valid, .note-textarea.input-valid {
     border-color: rgba(80, 200, 120, 0.8);
@@ -612,9 +629,11 @@
     /* Subtle field guidance notes */
     .field-note {
         font-size: 12px;
+        font-style: italic;
         color: rgba(255, 255, 255, 0.75);
-        margin: 6px 0 8px;
+        margin: 8px 0 8px 4px;
         line-height: 1.4;
+        text-align: left;
     }
     
     /* Autocomplete responsive styles */

@@ -208,11 +208,7 @@
             // Tailor details based on order type and quantity
             const detailsEl = document.querySelector('.confirmation-details');
             if (detailsEl) {
-                if (orderType === 'pre-order' && Number.isFinite(quantity)) {
-                    detailsEl.textContent = `We’ve recorded your pre-order request for ${quantity} item(s). We’ll confirm availability and timeline shortly.`;
-                } else {
-                    detailsEl.textContent = `Your order request has been recorded. Standard orders are limited to 5 items. For pre-orders up to 10 items, please specify in Additional Notes.`;
-                }
+                detailsEl.textContent = 'Your order request has been recorded. Our team is currently reviewing your request and will contact you shortly to confirm availability and delivery options.';
             }
         });
     </script>

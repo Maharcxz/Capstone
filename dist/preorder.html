@@ -8,21 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -209,7 +195,7 @@
                             
                             <div class="form-field">
                                 <label class="field-label" for="phone">Phone Number</label>
-                                <input type="tel" class="full-input" name="phone" id="phone" required inputmode="numeric" autocomplete="tel" maxlength="13" pattern="^\\+639\\d{9}$" title="Enter a valid PH mobile number starting with +63 followed by 10 digits" aria-invalid="false" aria-describedby="phoneError" value="+63">
+                                <input type="tel" class="full-input" name="phone" id="phone" required inputmode="numeric" autocomplete="tel" maxlength="13" pattern="^\+639\d{9}$" title="Enter a valid PH mobile number starting with +63 followed by 10 digits" aria-invalid="false" aria-describedby="phoneError" value="+63">
                                 <span class="input-error" id="phoneError" role="alert" aria-live="polite"></span>
                             </div>
                             
@@ -223,14 +209,8 @@
                             
                             <div class="form-field">
                                 <label class="field-label" for="quantity">Quantity</label>
-                                <p class="field-note" id="quantityGuidance">If you want to pre-order more than 5 frames, please include details in the Additional Notes section.</p>
-                                <select class="quantity-select" name="quantity" id="quantity" required aria-describedby="quantityError" aria-invalid="false">
-                                    <option value="1" selected>1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                </select>
+                                <input type="number" class="full-input" name="quantity" id="quantity" value="1" min="1" required aria-describedby="quantityError" aria-invalid="false">
+                                <p class="field-note" id="quantityGuidance">Enter the desired quantity. Stock availability will be checked.</p>
                                 <span class="input-error" id="quantityError" role="alert" aria-live="polite"></span>
                             </div>
                         </div>
@@ -261,8 +241,11 @@
     
     <script>
         let allFrameNames = [];
+        let allProducts = [];
         let isDropdownVisible = false;
         let isSubmitting = false;
+        let currentProductStock = null;
+        let currentProductId = null;
         
         document.addEventListener('DOMContentLoaded', function() {
             const preorderForm = document.getElementById('preorderForm');
@@ -292,7 +275,7 @@
                 const baseValid = isValidName(firstNameInput.value) &&
                                   isValidName(lastNameInput.value) &&
                                   isValidGmail(emailInput.value) &&
-                                  isValidPhone(phoneInput.value);
+                                  isValidPHMobile(phoneInput.value);
                 const qtyVal = quantityInput ? parseInt(quantityInput.value, 10) : 1;
                 const notesVal = notesInput ? (notesInput.value || '').trim() : '';
                 const quantityOk = isQuantityValid(qtyVal, notesVal);
@@ -303,10 +286,21 @@
                 return /^[A-Za-z0-9._%+-]+@gmail\.com$/.test(val.trim());
             }
             function isValidName(val) {
-                return /^[A-Za-z\s\-'.,]+$/.test(val.trim()) && val.trim().length > 0;
+                return /^[A-Za-z\s]+$/.test(val.trim()) && val.trim().length > 0;
             }
-            function isValidPhone(val) {
-                return /^\+639\d{9}$/.test(val.trim());
+            function normalizePhoneToE164PH(val) {
+                const raw = String(val || '').trim();
+                const digits = raw.replace(/\D/g, '');
+                if (/^639\d{9}$/.test(digits)) return '+' + digits;
+                if (/^09\d{9}$/.test(digits)) return '+63' + digits.slice(1);
+                if (/^\+639\d{9}$/.test(raw)) return raw;
+                const tail = digits.replace(/^63|^0/, '').slice(0, 10);
+                return '+63' + tail;
+            }
+            function isValidPHMobile(val) {
+                const raw = String(val || '').trim();
+                const digits = raw.replace(/\D/g, '');
+                return /^\+639\d{9}$/.test(raw) || /^639\d{9}$/.test(digits) || /^09\d{9}$/.test(digits);
             }
 
             // Pre-order keywords and quantity validation
@@ -316,25 +310,50 @@
             }
             function isQuantityValid(qty, notes) {
                 if (!Number.isFinite(qty)) qty = parseInt(qty, 10);
-                if (Number.isNaN(qty) || qty < 1 || qty > 10) return false;
-                if (qty <= 5) return true;
-                return hasPreOrderKeyword(notes);
+                if (!Number.isFinite(qty) || qty < 1) return false;
+                
+                // If we have stock information, validate against it
+                if (currentProductStock !== null) {
+                    return qty <= currentProductStock;
+                }
+                
+                // Fallback validation if no stock info available
+                return qty >= 1;
             }
 
-            // Name: block digits and invalid chars, show message
+            // Name: block non-alphabetical characters, show message only on blur
             [firstNameInput, lastNameInput].forEach((inp, idx) => {
                 if (!inp) return;
                 const errEl = document.getElementById(idx === 0 ? 'firstNameError' : 'lastNameError');
+                let hasShownError = false;
+                
                 inp.addEventListener('input', () => {
-                    // remove any digits
-                    const cleaned = inp.value.replace(/[0-9]/g,'');
+                    // Remove any non-alphabetical characters (keep only letters and spaces)
+                    const cleaned = inp.value.replace(/[^A-Za-z\s]/g, '');
                     if (cleaned !== inp.value) {
                         const pos = inp.selectionStart;
                         inp.value = cleaned;
-                        try { inp.setSelectionRange(Math.max((pos || 1) - 1, 0), Math.max((pos || 1) - 1, 0)); } catch {}
+                        try { 
+                            inp.setSelectionRange(Math.max((pos || 1) - 1, 0), Math.max((pos || 1) - 1, 0)); 
+                        } catch {}
                     }
+                    
+                    // Clear error message while typing if it was previously shown
+                    if (hasShownError && isValidName(inp.value)) {
+                        setValidity(inp, true, errEl, '');
+                        hasShownError = false;
+                    }
+                });
+                
+                inp.addEventListener('blur', () => {
                     const valid = isValidName(inp.value);
-                    setValidity(inp, valid, errEl, "Only letters, spaces, hyphen(-), apostrophe('), comma, and period are allowed.");
+                    if (!valid) {
+                        hasShownError = true;
+                        setValidity(inp, false, errEl, "Full Name must contain only alphabetical characters (a-z, A-Z) and spaces.");
+                    } else {
+                        setValidity(inp, true, errEl, '');
+                        hasShownError = false;
+                    }
                 });
             });
 
@@ -347,24 +366,22 @@
                 });
             }
 
-            // Phone: lock +63 prefix and digits-only after, 10 digits, start with 9
+            // Phone: normalize pasted formats (09..., 639...) and enforce +63 mask
             if (phoneInput) {
                 const phoneErr = document.getElementById('phoneError');
                 const prefix = '+63';
 
                 function enforcePrefix() {
                     if (!phoneInput.value || !phoneInput.value.startsWith(prefix)) {
-                        const digits = phoneInput.value.replace(/\D/g,'');
-                        phoneInput.value = prefix + digits;
+                        phoneInput.value = prefix;
                     }
                 }
 
                 phoneInput.addEventListener('focus', () => {
                     if (!phoneInput.value) phoneInput.value = prefix;
                     setTimeout(() => {
-                        if ((phoneInput.selectionStart || 0) < prefix.length) {
-                            try { phoneInput.setSelectionRange(prefix.length, prefix.length); } catch {}
-                        }
+                        const start = Math.max(prefix.length, phoneInput.selectionStart || 0);
+                        try { phoneInput.setSelectionRange(start, start); } catch {}
                     }, 0);
                 });
 
@@ -378,20 +395,21 @@
                 });
 
                 phoneInput.addEventListener('input', () => {
-                    enforcePrefix();
-                    // keep only digits after prefix, max 10
-                    const tail = phoneInput.value.slice(prefix.length).replace(/\D/g,'').slice(0,10);
+                    // Normalize any pasted/typed content to E.164 PH format
+                    const normalized = normalizePhoneToE164PH(phoneInput.value);
+                    // Extract tail after +63 and cap at 10 digits
+                    const tail = normalized.slice(prefix.length).replace(/\D/g,'').slice(0,10);
                     phoneInput.value = prefix + tail;
 
                     // Validity: must be +639XXXXXXXXX, 10 digits, start with 9
                     let message = '';
                     let valid = false;
                     if (tail.length === 0) {
-                        message = 'Enter 10 digits after +63';
+                        message = 'Expected format: +639XXXXXXXXX (PH mobile).';
                     } else if (!/^9/.test(tail)) {
-                        message = 'Number must start with 9 after +63';
+                        message = 'Must start with 9 after +63.';
                     } else if (tail.length < 10) {
-                        message = `Enter ${10 - tail.length} more digit(s)`;
+                        message = `Enter ${10 - tail.length} more digit(s).`;
                     } else {
                         valid = true;
                     }
@@ -403,29 +421,90 @@
                 phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
             }
 
-            // Quantity and Notes: enforce policy
-            function validateQuantityAndNotes() {
+            function updateQuantityGuidance() {
+                const note = document.getElementById('quantityGuidance');
+                if (!note) return;
+                if (currentProductStock !== null) {
+                    note.textContent = `Available: ${currentProductStock}. Maximum order is limited to available stock.`;
+                } else {
+                    note.textContent = 'Enter the desired quantity. Stock availability will be checked.';
+                }
+            }
+
+            // Quantity validation with stock checking
+            function validateQuantityAndNotes(showError = false) {
                 if (!quantityInput) return;
                 const qty = parseInt(quantityInput.value, 10);
                 const notesVal = notesInput ? (notesInput.value || '').trim() : '';
                 const errEl = document.getElementById('quantityError');
                 let msg = '';
                 let valid = false;
+
+                // Keep input constrained by available stock when known
+                if (currentProductStock !== null) {
+                    quantityInput.setAttribute('max', String(currentProductStock));
+                } else {
+                    quantityInput.removeAttribute('max');
+                }
+                updateQuantityGuidance();
+                
                 if (Number.isNaN(qty) || qty < 1) {
-                    msg = 'Please enter a valid quantity.';
-                } else if (qty > 5) {
-                    msg = 'Maximum order quantity is 5 frames';
+                    msg = 'Please enter a valid quantity (minimum 1).';
+                } else if (currentProductStock !== null && qty > currentProductStock) {
+                    msg = 'Quantity exceeds available stock';
                 } else {
                     valid = true;
                 }
-                setValidity(quantityInput, valid, errEl, msg);
+                
+                if (showError || !valid) {
+                    setValidity(quantityInput, valid, errEl, msg);
+                } else if (valid) {
+                    setValidity(quantityInput, true, errEl, '');
+                }
             }
+            
             if (quantityInput) {
-                quantityInput.addEventListener('change', validateQuantityAndNotes);
-                quantityInput.addEventListener('input', validateQuantityAndNotes);
+                quantityInput.addEventListener('input', () => {
+                    validateQuantityAndNotes(true);
+                });
+                
+                quantityInput.addEventListener('blur', () => {
+                    validateQuantityAndNotes(true);
+                });
+                
+                quantityInput.addEventListener('change', () => {
+                    validateQuantityAndNotes(true);
+                });
             }
-            if (notesInput) {
-                notesInput.addEventListener('input', validateQuantityAndNotes);
+
+            // Frame name: check stock when manually typed
+            const frameNameInput = document.getElementById('frameName');
+            if (frameNameInput) {
+                frameNameInput.addEventListener('blur', () => {
+                    const frameName = frameNameInput.value.trim();
+                    if (frameName) {
+                        // Find the product and update stock information
+                        const selectedProduct = allProducts.find(product => product.title === frameName);
+                        if (selectedProduct) {
+                            currentProductStock = selectedProduct.stock || 0;
+                            currentProductId = selectedProduct.id;
+                        } else {
+                            currentProductStock = null;
+                            currentProductId = null;
+                        }
+                        
+                        // Sync quantity input constraints and re-validate
+                        const quantityInput = document.getElementById('quantity');
+                        if (quantityInput) {
+                            if (currentProductStock !== null) {
+                                quantityInput.setAttribute('max', String(currentProductStock));
+                            } else {
+                                quantityInput.removeAttribute('max');
+                            }
+                        }
+                        validateQuantityAndNotes();
+                    }
+                });
             }
 
             // Initialize submit state once
@@ -465,20 +544,30 @@
                     const notes = document.getElementById('notes').value;
                     
                     // Validate all fields before submit
-                    const normalizedPhone = phone.replace(/\D/g, '');
+                    const normalizedPhone = normalizePhoneToE164PH(phone);
                     const fm = document.getElementById('formMessage');
                     const qtyNum = parseInt(quantity, 10) || 1;
                     const quantityOk = isQuantityValid(qtyNum, notes);
-                    const allValid = isValidName(firstName) && isValidName(lastName) && isValidGmail(email) && /^\+639\d{9}$/.test(phone.trim()) && quantityOk;
+                    const namesOk = isValidName(firstName) && isValidName(lastName);
+                    const emailOk = isValidGmail(email);
+                    const phoneOk = isValidPHMobile(phone);
+                    const allValid = namesOk && emailOk && phoneOk && quantityOk;
                     if (!allValid) {
                         if (!quantityOk) {
                             const qErr = document.getElementById('quantityError');
-                            const msg = (qtyNum > 5) ? 'Maximum order quantity is 5 frames' : 'Please enter a valid quantity.';
+                            const msg = 'Quantity exceeds available stock';
                             setValidity(document.getElementById('quantity'), false, qErr, msg);
                         }
+                        // Only show bottom form message when non-quantity fields are invalid
+                        const otherInvalid = !(namesOk && emailOk && phoneOk);
                         if (fm) {
-                            fm.textContent = 'Please correct the highlighted fields before submitting.';
-                            fm.className = 'form-message error';
+                            if (otherInvalid) {
+                                fm.textContent = 'Please correct the highlighted fields before submitting.';
+                                fm.className = 'form-message error';
+                            } else {
+                                fm.textContent = '';
+                                fm.className = 'form-message';
+                            }
                         }
                         if (submitBtn) {
                             submitBtn.disabled = false;
@@ -534,31 +623,8 @@
                             console.warn('Notification creation failed:', err);
                         }
 
-                        // Decrement product stock based on the pre-ordered quantity
-                        try {
-                            const qtyNum = parseInt(preOrder.quantity, 10) || 1;
-                            if (window.firebaseServices) {
-                                if (preOrder.productId && typeof window.firebaseServices.decrementProductStock === 'function') {
-                                    window.firebaseServices.decrementProductStock(preOrder.productId, qtyNum)
-                                        .then(res => {
-                                            console.log('Stock decremented by ID for', preOrder.frameName, '->', res);
-                                        })
-                                        .catch(err => {
-                                            console.warn('Failed to decrement stock by ID:', err);
-                                        });
-                                } else if (typeof window.firebaseServices.decrementProductStockByTitle === 'function') {
-                                    window.firebaseServices.decrementProductStockByTitle(preOrder.frameName, qtyNum)
-                                        .then(res => {
-                                            console.log('Stock decremented by title for', preOrder.frameName, '->', res);
-                                        })
-                                        .catch(err => {
-                                            console.warn('Failed to decrement stock by title:', err);
-                                        });
-                                }
-                            }
-                        } catch (err) {
-                            console.warn('Unexpected error while decrementing stock:', err);
-                        }
+                        // Note: Stock will be decremented only when admin marks order as "Completed"
+                        // This prevents automatic stock reduction on pre-order submission
 
                         // Automated email confirmation for special pre-orders
                         if (orderType === 'pre-order') {
@@ -567,7 +633,7 @@
                                     <div style="font-family:Poppins,Arial,sans-serif; color:#333; line-height:1.6;">
                                         <p>Hi ${preOrder.firstName} ${preOrder.lastName},</p>
                                         <p>We received your <strong>pre-order request</strong> for <strong>${preOrder.frameName || 'selected frame'}</strong> (Quantity: ${preOrder.quantity}).</p>
-                                        <p>We will confirm availability and timeline shortly. If you have additional details, simply reply to this email.</p>
+                                        <p>Your order request has been recorded. Our team is currently reviewing your request and will contact you shortly to confirm availability and delivery options.</p>
                                         ${preOrder.notes ? `<p><strong>Your Notes:</strong> ${preOrder.notes}</p>` : ''}
                                         <p>— Trinity Optimum Vision Center</p>
                                     </div>`;
@@ -578,7 +644,7 @@
                                         to: preOrder.email,
                                         subject: `Pre-Order Request Received: ${preOrder.frameName || 'Your Selection'}`,
                                         html: emailHtml,
-                                        text: `Hi ${preOrder.firstName} ${preOrder.lastName},\n\nWe received your pre-order request for ${preOrder.frameName || 'selected frame'} (Quantity: ${preOrder.quantity}). We will confirm availability and timeline shortly.\n\n— Trinity Optimum Vision Center`
+                                        text: `Hi ${preOrder.firstName} ${preOrder.lastName},\n\nWe received your pre-order request for ${preOrder.frameName || 'selected frame'} (Quantity: ${preOrder.quantity}). Your order request has been recorded. Our team is currently reviewing your request and will contact you shortly to confirm availability and delivery options.\n\n— Trinity Optimum Vision Center`
                                     })
                                 });
                                 console.log('Auto pre-order confirmation sent to', preOrder.email);
@@ -598,7 +664,8 @@
                         console.error('Error saving pre-order:', error);
 
                         if (formMessage) {
-                            formMessage.textContent = 'Error submitting pre-order. Please try again.';
+                            const msg = (error && (error.message || error.code)) ? (error.message || error.code) : '';
+                            formMessage.textContent = msg ? `Error submitting pre-order: ${msg}` : 'Error submitting pre-order. Please try again.';
                             formMessage.className = 'form-message error';
                         }
                     } finally {
@@ -617,8 +684,8 @@
             try {
                 if (typeof getAllProducts === 'function') {
                     const products = await getAllProducts();
-                    allFrameNames = products
-                        .filter(product => product.visible && product.title) // Only visible products with titles
+                    allProducts = products.filter(product => product.visible && product.title); // Store complete product info
+                    allFrameNames = allProducts
                         .map(product => product.title)
                         .sort(); // Sort alphabetically
                 } else {
@@ -759,6 +826,28 @@
             const frameNameInput = document.getElementById('frameName');
             if (frameNameInput) {
                 frameNameInput.value = frameName;
+                
+                // Find the selected product and update stock information
+                const selectedProduct = allProducts.find(product => product.title === frameName);
+                if (selectedProduct) {
+                    currentProductStock = selectedProduct.stock || 0;
+                    currentProductId = selectedProduct.id;
+                } else {
+                    currentProductStock = null;
+                    currentProductId = null;
+                }
+                
+                // Sync quantity input constraints and validate against new stock
+                const quantityInput = document.getElementById('quantity');
+                if (quantityInput) {
+                    if (currentProductStock !== null) {
+                        quantityInput.setAttribute('max', String(currentProductStock));
+                    } else {
+                        quantityInput.removeAttribute('max');
+                    }
+                    validateQuantityAndNotes();
+                }
+                
                 hideSuggestions();
                 frameNameInput.focus();
             }

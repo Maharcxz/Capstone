@@ -624,7 +624,7 @@
         let currentConfirmHandler = null;
         let isConfirmingAction = false;
         
-        function openConfirmModal({ title = 'Confirm Action', message = '', confirmText = 'Confirm', confirmClass = '', showCancel = true }) {
+        function openConfirmModal({ title = 'Confirm Action', message = '', confirmText = 'Confirm', confirmClass = '', showCancel = true, cancelText = 'Cancel' }) {
             const modal = document.getElementById('confirmActionModal');
             const titleEl = document.getElementById('confirmModalTitle');
             const msgEl = document.getElementById('confirmModalMessage');
@@ -634,6 +634,7 @@
             titleEl.textContent = title;
             msgEl.textContent = message;
             confirmBtn.textContent = confirmText;
+            cancelBtn.textContent = cancelText;
             
             // Reset classes then apply base and optional variant
             confirmBtn.className = 'admin-btn';
@@ -647,6 +648,9 @@
                 if (isConfirmingAction) return;
                 isConfirmingAction = true;
                 confirmBtn.disabled = true;
+                // Close the current modal BEFORE running the handler so a follow-up modal
+                // (e.g., success modal) is not immediately closed by the original finally block.
+                closeConfirmActionModal();
                 try {
                     if (typeof currentConfirmHandler === 'function') {
                         const result = currentConfirmHandler();
@@ -658,7 +662,7 @@
                 } finally {
                     confirmBtn.disabled = false;
                     isConfirmingAction = false;
-                    closeConfirmActionModal();
+                    // Do not close here; already closed above
                 }
             };
             cancelBtn.onclick = closeConfirmActionModal;
@@ -873,41 +877,183 @@
             const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
             const isCompleting = newStatus === 'completed';
             
-            currentConfirmHandler = function() {
-                const preOrdersRef = firebase.database().ref('preOrders/' + orderId);
-                preOrdersRef.update({ status: newStatus })
-                    .then(async () => {
-                        console.log(`Order ${orderId} status updated to ${newStatus}`);
+            currentConfirmHandler = async function() {
+                try {
+                    const preOrdersRef = firebase.database().ref('preOrders/' + orderId);
+                    // Fetch latest order details
+                    const orderSnap = await preOrdersRef.once('value');
+                    const order = orderSnap.val();
+                    if (!order) {
+                        throw new Error('Order not found');
+                    }
 
-                        // If marking as completed, remove any notifications linked to this pre-order
-                        if (isCompleting) {
-                            try {
-                                const notifQuery = firebase.database().ref('notifications').orderByChild('preOrderId').equalTo(orderId);
-                                const snapshot = await notifQuery.once('value');
-                                const removals = [];
-                                snapshot.forEach(child => {
-                                    removals.push(child.ref.remove());
-                                });
-                                await Promise.all(removals);
-                                // Refresh notification UI/badge
-                                if (typeof updateNotificationBadge === 'function') {
-                                    updateNotificationBadge();
-                                }
-                                if (typeof updateNotificationsList === 'function') {
-                                    updateNotificationsList();
-                                }
-                                console.log(`Removed ${removals.length} notification(s) for order ${orderId}`);
-                            } catch (err) {
-                                console.error('Failed to remove notifications for completed order:', err);
-                            }
+                    const user = firebase.auth().currentUser;
+                    const userId = user ? user.uid : null;
+
+                    // Guard: prevent duplicate stock adjustments
+                    if (isCompleting && order.stockAdjustment && order.stockAdjustment.committed === true) {
+                        console.warn('Stock already adjusted for order', orderId);
+                        await preOrdersRef.update({ status: newStatus });
+                        try {
+                            await window.firebaseServices.createAuditLog('STATUS_CHANGE_NO_STOCK_ADJUST', 'PREORDER', orderId, {
+                                previousStatus: currentStatus,
+                                newStatus,
+                                reason: 'stock already adjusted',
+                                productId: order.productId || null,
+                                quantity: parseInt(order.quantity || 0, 10) || 0
+                            }, userId);
+                        } catch (auditErr) {
+                            console.warn('Audit log failed:', auditErr);
+                        }
+                        loadPreOrders();
+                        return;
+                    }
+
+                    if (isCompleting) {
+                        const qty = parseInt(order.quantity, 10);
+                        if (!Number.isFinite(qty) || qty < 1) {
+                            throw new Error('Invalid order quantity');
                         }
 
-                        loadPreOrders();
-                    })
-                    .catch(error => {
-                        console.error('Error updating order status:', error);
-                        alert('Error updating order status: ' + error.message);
+                        let productId = order.productId || null;
+                        let productTitle = order.frameName || '';
+                        let product = null;
+
+                        if (productId) {
+                            const productSnap = await firebase.database().ref('products/' + productId).once('value');
+                            product = productSnap.val();
+                            if (!product) {
+                                throw new Error('Product not found for ID: ' + productId);
+                            }
+                            productTitle = product.title || productTitle;
+                        } else if (productTitle) {
+                            const titleSnap = await firebase.database().ref('products').orderByChild('title').equalTo(productTitle).once('value');
+                            if (!titleSnap.exists()) {
+                                throw new Error('Product not found for title: ' + productTitle);
+                            }
+                            let resolvedId = null;
+                            titleSnap.forEach(child => { if (!resolvedId) resolvedId = child.key; });
+                            productId = resolvedId;
+                            product = titleSnap.child(resolvedId).val();
+                        } else {
+                            throw new Error('Order missing product reference');
+                        }
+
+                        const currentStock = parseInt(product.stock || 0, 10);
+                        const willBePartial = currentStock < qty;
+
+                         // Decrement stock atomically
+                         let decResult;
+                         try {
+                             decResult = await window.firebaseServices.decrementProductStock(productId, qty);
+                         } catch (decErr) {
+                             console.error('Stock decrement failed:', decErr);
+                             alert('Error decrementing stock: ' + (decErr && decErr.message ? decErr.message : 'Unknown error'));
+                             return;
+                         }
+                         if (!decResult || decResult.committed !== true) {
+                             alert('Error decrementing stock: transaction not committed.');
+                             return;
+                         }
+
+                         if (decResult.partial) {
+                             const fulfilled = decResult.decremented || 0;
+                             const backordered = Math.max(0, qty - fulfilled);
+                             alert('Partial fulfillment: fulfilled ' + fulfilled + ' of ' + qty + '. Backordered: ' + backordered + '.');
+                         }
+
+                         // Update order status and mark stock adjustment metadata
+                         await preOrdersRef.update({ 
+                             status: newStatus,
+                             stockAdjustment: {
+                                committed: true,
+                                productId: productId,
+                                quantityRequested: qty,
+                                quantityFulfilled: decResult.decremented != null ? decResult.decremented : qty,
+                                quantityBackordered: Math.max(0, qty - (decResult.decremented != null ? decResult.decremented : qty)),
+                                partial: !!decResult.partial,
+                                byUser: userId,
+                                newStock: decResult.newStock,
+                                timestamp: firebase.database.ServerValue.TIMESTAMP
+                            }
+                         });
+                         console.log(`Order ${orderId} status updated to ${newStatus}`);
+
+                         // Audit logs
+                         try {
+                            await window.firebaseServices.createAuditLog('INVENTORY_DECREMENT', 'PRODUCT', productId, {
+                                byOrderId: orderId,
+                                requested: qty,
+                                decremented: decResult.decremented,
+                                partial: !!decResult.partial,
+                                newStock: decResult.newStock
+                            }, userId);
+                            await window.firebaseServices.createAuditLog('UPDATE', 'PREORDER', orderId, {
+                                previousStatus: currentStatus,
+                                newStatus,
+                                productId,
+                                quantityRequested: qty,
+                                quantityFulfilled: decResult.decremented != null ? decResult.decremented : qty,
+                                quantityBackordered: Math.max(0, qty - (decResult.decremented != null ? decResult.decremented : qty)),
+                                partial: !!decResult.partial
+                            }, userId);
+                         } catch (auditErr) {
+                             console.warn('Audit log failed:', auditErr);
+                         }
+
+                        // Remove notifications linked to this pre-order
+                        try {
+                            const notifQuery = firebase.database().ref('notifications').orderByChild('preOrderId').equalTo(orderId);
+                            const snapshot = await notifQuery.once('value');
+                            const removals = [];
+                            snapshot.forEach(child => {
+                                removals.push(child.ref.remove());
+                            });
+                            await Promise.all(removals);
+                            if (typeof updateNotificationBadge === 'function') {
+                                updateNotificationBadge();
+                            }
+                            if (typeof updateNotificationsList === 'function') {
+                                updateNotificationsList();
+                            }
+                            console.log(`Removed ${removals.length} notification(s) for order ${orderId}`);
+                        } catch (err) {
+                            console.error('Failed to remove notifications for completed order:', err);
+                        }
+
+                    } else {
+                        // Mark as pending
+                        await preOrdersRef.update({ status: newStatus });
+                        console.log(`Order ${orderId} status updated to ${newStatus}`);
+
+                        // Audit log
+                        try {
+                            await window.firebaseServices.createAuditLog('UPDATE', 'PREORDER', orderId, {
+                                previousStatus: currentStatus,
+                                newStatus
+                            }, userId);
+                        } catch (auditErr) {
+                            console.warn('Audit log failed:', auditErr);
+                        }
+                    }
+
+                    loadPreOrders();
+                    // Show success modal with “View Order” and “OK”
+                    currentConfirmHandler = function() {
+                        viewOrderDetails(orderId);
+                    };
+                    openConfirmModal({
+                        title: 'Pre-Order Completed',
+                        message: 'The order has been marked as Completed.',
+                        confirmText: 'View Order',
+                        confirmClass: '',
+                        showCancel: true,
+                        cancelText: 'OK'
                     });
+                } catch (error) {
+                    console.error('Error updating order status:', error);
+                    alert('Error updating order status: ' + (error && error.message ? error.message : 'Unknown error'));
+                }
             };
             
             openConfirmModal({
@@ -1119,26 +1265,26 @@
         </div>
     </div>
 
-</body>
-</html>
-
-<!-- Reusable Confirmation Modal -->
-<div id="confirmActionModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeConfirmActionModal()">&times;</span>
-        <div class="modal-header">
-            <h2 id="confirmModalTitle">Confirm Action</h2>
-        </div>
-        <div class="modal-body confirm-center">
-            <div class="confirmation-container">
-                <div class="confirmation-message">
-                    <p id="confirmModalMessage"></p>
+    <!-- Reusable Confirmation Modal -->
+    <div id="confirmActionModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeConfirmActionModal()">&times;</span>
+            <div class="modal-header">
+                <h2 id="confirmModalTitle">Confirm Action</h2>
+            </div>
+            <div class="modal-body confirm-center">
+                <div class="confirmation-container">
+                    <div class="confirmation-message">
+                        <p id="confirmModalMessage"></p>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="modal-footer">
-            <button class="admin-btn" id="confirmCancelBtn">Cancel</button>
-            <button class="admin-btn delete-btn" id="confirmConfirmBtn">Confirm</button>
+            <div class="modal-footer">
+                <button class="admin-btn" id="confirmCancelBtn">Cancel</button>
+                <button class="admin-btn delete-btn" id="confirmConfirmBtn">Confirm</button>
+            </div>
         </div>
     </div>
-</div>
+
+</body>
+</html>

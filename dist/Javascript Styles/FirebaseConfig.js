@@ -37,24 +37,189 @@ const categoriesRef = db.ref('categories');
 
 // Database reference: notifications
 const notificationsRef = db.ref('notifications');
+const auditLogsRef = db.ref('auditLogs');
+
+// Server-side validation functions
+function normalizePhoneToE164PH(input) {
+    const raw = String(input || '').trim();
+    const digits = raw.replace(/\D/g, '');
+    if (/^639\d{9}$/.test(digits)) return '+' + digits;
+    if (/^09\d{9}$/.test(digits)) return '+63' + digits.slice(1);
+    if (/^\+639\d{9}$/.test(raw)) return raw;
+    const tail = digits.replace(/^63|^0/, '').slice(0, 10);
+    return '+63' + tail;
+}
+
+function validatePreOrderData(preOrder) {
+    const errors = [];
+    
+    // Validate required fields
+    if (!preOrder.firstName || typeof preOrder.firstName !== 'string' || preOrder.firstName.trim().length === 0) {
+        errors.push('First name is required');
+    } else if (!/^[A-Za-z\s]+$/.test(preOrder.firstName.trim())) {
+        errors.push('First name must contain only alphabetical characters and spaces');
+    }
+    
+    if (!preOrder.lastName || typeof preOrder.lastName !== 'string' || preOrder.lastName.trim().length === 0) {
+        errors.push('Last name is required');
+    } else if (!/^[A-Za-z\s]+$/.test(preOrder.lastName.trim())) {
+        errors.push('Last name must contain only alphabetical characters and spaces');
+    }
+    
+    if (!preOrder.email || typeof preOrder.email !== 'string') {
+        errors.push('Email is required');
+    } else if (!/^[A-Za-z0-9._%+-]+@gmail\.com$/.test(preOrder.email.trim())) {
+        errors.push('Email must be a valid Gmail address');
+    }
+    
+    if (!preOrder.phone || typeof preOrder.phone !== 'string') {
+        errors.push('Phone number is required');
+    } else {
+        const raw = preOrder.phone.trim();
+        const digits = raw.replace(/\D/g, '');
+        const isE164 = /^\+639\d{9}$/.test(raw);
+        const isNoPlusE164 = /^639\d{9}$/.test(digits);
+        const isLocal = /^09\d{9}$/.test(digits);
+        if (!(isE164 || isNoPlusE164 || isLocal)) {
+            errors.push('Phone must be a valid PH mobile (e.g., +639XXXXXXXXX)');
+        }
+    }
+    
+    if (!preOrder.frameName || typeof preOrder.frameName !== 'string' || preOrder.frameName.trim().length === 0) {
+        errors.push('Frame name is required');
+    }
+    
+    const quantity = parseInt(preOrder.quantity, 10);
+    if (!Number.isFinite(quantity) || quantity < 1) {
+        errors.push('Quantity must be a positive number');
+    }
+    
+    // Validate order type
+    if (preOrder.orderType && !['standard', 'pre-order'].includes(preOrder.orderType)) {
+        errors.push('Invalid order type');
+    }
+    
+    // Validate status
+    if (preOrder.status && !['pending', 'confirmed', 'completed', 'cancelled'].includes(preOrder.status)) {
+        errors.push('Invalid status');
+    }
+    
+    return errors;
+}
+
+// Audit logging functions
+function createAuditLog(action, entityType, entityId, details, userId = null) {
+    const auditEntry = {
+        action: action, // 'CREATE', 'UPDATE', 'DELETE', 'STATUS_CHANGE'
+        entityType: entityType, // 'PREORDER', 'PRODUCT', 'USER'
+        entityId: entityId,
+        details: details,
+        userId: userId,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        ipAddress: null // Would need server-side implementation for real IP
+    };
+    
+    return auditLogsRef.push(auditEntry);
+}
+
+async function getAuditLogs(entityType = null, entityId = null, limit = 100) {
+    let query = auditLogsRef.orderByChild('timestamp').limitToLast(limit);
+    
+    const snapshot = await query.once('value');
+    const logs = [];
+    
+    snapshot.forEach(childSnapshot => {
+        const log = childSnapshot.val();
+        log.id = childSnapshot.key;
+        
+        // Filter by entityType and entityId if provided
+        if (entityType && log.entityType !== entityType) return;
+        if (entityId && log.entityId !== entityId) return;
+        
+        logs.push(log);
+    });
+    
+    return logs.reverse(); // Most recent first
+}
 
 // Function to save pre-order to Firebase and attach confirmation details on the same record
-function savePreOrderToFirebase(preOrder) {
-    // First write only the customer-provided pre-order data
-    return preOrdersRef.push(preOrder).then((result) => {
-        // Then attach confirmation details to the SAME document (no separate entry)
-        const confirmationAttachment = {
-            confirmationDetails: {
-                message: 'Pre-order submitted successfully!',
-                status: 'submitted',
-                timestamp: new Date().toISOString()
+async function savePreOrderToFirebase(preOrder) {
+    // Server-side validation
+    const validationErrors = validatePreOrderData(preOrder);
+    if (validationErrors.length > 0) {
+        return Promise.reject(new Error('Validation failed: ' + validationErrors.join(', ')));
+    }
+    
+    // Sanitize data before saving
+    const sanitizedPreOrder = {
+        firstName: preOrder.firstName.trim(),
+        lastName: preOrder.lastName.trim(),
+        email: preOrder.email.trim().toLowerCase(),
+        phone: normalizePhoneToE164PH(preOrder.phone),
+        frameName: preOrder.frameName.trim(),
+        productId: preOrder.productId || null,
+        quantity: parseInt(preOrder.quantity, 10),
+        prescription: preOrder.prescription ? preOrder.prescription.trim() : '',
+        notes: preOrder.notes ? preOrder.notes.trim() : '',
+        orderType: preOrder.orderType || 'standard',
+        specialRequestKeywordsMatched: Boolean(preOrder.specialRequestKeywordsMatched),
+        date: new Date().toISOString(),
+        status: 'pending'
+    };
+    
+    // Server-side stock validation as backup
+    try {
+        if (sanitizedPreOrder.productId || sanitizedPreOrder.frameName) {
+            let product = null;
+            if (sanitizedPreOrder.productId) {
+                const snap = await productsRef.child(sanitizedPreOrder.productId).once('value');
+                product = snap.val();
+            } else {
+                const snap = await productsRef.orderByChild('title').equalTo(sanitizedPreOrder.frameName).once('value');
+                if (snap.exists()) {
+                    snap.forEach(child => { if (!product) product = child.val(); });
+                }
             }
-        };
+            if (product && Number.isFinite(parseInt(product.stock, 10))) {
+                const stock = parseInt(product.stock, 10);
+                if (sanitizedPreOrder.quantity > stock) {
+                    throw new Error(`Quantity exceeds available stock (${stock} available).`);
+                }
+            }
+        }
+    } catch (stockErr) {
+        return Promise.reject(stockErr);
+    }
 
-        return preOrdersRef.child(result.key).update(confirmationAttachment).then(() => {
-            return { key: result.key };
+    // First write only the customer-provided pre-order data
+    const result = await preOrdersRef.push(sanitizedPreOrder);
+    // Then attach confirmation details to the SAME document
+    const confirmationAttachment = {
+        confirmationDetails: {
+            message: 'Pre-order submitted successfully!',
+            status: 'submitted',
+            timestamp: new Date().toISOString()
+        }
+    };
+    await preOrdersRef.child(result.key).update(confirmationAttachment);
+
+    try {
+        await createAuditLog('CREATE', 'PREORDER', result.key, {
+            firstName: sanitizedPreOrder.firstName,
+            lastName: sanitizedPreOrder.lastName,
+            email: sanitizedPreOrder.email,
+            phone: sanitizedPreOrder.phone,
+            frameName: sanitizedPreOrder.frameName,
+            productId: sanitizedPreOrder.productId,
+            quantity: sanitizedPreOrder.quantity,
+            orderType: sanitizedPreOrder.orderType
         });
-    });
+    } catch (auditErr) {
+        console.warn('Failed to write audit log for pre-order creation:', auditErr);
+    }
+
+    return { key: result.key };
 }
 
 // Function to get all pre-orders from Firebase
@@ -325,6 +490,11 @@ window.firebaseServices = {
         });
         return notifications;
     },
+    // Audit logs
+    auditLogsRef,
+    createAuditLog,
+    getAuditLogs,
+    // Auth
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged
