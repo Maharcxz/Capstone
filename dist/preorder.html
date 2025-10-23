@@ -217,13 +217,42 @@
                         
                         <div class="form-column">
                             <div class="form-field">
-                                <label class="field-label">Prescription (Optional)</label>
-                                <textarea placeholder="Enter prescription details if available..." class="note-textarea" name="prescription" id="prescription"></textarea>
+                                <label class="field-label" for="lensUpgrade">Lens Upgrade</label>
+                                <select class="full-input" name="lensUpgrade" id="lensUpgrade" onchange="updateTotalPrice()">
+                                    <option value="0">Uncoated (no additional cost)</option>
+                                    <option value="0">Multicoated Lens (no additional cost)</option>
+                                    <option value="800">Blue Coated Lens: + ₱ 800</option>
+                                    <option value="1380">Blue Blocker UV420: + ₱ 1,380</option>
+                                    <option value="1380">Photochromic Multicoated: + ₱ 1,380</option>
+                                    <option value="2850">Photochromic UV420: + ₱ 2,850</option>
+                                    <option value="2850">Ultrathin Lens: + ₱ 2,850</option>
+                                    <option value="1580">Semithin Lens: + ₱ 1,580</option>
+                                    <option value="2850">Polycarbonate Multicoated Lens: + ₱ 2,850</option>
+                                </select>
                             </div>
                             
                             <div class="form-field">
                                 <label class="field-label">Additional Notes</label>
                                 <textarea placeholder="Add your note here..." class="note-textarea" name="notes" id="notes"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Price Calculation Section -->
+                    <div class="price-calculation-section">
+                        <div class="price-breakdown">
+                            <h3 class="price-title">Order Summary</h3>
+                            <div class="price-row">
+                                <span class="price-label">Base Price:</span>
+                                <span class="price-value" id="basePrice">₱0</span>
+                            </div>
+                            <div class="price-row">
+                                <span class="price-label">Lens Upgrade:</span>
+                                <span class="price-value" id="lensUpgradePrice">₱0</span>
+                            </div>
+                            <div class="price-row total-row">
+                                <span class="price-label total-label">Total Price:</span>
+                                <span class="price-value total-price" id="totalPrice">₱0</span>
                             </div>
                         </div>
                     </div>
@@ -883,5 +912,61 @@
         }
         
         // Using centralized firebaseServices.savePreOrderToFirebase; local duplicate removed
+        
+        // Price calculation variables
+        let currentBasePrice = 0;
+        
+        // Update total price calculation
+        function updateTotalPrice() {
+            const lensUpgradeSelect = document.getElementById('lensUpgrade');
+            const quantityInput = document.getElementById('quantity');
+            const basePriceEl = document.getElementById('basePrice');
+            const lensUpgradePriceEl = document.getElementById('lensUpgradePrice');
+            const totalPriceEl = document.getElementById('totalPrice');
+            
+            if (!lensUpgradeSelect || !quantityInput || !basePriceEl || !lensUpgradePriceEl || !totalPriceEl) {
+                return;
+            }
+            
+            const quantity = parseInt(quantityInput.value) || 1;
+            const lensUpgradeCost = parseInt(lensUpgradeSelect.value) || 0;
+            
+            // Calculate prices
+            const totalBasePrice = currentBasePrice * quantity;
+            const totalLensUpgrade = lensUpgradeCost * quantity;
+            const totalPrice = totalBasePrice + totalLensUpgrade;
+            
+            // Update display with proper formatting
+            basePriceEl.textContent = formatPrice(totalBasePrice);
+            lensUpgradePriceEl.textContent = formatPrice(totalLensUpgrade);
+            totalPriceEl.textContent = formatPrice(totalPrice);
+        }
+        
+        // Format price with Philippine peso symbol
+        function formatPrice(amount) {
+            return `₱${amount.toLocaleString('en-PH')}`;
+        }
+        
+        // Set base price for selected product
+        function setBasePrice(price) {
+            currentBasePrice = price || 0;
+            updateTotalPrice();
+        }
+        
+        // Initialize price calculation when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial base price (you can modify this based on your product pricing logic)
+            setBasePrice(0); // Default to 0, will be updated when product is selected
+            
+            // Add event listener to quantity input for real-time updates
+            const quantityInput = document.getElementById('quantity');
+            if (quantityInput) {
+                quantityInput.addEventListener('input', updateTotalPrice);
+                quantityInput.addEventListener('change', updateTotalPrice);
+            }
+            
+            // Initial calculation
+            updateTotalPrice();
+        });
     </script>
 </html>

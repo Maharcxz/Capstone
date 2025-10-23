@@ -795,3 +795,183 @@
         max-width: 300px;
     }
 }
+
+/* Price Calculation Section - Enhanced positioning and spacing */
+.price-calculation-section {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 24px;
+    margin: 35px 0 28px 0; /* Top margin for separation from form fields, bottom margin before actions */
+    backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    clear: both; /* Ensure it clears any floated elements */
+    min-height: 220px; /* Increased height for clearer presence */
+}
+
+/* Ensure proper spacing from form row */
+.form-row + .price-calculation-section {
+    margin-top: 35px;
+}
+
+/* Ensure proper spacing before form actions */
+.price-calculation-section + .form-actions {
+    margin-top: 30px;
+}
+
+.price-calculation-title {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+.price-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.price-item, .price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    font-size: 14px;
+    padding: 8px 0;
+    width: 100%;
+}
+
+.price-item.total, .price-row.total-row {
+    border-top: 2px solid rgba(255, 255, 255, 0.3);
+    margin-top: 10px;
+    padding-top: 15px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.price-label, .total-label {
+    color: rgba(255, 255, 255, 0.8);
+    flex: 1;
+}
+
+.price-value, .total-price {
+    color: white;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-align: right;
+}
+
+.price-item.total .price-value, .total-price {
+    color: #FFD700;
+    font-size: 18px;
+}
+
+.price-title {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+/* Responsive adjustments for price section */
+@media (max-width: 768px) {
+    .price-calculation-section {
+        padding: 20px;
+        margin: 28px 0 22px 0;
+        min-height: 190px; /* larger height on tablets */
+    }
+    
+    .form-row + .price-calculation-section {
+        margin-top: 25px;
+    }
+    
+    .price-calculation-section + .form-actions {
+        margin-top: 25px;
+    }
+    
+    .price-calculation-title, .price-title {
+        font-size: 16px;
+    }
+    
+    .price-item, .price-row {
+        font-size: 13px;
+    }
+    
+    .price-item.total, .price-row.total-row {
+        font-size: 15px;
+    }
+    
+    .price-item.total .price-value, .total-price {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .price-calculation-section {
+        padding: 16px;
+        margin: 22px 0 18px 0;
+        min-height: 170px; /* larger height on phones */
+    }
+    
+    .form-row + .price-calculation-section {
+        margin-top: 20px;
+    }
+    
+    .price-calculation-section + .form-actions {
+        margin-top: 20px;
+    }
+}
+
+/* Stronger, scoped rules targeting the Lens Upgrade select by id */
+/* Lens Upgrade select styled like Additional Notes / previous Prescription */
+#lensUpgrade {
+  appearance: none;
+  padding: 1.1rem 1.4rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  line-height: 1.5;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8"><path fill="white" d="M6 8L0 2h12z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  padding-right: 40px;
+}
+
+#lensUpgrade:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+#lensUpgrade option {
+  background-color: #540000;
+  color: #ffffff;
+}
+
+#lensUpgrade option:checked {
+  background-color: #3b6cff;
+  color: #ffffff;
+}
+
+/* Legacy Edge/IE fallback for displayed value */
+#lensUpgrade.form-select::-ms-value {
+  color: #000000;
+}

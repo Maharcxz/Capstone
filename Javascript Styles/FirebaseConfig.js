@@ -104,6 +104,25 @@ function validatePreOrderData(preOrder) {
         errors.push('Invalid status');
     }
     
+    // Validate optional billing
+    if (preOrder.billing) {
+        const b = preOrder.billing;
+        const toNum = (v) => Number.isFinite(Number(v)) ? Number(v) : NaN;
+        const checks = [
+            ['frameUnitPrice', b.frameUnitPrice],
+            ['lensUnitUpgrade', b.lensUnitUpgrade],
+            ['totalFramePrice', b.totalFramePrice],
+            ['totalLensUpgradePrice', b.totalLensUpgradePrice],
+            ['totalPrice', b.totalPrice]
+        ];
+        checks.forEach(([name, val]) => {
+            const n = toNum(val);
+            if (!Number.isFinite(n) || n < 0) {
+                errors.push(`Billing field ${name} must be a non-negative number`);
+            }
+        });
+    }
+    
     return errors;
 }
 
@@ -168,6 +187,39 @@ async function savePreOrderToFirebase(preOrder) {
         status: 'pending'
     };
     
+    // Normalize helper to parse integer-like amounts
+    const normalizeAmount = (v) => {
+        if (v === null || v === undefined) return null;
+        const n = parseInt(String(v).replace(/[^0-9\-]/g, ''), 10);
+        return Number.isFinite(n) ? n : null;
+    };
+
+    // Compute sanitized billing from input or product data
+    let productForBilling = null;
+    try {
+        if (sanitizedPreOrder.productId) {
+            const snap = await productsRef.child(sanitizedPreOrder.productId).once('value');
+            productForBilling = snap.val() || null;
+        }
+    } catch (_) {}
+
+    const q = sanitizedPreOrder.quantity || 1;
+    const incomingBilling = preOrder.billing || {};
+    const frameUnitPrice = normalizeAmount(incomingBilling.frameUnitPrice) ?? normalizeAmount(productForBilling && productForBilling.price) ?? 0;
+    const lensUnitUpgrade = normalizeAmount(incomingBilling.lensUnitUpgrade) ?? 0;
+    const totalFramePrice = frameUnitPrice * q;
+    const totalLensUpgradePrice = lensUnitUpgrade * q;
+    const totalPrice = totalFramePrice + totalLensUpgradePrice;
+    sanitizedPreOrder.billing = {
+        quantity: q,
+        frameUnitPrice,
+        lensUnitUpgrade,
+        totalFramePrice,
+        totalLensUpgradePrice,
+        totalPrice,
+        currency: 'PHP'
+    };
+
     // Server-side stock validation as backup
     try {
         if (sanitizedPreOrder.productId || sanitizedPreOrder.frameName) {
@@ -213,7 +265,8 @@ async function savePreOrderToFirebase(preOrder) {
             frameName: sanitizedPreOrder.frameName,
             productId: sanitizedPreOrder.productId,
             quantity: sanitizedPreOrder.quantity,
-            orderType: sanitizedPreOrder.orderType
+            orderType: sanitizedPreOrder.orderType,
+            billingTotalPrice: sanitizedPreOrder.billing ? sanitizedPreOrder.billing.totalPrice : null
         });
     } catch (auditErr) {
         console.warn('Failed to write audit log for pre-order creation:', auditErr);

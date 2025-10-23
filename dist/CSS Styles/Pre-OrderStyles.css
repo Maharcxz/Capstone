@@ -795,3 +795,110 @@
         max-width: 300px;
     }
 }
+
+/* Price Calculation Section Styles */
+.price-calculation-section {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    backdrop-filter: blur(10px);
+}
+
+.price-calculation-title {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+.price-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.price-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    font-size: 14px;
+    padding: 8px 0;
+}
+
+.price-item.total {
+    border-top: 2px solid rgba(255, 255, 255, 0.3);
+    margin-top: 10px;
+    padding-top: 15px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.price-label {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.price-value {
+    color: white;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.price-item.total .price-value {
+    color: #FFD700;
+    font-size: 18px;
+}
+
+/* Responsive adjustments for price section */
+@media (max-width: 480px) {
+    .price-calculation-section {
+        padding: 15px;
+        margin: 15px 0;
+    }
+    
+    .price-calculation-title {
+        font-size: 16px;
+    }
+    
+    .price-item {
+        font-size: 13px;
+    }
+    
+    .price-item.total {
+        font-size: 15px;
+    }
+    
+    .price-item.total .price-value {
+        font-size: 16px;
+    }
+}
+
+/* Lens Upgrade dropdown: improve contrast with white background */
+#lensUpgrade.form-select {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: rgba(0, 0, 0, 0.3);
+}
+#lensUpgrade.form-select:focus {
+  border-color: #000000;
+  outline: none;
+}
+
+/* Ensure options list remains readable across browsers */
+#lensUpgrade.form-select option {
+  background-color: #ffffff;
+  color: #000000;
+}
+#lensUpgrade.form-select option:checked {
+  background-color: #e6f0ff; /* subtle highlight for selected option */
+  color: #000000;
+}
+
+/* Legacy Edge/IE fallback for displayed value */
+#lensUpgrade.form-select::-ms-value {
+  color: #000000;
+}

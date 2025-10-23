@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+
 
 
     <!-- Firebase SDK -->
@@ -624,17 +624,19 @@
         let currentConfirmHandler = null;
         let isConfirmingAction = false;
         
-        function openConfirmModal({ title = 'Confirm Action', message = '', confirmText = 'Confirm', confirmClass = '', showCancel = true, cancelText = 'Cancel' }) {
+        function openConfirmModal({ title = 'Confirm Action', message = '', confirmText = 'Confirm', confirmClass = '', showCancel = true, cancelText = 'Cancel', deferClose = false, showSuccessIcon = false }) {
             const modal = document.getElementById('confirmActionModal');
             const titleEl = document.getElementById('confirmModalTitle');
             const msgEl = document.getElementById('confirmModalMessage');
             const confirmBtn = document.getElementById('confirmConfirmBtn');
             const cancelBtn = document.getElementById('confirmCancelBtn');
+            const iconEl = document.getElementById('confirmModalIcon');
             
             titleEl.textContent = title;
             msgEl.textContent = message;
             confirmBtn.textContent = confirmText;
             cancelBtn.textContent = cancelText;
+            if (iconEl) iconEl.style.display = showSuccessIcon ? '' : 'none';
             
             // Reset classes then apply base and optional variant
             confirmBtn.className = 'admin-btn';
@@ -648,9 +650,6 @@
                 if (isConfirmingAction) return;
                 isConfirmingAction = true;
                 confirmBtn.disabled = true;
-                // Close the current modal BEFORE running the handler so a follow-up modal
-                // (e.g., success modal) is not immediately closed by the original finally block.
-                closeConfirmActionModal();
                 try {
                     if (typeof currentConfirmHandler === 'function') {
                         const result = currentConfirmHandler();
@@ -662,7 +661,10 @@
                 } finally {
                     confirmBtn.disabled = false;
                     isConfirmingAction = false;
-                    // Do not close here; already closed above
+                    // Close automatically unless caller requests to defer
+                    if (!deferClose) {
+                        closeConfirmActionModal();
+                    }
                 }
             };
             cancelBtn.onclick = closeConfirmActionModal;
@@ -1037,18 +1039,19 @@
                         }
                     }
 
-                    loadPreOrders();
-                    // Show success modal with “View Order” and “OK”
-                    currentConfirmHandler = function() {
-                        viewOrderDetails(orderId);
+                    // Show success state in the same modal; only return after user clicks OK
+                    currentConfirmHandler = async function() {
+                        closeConfirmActionModal();
+                        await loadPreOrders();
                     };
                     openConfirmModal({
                         title: 'Pre-Order Completed',
-                        message: 'The order has been marked as Completed.',
-                        confirmText: 'View Order',
-                        confirmClass: '',
-                        showCancel: true,
-                        cancelText: 'OK'
+                        message: 'This pre-order has been successfully marked as completed',
+                        confirmText: 'OK',
+                        confirmClass: 'btn-primary',
+                        showCancel: false,
+                        showSuccessIcon: true,
+                        deferClose: true
                     });
                 } catch (error) {
                     console.error('Error updating order status:', error);
@@ -1060,7 +1063,8 @@
                 title: isCompleting ? 'Mark as Completed' : 'Mark as Pending',
                 message: isCompleting ? 'Are you sure you want to mark this order as Completed?' : 'Are you sure you want to mark this order as Pending?',
                 confirmText: isCompleting ? 'Mark as Completed' : 'Mark as Pending',
-                confirmClass: isCompleting ? 'pending' : ''
+                confirmClass: isCompleting ? 'pending' : '',
+                deferClose: true
             });
         }
         
@@ -1274,6 +1278,12 @@
             </div>
             <div class="modal-body confirm-center">
                 <div class="confirmation-container">
+                    <div id="confirmModalIcon" class="confirmation-icon" style="display:none; margin-bottom: 12px;">
+                        <svg width="56" height="56" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <circle cx="12" cy="12" r="10" fill="#e6f7ee"></circle>
+                            <path d="M9 12.5l2 2 4-4" stroke="#28a745" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                    </div>
                     <div class="confirmation-message">
                         <p id="confirmModalMessage"></p>
                     </div>
