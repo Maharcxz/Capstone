@@ -8,13 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-
-
-
-
-
-
+
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -138,7 +132,7 @@
                     <input type="text" class="search-input" id="productSearch" placeholder="Search products..." onkeyup="filterProducts()">
                 </div>
                 <select class="filter-select" id="categoryFilter" onchange="filterProducts()">
-                    <option value="">All Categories</option>
+                    <option value="">All Brands</option>
                     <!-- Categories will be loaded dynamically -->
                 </select>
                 <select class="filter-select" id="visibilityFilter" onchange="filterProducts()">
@@ -161,7 +155,7 @@
                         <line x1="12" y1="11" x2="12" y2="17"></line>
                         <line x1="9" y1="14" x2="15" y2="14"></line>
                     </svg>
-                    Add Category
+                    Add New Brand
                 </button>
                 <button class="add-product-btn" onclick="openAddProductModal()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -211,9 +205,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="productCategory">Category *</label>
+                    <label class="form-label" for="productCategory">Brand *</label>
                     <select class="form-select" id="productCategory" required>
-                        <option value="">Select Category</option>
+                        <option value="">Select Brand</option>
                         <!-- Categories will be loaded dynamically -->
                     </select>
                 </div>
@@ -478,25 +472,25 @@
     <div id="sidebarManagerModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Manage Categories</h2>
+                <h2>Manage Brands</h2>
                 <!-- X back/close button -->
                 <button id="closeSidebarManagerBtn" class="close-btn" aria-label="Close">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="add-category-section">
-                    <h3>Add New Category</h3>
+                    <h3>Add New Brand</h3>
                     <form id="addCategoryForm">
                         <div class="form-group">
-                            <label for="categoryName">Category Name:</label>
+                            <label for="categoryName">Brand Name:</label>
                             <input type="text" id="categoryName" name="categoryName" required>
                         </div>
                         <div class="form-actions">
-                            <button type="submit" class="submit-btn">Add Category</button>
+                            <button type="submit" class="submit-btn">Add Brand</button>
                         </div>
                     </form>
                 </div>
                 <div class="existing-categories-section">
-                    <h3>Existing Categories</h3>
+                    <h3>Existing Brands</h3>
                     <div id="existingCategories"></div>
                 </div>
             </div>
@@ -525,11 +519,11 @@
     <div id="editCategoryOverlay" class="modal-overlay">
         <div id="editCategoryModal" class="confirm-modal">
             <div class="modal-header">
-                <h2 class="modal-title">Edit Category</h2>
+                <h2 class="modal-title">Edit Brand</h2>
                 <button id="closeEditCategoryBtn" class="close-btn" aria-label="Close">&times;</button>
             </div>
             <div class="modal-content">
-                <label for="editCategoryName">Category Name</label>
+                <label for="editCategoryName">Brand Name</label>
                 <input type="text" id="editCategoryName" placeholder="Enter category name">
                 <p id="editCategoryError" style="display:none;color:#ff4d4f;margin-top:8px;"></p>
             </div>

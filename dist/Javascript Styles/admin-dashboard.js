@@ -1213,7 +1213,7 @@ function renderExistingCategories() {
     const dedupedCategories = uniqueCategoriesByName(Array.isArray(sidebarCategories) ? sidebarCategories : []);
     
     if (dedupedCategories.length === 0) {
-        container.innerHTML = '<div class="empty-categories">No brands created yet</div>';
+        container.innerHTML = '<div class="empty-categories">No categories created yet</div>';
         console.log('No categories, showing empty message');
         return;
     }

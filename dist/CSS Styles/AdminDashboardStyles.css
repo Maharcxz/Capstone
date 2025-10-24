@@ -2,7 +2,7 @@
 
 /* Dashboard container and overall layout */
 .admin-dashboard {
-    width: 61%;
+    width: 64%;
     max-width: 75; /* expand to full viewport width */
     margin: 0 auto;
     padding: 10px 20px;
