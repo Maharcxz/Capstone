@@ -405,6 +405,10 @@
     color: #ffa500;
 }
 
+.stock-display.critical-stock {
+    color: #ff3b3b;
+}
+
 /* Quantity Selector Styles */
 /* Quantity selector section */
 .quantity-section {

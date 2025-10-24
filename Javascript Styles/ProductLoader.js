@@ -8,6 +8,9 @@ let filteredProductsData = [];
 // Pagination state
 let currentPage = 1;
 const PAGE_SIZE = 9;
+// Critical and low stock thresholds
+const CRITICAL_STOCK_THRESHOLD = 2;
+const LOW_STOCK_THRESHOLD = 5;
 // State: currently selected frame category
 let currentCategory = 'All Frames';
 // State: product id currently shown in modal
@@ -112,8 +115,9 @@ function renderProductGrid() {
                 ${product.image ? 
                     `<img src="${product.image}" alt="${escapeHtml(product.title)}" 
                           style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;"
-                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                     <div class="image-placeholder" style="display: none;">🖼</div>` :
+                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+                     +
+                     `<div class="image-placeholder" style="display: none;">🖼</div>` :
                     `<div class="image-placeholder">🖼</div>`
                 }
             </div>
@@ -122,7 +126,7 @@ function renderProductGrid() {
                     <h3 class="product-title">${escapeHtml(product.title)}</h3>
                     <div class="price-stock-container">
                         <p class="product-price">₱ ${parseFloat(product.price).toLocaleString()}</p>
-                        <p class="product-stock ${(product.stock || 0) === 0 ? 'out-of-stock' : (product.stock || 0) <= 5 ? 'low-stock' : ''}">
+                        <p class="product-stock ${(product.stock || 0) === 0 ? 'out-of-stock' : (product.stock || 0) <= CRITICAL_STOCK_THRESHOLD ? 'critical-stock' : (product.stock || 0) <= LOW_STOCK_THRESHOLD ? 'low-stock' : ''}">
                             Stock: ${product.stock || 0}
                         </p>
                     </div>
@@ -588,7 +592,9 @@ function updateStockDisplay(stock) {
         stockDisplayElement.className = 'stock-display';
         if (stock === 0) {
             stockDisplayElement.classList.add('out-of-stock');
-        } else if (stock <= 5) {
+        } else if (stock <= CRITICAL_STOCK_THRESHOLD) {
+            stockDisplayElement.classList.add('critical-stock');
+        } else if (stock <= LOW_STOCK_THRESHOLD) {
             stockDisplayElement.classList.add('low-stock');
         }
     }

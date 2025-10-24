@@ -2,8 +2,8 @@
 
 /* Dashboard container and overall layout */
 .admin-dashboard {
-    width: 100%;
-    max-width: 1100px;
+    width: 61%;
+    max-width: 75; /* expand to full viewport width */
     margin: 0 auto;
     padding: 10px 20px;
     box-sizing: border-box;
@@ -41,7 +41,7 @@
 /* Primary admin toolbar container */
 .toolbar-section {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start; /* inline alignment, rely on gap for spacing */
     align-items: center;
     margin-bottom: 40px;
     padding: 16px 20px;
@@ -50,19 +50,21 @@
     border-radius: 16px;
     backdrop-filter: blur(10px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    gap: 12px;
-    flex-wrap: nowrap;
+    gap: 12px; /* tighter spacing to help fit inline */
+    flex-wrap: nowrap; /* force a single line */
     width: 100%;
     box-sizing: border-box;
+    position: relative; /* enable z-index stacking context */
+    overflow: visible; /* remove horizontal scroll; allow dropdowns to render */
 }
 
 /* Left-side toolbar controls group */
 .toolbar-left {
     display: flex;
-    gap: 12px;
+    gap: 12px; /* tighter spacing for inline fit */
     align-items: center;
-    flex-wrap: nowrap;
-    flex: 1 1 auto;
+    flex-wrap: nowrap; /* keep single line */
+    flex: 0 0 auto;
     min-width: 0;
     width: auto;
 }
@@ -83,6 +85,7 @@
     transition: all 0.3s ease;
     font-family: 'Poppins', sans-serif;
     box-shadow: 0 4px 15px rgba(139, 105, 20, 0.3);
+    white-space: nowrap; /* keep label inline */
 }
 
 .sidebar-toggle-btn:hover {
@@ -100,8 +103,8 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    gap: 12px;
-    flex-wrap: nowrap;
+    gap: 15px; /* consistent distance between interactive elements */
+    flex-wrap: wrap; /* wrap for responsiveness */
 }
 
 /* Search Input */
@@ -127,13 +130,13 @@
     border: 2px solid rgba(255, 255, 255, 0.15);
     border-radius: 12px;
     height: 44px;
-    padding: 0 12px 0 42px;
+    padding: 10px 12px 10px 42px; /* consistent vertical padding, extra left for icon */
     color: white;
     font-size: 14px;
     font-family: 'Poppins', sans-serif;
-    width: clamp(145px, 15vw, 320px);
-    min-width: 0;
-    max-width: 230px;
+    width: clamp(140px, 12vw, 200px);
+    min-width: 140px;
+    max-width: 200px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
@@ -160,14 +163,29 @@
     border-radius: 12px;
     color: white;
     height: 44px;
-    padding: 0 12px;
+    padding: 10px 14px; /* consistent control padding */
     font-family: 'Poppins', sans-serif;
     font-size: 14px;
     font-weight: 400;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    width: clamp(150px, 16vw, 185px);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    width: clamp(140px, 12vw, 200px); /* tighter width for inline fit */
+    min-width: 140px;
+    max-width: 200px;
     box-sizing: border-box;
+    position: relative;
+    z-index: 5; /* maintain visual hierarchy above neighbors */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0; /* rely on container gap for spacing */
+    display: inline-flex;
+    align-items: center;
+}
+
+@keyframes dropdownExpand {
+    0% { transform: scale(0.98); opacity: 0.9; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 .filter-select:focus {
@@ -176,6 +194,7 @@
     background: rgba(255, 255, 255, 0.12);
     box-shadow: 0 0 0 3px rgba(84, 0, 0, 0.1), 0 8px 24px rgba(0, 0, 0, 0.15);
     transform: translateY(-1px);
+    animation: dropdownExpand 0.18s ease-out;
 }
 
 .filter-select:hover {
@@ -186,16 +205,17 @@
 .filter-select option {
     background: #1a1a1a;
     color: white;
-    padding: 12px;
+    padding: 12px 15px; /* top/bottom: 12px, left/right: 15px */
     border: none;
 }
 
 /* Toolbar Right */
 .toolbar-right {
     display: flex;
-    gap: 12px;
     align-items: center;
-    flex: 0 0 auto;
+    flex-shrink: 0;
+    gap: 12px; /* tighter spacing for inline fit */
+    flex-wrap: nowrap; /* keep single line */
 }
 
 /* Add Category Button */
@@ -205,7 +225,7 @@
     color: white;
     border: 2px solid rgba(255, 255, 255, 0.2);
     height: 44px;
-    padding: 0 16px;
+    padding: 10px 14px; /* consistent control padding */
     border-radius: 12px;
     font-size: 14px;
     font-weight: 600;
@@ -218,8 +238,10 @@
     box-shadow: 0 6px 20px rgba(13, 79, 79, 0.3);
     position: relative;
     overflow: hidden;
-    width: clamp(160px, 18vw, 185px);
+    width: clamp(150px, 16vw, 170px); /* tighter width for inline fit */
     box-sizing: border-box;
+    white-space: nowrap; /* keep label inline */
+    text-overflow: ellipsis;
 }
 
 .add-category-btn::before {
@@ -256,7 +278,7 @@
     color: white;
     border: 2px solid rgba(255, 255, 255, 0.2);
     height: 44px;
-    padding: 0 16px;
+    padding: 10px 14px; /* consistent control padding */
     border-radius: 12px;
     font-size: 14px;
     font-weight: 600;
@@ -269,8 +291,10 @@
     box-shadow: 0 6px 20px rgba(84, 0, 0, 0.3);
     position: relative;
     overflow: hidden;
-    width: clamp(160px, 18vw, 185px);
+    width: clamp(150px, 16vw, 170px); /* tighter width for inline fit */
     box-sizing: border-box;
+    white-space: nowrap; /* keep label inline */
+    text-overflow: ellipsis;
 }
 
 .add-product-btn::before {
@@ -353,6 +377,40 @@
 
 .status-hidden {
     background: #f8d7da;
+    color: #721c24;
+}
+
+/* Stock Badge */
+.stock-badge {
+    position: absolute;
+    top: 40px;
+    right: 8px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.stock-badge.in-stock {
+    background: #d4edda;
+    color: #155724;
+}
+.stock-badge.low-stock {
+    background: #fff3cd;
+    color: #856404;
+}
+.stock-badge.critical-stock {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+.stock-badge.out-of-stock {
+    background: #f5c6cb;
     color: #721c24;
 }
 

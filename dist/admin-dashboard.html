@@ -8,7 +8,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+
+
+
+
+
+
+
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -139,6 +145,13 @@
                     <option value="">All Products</option>
                     <option value="visible">Visible Only</option>
                     <option value="hidden">Hidden Only</option>
+                </select>
+                <select class="filter-select" id="stockFilter" onchange="filterProducts()">
+                    <option value="">All Stock Levels</option>
+                    <option value="critical">Critical</option>
+                    <option value="low">Low</option>
+                    <option value="out">Out of Stock</option>
+                    <option value="in">In Stock</option>
                 </select>
             </div>
             <div class="toolbar-right">

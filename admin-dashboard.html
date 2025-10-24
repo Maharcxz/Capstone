@@ -140,6 +140,13 @@
                     <option value="visible">Visible Only</option>
                     <option value="hidden">Hidden Only</option>
                 </select>
+                <select class="filter-select" id="stockFilter" onchange="filterProducts()">
+                    <option value="">All Stock Levels</option>
+                    <option value="critical">Critical</option>
+                    <option value="low">Low</option>
+                    <option value="out">Out of Stock</option>
+                    <option value="in">In Stock</option>
+                </select>
             </div>
             <div class="toolbar-right">
                 <button id="manageCategoriesBtn" class="add-category-btn" onclick="openSidebarManagerModal()">

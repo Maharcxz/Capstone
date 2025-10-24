@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+
 
 
     <!-- Firebase SDK -->
@@ -306,9 +306,34 @@
             statusElement.style.color = status === 'completed' ? '#28a745' : '#ffc107';
             statusElement.style.fontWeight = '600';
 
-            // Quantity and Type
+            // Quantity
             document.getElementById('modal-order-quantity').textContent = order.quantity || 1;
-            document.getElementById('modal-order-type').textContent = order.orderType || ((order.quantity || 1) > 5 ? 'pre-order' : 'standard');
+            
+            // Bill Information
+            const formatPhp = (amount) => {
+                if (!Number.isFinite(Number(amount))) return 'N/A';
+                return `₱${Number(amount).toLocaleString('en-PH')}`;
+            };
+            const billing = order.billing || null;
+            const qty = Number(order.quantity) || Number(billing && billing.quantity) || 1;
+            let frameTotal = null;
+            let upgradeTotal = null;
+            let grandTotal = null;
+            if (billing) {
+                const unitBase = Number(billing.frameUnitPrice);
+                const unitUpgrade = Number(billing.lensUnitUpgrade);
+                const totalFrame = Number(billing.totalFramePrice);
+                const totalUpgrade = Number(billing.totalLensUpgradePrice);
+                const total = Number(billing.totalPrice);
+                frameTotal = Number.isFinite(totalFrame) ? totalFrame : (Number.isFinite(unitBase) ? unitBase * qty : null);
+                upgradeTotal = Number.isFinite(totalUpgrade) ? totalUpgrade : (Number.isFinite(unitUpgrade) ? unitUpgrade * qty : null);
+                grandTotal = Number.isFinite(total) && Number.isFinite(frameTotal) && Number.isFinite(upgradeTotal)
+                    ? total
+                    : (Number.isFinite(frameTotal) && Number.isFinite(upgradeTotal) ? frameTotal + upgradeTotal : null);
+            }
+            document.getElementById('modal-bill-frame').textContent = frameTotal !== null ? formatPhp(frameTotal) : 'N/A';
+            document.getElementById('modal-bill-upgrade').textContent = upgradeTotal !== null ? formatPhp(upgradeTotal) : 'N/A';
+            document.getElementById('modal-bill-total').textContent = grandTotal !== null ? formatPhp(grandTotal) : 'N/A';
             
             // Prescription Details section removed
             
@@ -365,7 +390,7 @@
                 return `
                     <div style="font-family:Poppins,Arial,sans-serif; color:#333; line-height:1.6;">
                       <p>Hi ${fullName},</p>
-                      <p>Your order for <strong>${productName}</strong> has been marked <strong>Completed</strong> on ${formattedDate}.</p>
+                      <p>Your Order for <strong>${productName}</strong> has been marked <strong>Completed</strong> on ${formattedDate}.</p>
                       ${notes ? `<p>Notes: ${notes}</p>` : ''}
                       <p>Thank you for choosing Trinity Optimum Vision Center.</p>
                       <p>— Trinity Optimum Vision Center</p>
@@ -1046,7 +1071,7 @@
                     };
                     openConfirmModal({
                         title: 'Pre-Order Completed',
-                        message: 'This pre-order has been successfully marked as completed',
+                        message: 'This Pre-Order has been Successfully Marked as Completed',
                         confirmText: 'OK',
                         confirmClass: 'btn-primary',
                         showCancel: false,
@@ -1243,9 +1268,21 @@
                         <span class="detail-label">Quantity:</span>
                         <span id="modal-order-quantity"></span>
                     </div>
+                </div>
+                
+                <div class="order-detail-section">
+                    <h3>Bill Information</h3>
                     <div class="detail-row">
-                        <span class="detail-label">Type:</span>
-                        <span id="modal-order-type"></span>
+                        <span class="detail-label">Frame Price:</span>
+                        <span id="modal-bill-frame"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Lens Upgrade:</span>
+                        <span id="modal-bill-upgrade"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Total Price:</span>
+                        <span id="modal-bill-total"></span>
                     </div>
                 </div>
                 

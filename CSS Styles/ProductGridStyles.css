@@ -132,6 +132,10 @@
     color: #ffa500;
 }
 
+.product-stock.critical-stock {
+    color: #ff3b3b;
+}
+
 .product-card:hover .product-title {
     color: #540000;
 }

@@ -210,7 +210,7 @@
                             <div class="form-field">
                                 <label class="field-label" for="quantity">Quantity</label>
                                 <input type="number" class="full-input" name="quantity" id="quantity" value="1" min="1" required aria-describedby="quantityError" aria-invalid="false">
-                                <p class="field-note" id="quantityGuidance">Enter the desired quantity. Stock availability will be checked.</p>
+                                <p class="field-note" id="quantityGuidance">Enter the desired quantity. Stock Availability will be cChecked.</p>
                                 <span class="input-error" id="quantityError" role="alert" aria-live="polite"></span>
                             </div>
                         </div>
@@ -235,24 +235,24 @@
                                 <label class="field-label">Additional Notes</label>
                                 <textarea placeholder="Add your note here..." class="note-textarea" name="notes" id="notes"></textarea>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Price Calculation Section -->
-                    <div class="price-calculation-section">
-                        <div class="price-breakdown">
-                            <h3 class="price-title">Order Summary</h3>
-                            <div class="price-row">
-                                <span class="price-label">Base Price:</span>
-                                <span class="price-value" id="basePrice">₱0</span>
-                            </div>
-                            <div class="price-row">
-                                <span class="price-label">Lens Upgrade:</span>
-                                <span class="price-value" id="lensUpgradePrice">₱0</span>
-                            </div>
-                            <div class="price-row total-row">
-                                <span class="price-label total-label">Total Price:</span>
-                                <span class="price-value total-price" id="totalPrice">₱0</span>
+                            
+                            <!-- Price Calculation Section (moved into right column) -->
+                            <div class="price-calculation-section">
+                                <div class="price-breakdown">
+                                    <h3 class="price-title">Order Summary</h3>
+                                    <div class="price-row">
+                                        <span class="price-label">Base Price:</span>
+                                        <span class="price-value" id="basePrice">₱0</span>
+                                    </div>
+                                    <div class="price-row">
+                                        <span class="price-label">Lens Upgrade:</span>
+                                        <span class="price-value" id="lensUpgradePrice">₱0</span>
+                                    </div>
+                                    <div class="price-row total-row">
+                                        <span class="price-label total-label">Total Price:</span>
+                                        <span class="price-value total-price" id="totalPrice">₱0</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -275,8 +275,20 @@
         let isSubmitting = false;
         let currentProductStock = null;
         let currentProductId = null;
+
+        // Global helpers (used by autocomplete and DOM handlers outside this block)
+        function normalizePrice(val) {
+            if (typeof val === 'number') return val;
+            if (val == null) return 0;
+            const num = parseFloat(String(val).replace(/[^\d.]/g, ''));
+            return Number.isFinite(num) ? num : 0;
+        }
+        function getProductByTitleExact(title) {
+            const t = String(title || '').trim().toLowerCase();
+            return allProducts.find(p => String(p.title || '').trim().toLowerCase() === t) || null;
+        }
         
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             const preorderForm = document.getElementById('preorderForm');
             const phoneInput = document.getElementById('phone');
             const emailInput = document.getElementById('email');
@@ -330,6 +342,18 @@
                 const raw = String(val || '').trim();
                 const digits = raw.replace(/\D/g, '');
                 return /^\+639\d{9}$/.test(raw) || /^639\d{9}$/.test(digits) || /^09\d{9}$/.test(digits);
+            }
+
+            // Helper: normalize price to number (handles commas or currency symbols)
+            function normalizePrice(val) {
+                if (typeof val === 'number') return val;
+                if (val == null) return 0;
+                const num = parseFloat(String(val).replace(/[^\d.]/g, ''));
+                return Number.isFinite(num) ? num : 0;
+            }
+            function getProductByTitleExact(title) {
+                const t = String(title || '').trim().toLowerCase();
+                return allProducts.find(p => String(p.title || '').trim().toLowerCase() === t) || null;
             }
 
             // Pre-order keywords and quantity validation
@@ -454,9 +478,9 @@
                 const note = document.getElementById('quantityGuidance');
                 if (!note) return;
                 if (currentProductStock !== null) {
-                    note.textContent = `Available: ${currentProductStock}. Maximum order is limited to available stock.`;
+                    note.textContent = `Available: ${currentProductStock}. Maximum Order is limited to Available Stock.`;
                 } else {
-                    note.textContent = 'Enter the desired quantity. Stock availability will be checked.';
+                    note.textContent = 'Enter the desired quantity. Stock Availability will be Checked.';
                 }
             }
 
@@ -514,13 +538,15 @@
                     if (frameName) {
                         // Find the product and update stock information
                         const selectedProduct = allProducts.find(product => product.title === frameName);
-                        if (selectedProduct) {
-                            currentProductStock = selectedProduct.stock || 0;
-                            currentProductId = selectedProduct.id;
-                        } else {
-                            currentProductStock = null;
-                            currentProductId = null;
-                        }
+                if (selectedProduct) {
+                    currentProductStock = selectedProduct.stock || 0;
+                    currentProductId = selectedProduct.id;
+                    setBasePrice(normalizePrice(selectedProduct.price));
+                } else {
+                    currentProductStock = null;
+                    currentProductId = null;
+                    setBasePrice(0);
+                }
                         
                         // Sync quantity input constraints and re-validate
                         const quantityInput = document.getElementById('quantity');
@@ -532,6 +558,8 @@
                             }
                         }
                         validateQuantityAndNotes();
+                        // Recalculate with new base price
+                        updateTotalPrice();
                     }
                 });
             }
@@ -540,15 +568,33 @@
             validateQuantityAndNotes();
             updateSubmitState();
             
-            // Load frame names from database
-            loadFrameNames();
+            // Load frame names from database (await to ensure products are ready)
+            await loadFrameNames();
             
             // Set up auto-suggestion for frame name input
             setupFrameNameAutocomplete();
             
-            // Auto-fill frame name if passed via URL parameter
+            // Auto-fill frame name if passed via URL parameter and set base price
             autoFillFrameName();
-            
+            const frameNameInputInit = document.getElementById('frameName');
+            if (frameNameInputInit && frameNameInputInit.value.trim()) {
+                const prod = getProductByTitleExact(frameNameInputInit.value.trim());
+                if (prod) {
+                    currentProductStock = prod.stock || 0;
+                    currentProductId = prod.id;
+                    setBasePrice(normalizePrice(prod.price));
+                    const quantityInput = document.getElementById('quantity');
+                    if (quantityInput) {
+                        if (currentProductStock !== null) {
+                            quantityInput.setAttribute('max', String(currentProductStock));
+                        } else {
+                            quantityInput.removeAttribute('max');
+                        }
+                    }
+                    updateTotalPrice();
+                }
+            }
+
             if (preorderForm) {
                 preorderForm.addEventListener('submit', async function(e) {
                     e.preventDefault();
@@ -569,7 +615,8 @@
                     const phone = document.getElementById('phone').value;
                     const frameName = document.getElementById('frameName').value;
                     const quantity = document.getElementById('quantity').value;
-                    const prescription = document.getElementById('prescription').value;
+                    const prescriptionEl = document.getElementById('prescription');
+                    const prescription = prescriptionEl ? prescriptionEl.value : '';
                     const notes = document.getElementById('notes').value;
                     
                     // Validate all fields before submit
@@ -609,6 +656,14 @@
                     const isSpecialPreOrder = qtyNum === 5 && hasPreOrderKeyword(notes);
                     const orderType = isSpecialPreOrder ? 'pre-order' : 'standard';
 
+                    // Billing calculation
+                    const lensUpgradeSelect = document.getElementById('lensUpgrade');
+                    const unitBasePrice = Number.isFinite(Number(currentBasePrice)) ? Number(currentBasePrice) : 0;
+                    const unitLensUpgrade = lensUpgradeSelect ? (parseInt(lensUpgradeSelect.value, 10) || 0) : 0;
+                    const totalFramePrice = unitBasePrice * qtyNum;
+                    const totalLensUpgradePrice = unitLensUpgrade * qtyNum;
+                    const grandTotal = totalFramePrice + totalLensUpgradePrice;
+
                     // Create pre-order object
                     const preOrder = {
                         firstName: firstName,
@@ -623,7 +678,16 @@
                         orderType: orderType,
                         specialRequestKeywordsMatched: isSpecialPreOrder,
                         date: new Date().toISOString(),
-                        status: 'pending'
+                        status: 'pending',
+                        billing: {
+                            quantity: qtyNum,
+                            frameUnitPrice: unitBasePrice,
+                            lensUnitUpgrade: unitLensUpgrade,
+                            totalFramePrice: totalFramePrice,
+                            totalLensUpgradePrice: totalLensUpgradePrice,
+                            totalPrice: grandTotal,
+                            currency: 'PHP'
+                        }
                     };
                     
                     // Save to Firebase using centralized service and show messages
@@ -666,19 +730,27 @@
                                         ${preOrder.notes ? `<p><strong>Your Notes:</strong> ${preOrder.notes}</p>` : ''}
                                         <p>— Trinity Optimum Vision Center</p>
                                     </div>`;
-                                await fetch('/.netlify/functions/send-email', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        to: preOrder.email,
-                                        subject: `Pre-Order Request Received: ${preOrder.frameName || 'Your Selection'}`,
-                                        html: emailHtml,
-                                        text: `Hi ${preOrder.firstName} ${preOrder.lastName},\n\nWe received your pre-order request for ${preOrder.frameName || 'selected frame'} (Quantity: ${preOrder.quantity}). Your order request has been recorded. Our team is currently reviewing your request and will contact you shortly to confirm availability and delivery options.\n\n— Trinity Optimum Vision Center`
+                                const payload = {
+                                    to: preOrder.email,
+                                    subject: `Pre-Order Request Received: ${preOrder.frameName || 'Your Selection'}`,
+                                    html: emailHtml,
+                                    text: `Hi ${preOrder.firstName} ${preOrder.lastName},\n\nWe received your pre-order request for ${preOrder.frameName || 'selected frame'} (Quantity: ${preOrder.quantity}). Your order request has been recorded. Our team is currently reviewing your request and will contact you shortly to confirm availability and delivery options.\n\n— Trinity Optimum Vision Center`
+                                };
+                                const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+                                if (!isLocal) {
+                                    // Fire-and-forget to avoid blocking submission UX
+                                    fetch('/.netlify/functions/send-email', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify(payload)
                                     })
-                                });
-                                console.log('Auto pre-order confirmation sent to', preOrder.email);
+                                    .then(() => console.log('Auto pre-order confirmation queued for', preOrder.email))
+                                    .catch(mailErr => console.warn('Failed to send auto pre-order email:', mailErr));
+                                } else {
+                                    console.log('Local environment detected; skipping email send.');
+                                }
                             } catch (mailErr) {
-                                console.warn('Failed to send auto pre-order email:', mailErr);
+                                console.warn('Failed to prepare auto pre-order email:', mailErr);
                             }
                         }
 
@@ -752,6 +824,22 @@
                 const query = this.value.trim();
                 if (query.length > 0) {
                     showSuggestions(query);
+                    // If exact match, immediately set stock/base price
+                    const prod = getProductByTitleExact(query);
+                    if (prod) {
+                        currentProductStock = prod.stock || 0;
+                        currentProductId = prod.id;
+                        setBasePrice(normalizePrice(prod.price));
+                        const quantityInput = document.getElementById('quantity');
+                        if (quantityInput) {
+                            if (currentProductStock !== null) {
+                                quantityInput.setAttribute('max', String(currentProductStock));
+                            } else {
+                                quantityInput.removeAttribute('max');
+                            }
+                        }
+                        updateTotalPrice();
+                    }
                 } else {
                     hideSuggestions();
                 }
@@ -861,9 +949,12 @@
                 if (selectedProduct) {
                     currentProductStock = selectedProduct.stock || 0;
                     currentProductId = selectedProduct.id;
+                    // Update base price from selected frame product
+                    setBasePrice(normalizePrice(selectedProduct.price));
                 } else {
                     currentProductStock = null;
                     currentProductId = null;
+                    setBasePrice(0);
                 }
                 
                 // Sync quantity input constraints and validate against new stock
@@ -874,8 +965,13 @@
                     } else {
                         quantityInput.removeAttribute('max');
                     }
-                    validateQuantityAndNotes();
+                    if (typeof validateQuantityAndNotes === 'function') {
+                        validateQuantityAndNotes();
+                    }
                 }
+                
+                // Recalculate totals after setting base price
+                updateTotalPrice();
                 
                 hideSuggestions();
                 frameNameInput.focus();
@@ -932,12 +1028,13 @@
             const lensUpgradeCost = parseInt(lensUpgradeSelect.value) || 0;
             
             // Calculate prices
-            const totalBasePrice = currentBasePrice * quantity;
+            const unitBasePrice = currentBasePrice; // Show the frame glasses price per unit
+            const totalBasePrice = unitBasePrice * quantity;
             const totalLensUpgrade = lensUpgradeCost * quantity;
             const totalPrice = totalBasePrice + totalLensUpgrade;
             
             // Update display with proper formatting
-            basePriceEl.textContent = formatPrice(totalBasePrice);
+            basePriceEl.textContent = formatPrice(unitBasePrice); // display unit/base frame price
             lensUpgradePriceEl.textContent = formatPrice(totalLensUpgrade);
             totalPriceEl.textContent = formatPrice(totalPrice);
         }

@@ -9,6 +9,9 @@ let currentCategory = 'all';
 let pendingCategoryAdds = new Set();
 let glbStore = {};
 let isSavingProduct = false;
+// Stock thresholds for admin low/critical indicators
+const ADMIN_CRITICAL_STOCK_THRESHOLD = 2;
+const ADMIN_LOW_STOCK_THRESHOLD = 5;
 
 // Helper to reliably find the product submit button even if it's outside the form
 function getProductSubmitBtn() {
@@ -199,6 +202,12 @@ function renderProducts() {
                 </svg>
                 ${product.visible ? 'Visible' : 'Hidden'}
             </div>
+            ${(() => {
+                const v = product.stock || 0;
+                const cls = v === 0 ? 'out-of-stock' : v <= ADMIN_CRITICAL_STOCK_THRESHOLD ? 'critical-stock' : v <= ADMIN_LOW_STOCK_THRESHOLD ? 'low-stock' : 'in-stock';
+                const label = v === 0 ? 'Out of Stock' : v <= ADMIN_CRITICAL_STOCK_THRESHOLD ? `Critical (${v})` : v <= ADMIN_LOW_STOCK_THRESHOLD ? `Low (${v})` : `In Stock (${v})`;
+                return `<div class=\"stock-badge ${cls}\" title=\"${label}\">${label}</div>`;
+            })()}
             
             <div class="product-image-admin">
                 ${(() => {
@@ -264,9 +273,10 @@ function renderProducts() {
 
 // Filter products based on search and filters
 function filterProducts() {
-    const searchTerm = document.getElementById('productSearch').value.toLowerCase();
-    const categoryFilter = document.getElementById('categoryFilter').value;
-    const visibilityFilter = document.getElementById('visibilityFilter').value;
+    const searchTerm = (document.getElementById('productSearch')?.value || '').toLowerCase();
+    const categoryFilter = document.getElementById('categoryFilter')?.value || '';
+    const visibilityFilter = document.getElementById('visibilityFilter')?.value || '';
+    const stockFilter = document.getElementById('stockFilter')?.value || '';
     
     filteredProducts = allProducts.filter(product => {
         const matchesSearch = product.title.toLowerCase().includes(searchTerm) ||
@@ -278,7 +288,14 @@ function filterProducts() {
                                 (visibilityFilter === 'visible' && product.visible) ||
                                 (visibilityFilter === 'hidden' && !product.visible);
         
-        return matchesSearch && matchesCategory && matchesVisibility;
+        const v = product.stock || 0;
+        const matchesStock = !stockFilter ||
+            (stockFilter === 'out' && v === 0) ||
+            (stockFilter === 'critical' && v > 0 && v <= ADMIN_CRITICAL_STOCK_THRESHOLD) ||
+            (stockFilter === 'low' && v > ADMIN_CRITICAL_STOCK_THRESHOLD && v <= ADMIN_LOW_STOCK_THRESHOLD) ||
+            (stockFilter === 'in' && v > ADMIN_LOW_STOCK_THRESHOLD);
+        
+        return matchesSearch && matchesCategory && matchesVisibility && matchesStock;
     });
     
     renderProducts();
