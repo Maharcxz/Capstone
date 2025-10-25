@@ -2,8 +2,8 @@
 
 /* Dashboard container and overall layout */
 .admin-dashboard {
-    width: 64%;
-    max-width: 75; /* expand to full viewport width */
+    width: 100%;
+    max-width: 1400px; /* desktop cap to create large side margins */
     margin: 0 auto;
     padding: 10px 20px;
     box-sizing: border-box;
@@ -40,22 +40,23 @@
 /* Toolbar Section */
 /* Primary admin toolbar container */
 .toolbar-section {
-    display: flex;
-    justify-content: flex-start; /* inline alignment, rely on gap for spacing */
+    display: flex; /* block-level flex so margin auto centers */
+    justify-content: center; /* center all controls within the pill */
     align-items: center;
-    margin-bottom: 40px;
+    margin: 0 auto 40px; /* center the pill */
     padding: 16px 20px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     backdrop-filter: blur(10px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    gap: 12px; /* tighter spacing to help fit inline */
-    flex-wrap: nowrap; /* force a single line */
-    width: 100%;
+    gap: 10px; /* tighter spacing for inline fit */
+    flex-wrap: nowrap; /* keep single line */
+    width: fit-content; /* shrink to exactly fit six controls */
+    max-width: 100%; /* never exceed viewport */
     box-sizing: border-box;
     position: relative; /* enable z-index stacking context */
-    overflow: visible; /* remove horizontal scroll; allow dropdowns to render */
+    overflow: visible; /* no scrollbars; container holds content */
 }
 
 /* Left-side toolbar controls group */
@@ -104,7 +105,7 @@
     align-items: center;
     flex-shrink: 0;
     gap: 15px; /* consistent distance between interactive elements */
-    flex-wrap: wrap; /* wrap for responsiveness */
+    flex-wrap: nowrap; /* keep inline */
 }
 
 /* Search Input */
@@ -134,9 +135,9 @@
     color: white;
     font-size: 14px;
     font-family: 'Poppins', sans-serif;
-    width: clamp(140px, 12vw, 200px);
-    min-width: 140px;
-    max-width: 200px;
+    width: clamp(160px, 14vw, 220px);
+    min-width: 160px;
+    max-width: 220px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
@@ -169,9 +170,9 @@
     font-weight: 400;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    width: clamp(140px, 12vw, 200px); /* tighter width for inline fit */
+    width: clamp(140px, 12vw, 180px); /* reduced width for compact fit */
     min-width: 140px;
-    max-width: 200px;
+    max-width: 180px;
     box-sizing: border-box;
     position: relative;
     z-index: 5; /* maintain visual hierarchy above neighbors */
@@ -238,7 +239,8 @@
     box-shadow: 0 6px 20px rgba(13, 79, 79, 0.3);
     position: relative;
     overflow: hidden;
-    width: clamp(150px, 16vw, 170px); /* tighter width for inline fit */
+    min-width: 160px;
+    width: clamp(160px, 16vw, 180px); /* equalized button width */
     box-sizing: border-box;
     white-space: nowrap; /* keep label inline */
     text-overflow: ellipsis;
@@ -291,7 +293,8 @@
     box-shadow: 0 6px 20px rgba(84, 0, 0, 0.3);
     position: relative;
     overflow: hidden;
-    width: clamp(150px, 16vw, 170px); /* tighter width for inline fit */
+    min-width: 160px;
+    width: clamp(160px, 16vw, 180px); /* equalized button width */
     box-sizing: border-box;
     white-space: nowrap; /* keep label inline */
     text-overflow: ellipsis;
@@ -327,7 +330,7 @@
 /* Products Grid */
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 25px;
     margin-bottom: 40px;
     width: 100%;
@@ -1164,60 +1167,73 @@
         margin-bottom: 30px;
     }
 
+    /* Expand dashboard container width on tablets to avoid compression */
+    .admin-dashboard {
+        width: 95%;
+        max-width: none;
+    }
+
     .toolbar-section {
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: row; /* keep inline on tablets */
+        align-items: center;
+        justify-content: center; /* center contents within full-width pill */
         padding: 20px;
-        gap: 20px;
+        gap: 12px;
+        width: 100%; /* full-width on tablets to avoid overflow */
+        margin: 0 auto 40px; /* visually centered */
+        flex-wrap: wrap; /* allow toolbar to break into multiple lines */
     }
 
     .toolbar-left {
-        flex-direction: column;
-        gap: 15px;
-        width: 100%;
+        flex-direction: row; /* inline */
+        gap: 12px;
+        width: 100%; /* expand to full width when wrapping */
+        flex-wrap: wrap; /* allow controls to wrap */
+        justify-content: center; /* keep centered when wrapped */
     }
 
     .toolbar-right {
-        width: 100%;
-        justify-content: center;
-        flex-direction: column;
+        width: 100%; /* expand to full width when wrapping */
+        justify-content: center; /* center contents when wrapped */
+        flex-direction: row; /* inline */
         gap: 12px;
+        flex-wrap: wrap; /* allow controls to wrap */
     }
 
     .search-container {
-        width: 100%;
+        width: auto;
     }
 
     .search-input {
-        min-width: 0;
-        max-width: none;
-        width: 100%;
-        display: block;
+        min-width: 140px;
+        max-width: 200px;
+        width: auto;
+        display: inline-block;
     }
 
     .filter-select {
-        min-width: 0;
-        max-width: none;
-        width: 100%;
-        display: block;
+        min-width: 140px;
+        max-width: 180px; /* reduced for tablet */
+        width: auto;
+        display: inline-block;
     }
 
     .add-category-btn {
-        width: 100%;
+        width: auto;
         justify-content: center;
         padding: 14px 24px;
         font-size: 16px;
     }
 
     .add-product-btn {
-        width: 100%;
+        width: auto;
         justify-content: center;
         padding: 14px 24px;
         font-size: 16px;
     }
 
     .products-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(3, 1fr);
     }
 
     .admin-actions {
@@ -1226,6 +1242,13 @@
 
     .admin-btn {
         flex: none;
+    }
+}
+
+/* One-column products on wide phones and small devices */
+@media (max-width: 640px) {
+    .products-grid {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -1240,43 +1263,54 @@
         margin-bottom: 24px;
     }
 
+    /* Fill full width on small screens to keep products wide */
+    .admin-dashboard {
+        width: 100%;
+        max-width: none;
+    }
+
     .toolbar-section {
         padding: 15px;
         margin-bottom: 30px;
         gap: 14px;
+        width: 100%; /* full-width on mobile */
+        margin-left: auto; /* center pill horizontally */
+        margin-right: auto;
+        justify-content: center; /* center contents */
+        flex-wrap: wrap; /* allow break into multiple lines on small screens */
     }
 
     .toolbar-left,
     .toolbar-right {
-        width: 100%;
-        flex-direction: column;
-        align-items: stretch;
+        width: 100%; /* full width on mobile */
+        flex-direction: column; /* stack controls vertically */
+        align-items: stretch; /* let children fill container width */
         gap: 12px;
+        flex-wrap: nowrap; /* stacked; no wrapping needed */
+        justify-content: center;
     }
 
-    .search-container,
-    .search-input,
-    .filter-select {
-        width: 100%;
-        min-width: 0;
-    }
+    .search-container { width: auto; }
 
     .search-input,
     .filter-select {
-        padding: 10px 15px;
-        font-size: 14px;
+        width: 100%; /* fill toolbar pill width */
+        min-width: 0; /* allow shrink within container */
+        max-width: none; /* no cap on mobile */
+        padding: 12px 16px;
+        font-size: 15px;
+        box-sizing: border-box;
     }
 
-    .search-input {
-        padding-left: 40px;
-    }
+    .search-input { padding-left: 40px; }
 
     .add-category-btn,
     .add-product-btn {
-        width: 100%;
+        width: 100%; /* fill pill width for comfortable tapping */
         justify-content: center;
-        padding: 12px 18px;
-        font-size: 15px;
+        padding: 14px 20px;
+        font-size: 16px;
+        box-sizing: border-box;
     }
 
     .products-grid {
@@ -2296,6 +2330,13 @@
     
     .control-group label {
         font-size: 12px;
+    }
+}
+
+/* Apply 2-column products only between 641px and 768px */
+@media (min-width: 641px) and (max-width: 768px) {
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
