@@ -184,7 +184,9 @@ async function savePreOrderToFirebase(preOrder) {
         orderType: preOrder.orderType || 'standard',
         specialRequestKeywordsMatched: Boolean(preOrder.specialRequestKeywordsMatched),
         date: new Date().toISOString(),
-        status: 'pending'
+        status: 'pending',
+        expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+        expiryPolicyDays: 5
     };
     
     // Normalize helper to parse integer-like amounts

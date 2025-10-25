@@ -752,7 +752,9 @@
                     // Display orders based on current filter
                     displayFilteredOrders();
                     
-                    // Update counters
+                    // Update counters (reset per snapshot to avoid accumulation on updates)
+                    pendingOrders = 0;
+                    completedOrders = 0;
                     preOrdersArray.forEach(order => {
                         if (order.status === 'completed') {
                             completedOrders++;
@@ -777,6 +779,86 @@
             });
         }
         
+        // Countdown helpers for pending pre-orders
+        window.preOrderCountdowns = window.preOrderCountdowns || {};
+        function formatDuration(ms) {
+            if (!Number.isFinite(ms)) return '—';
+            const s = Math.max(0, Math.floor(ms / 1000));
+            const days = Math.floor(s / 86400);
+            const hours = Math.floor((s % 86400) / 3600);
+            const mins = Math.floor((s % 3600) / 60);
+            const secs = s % 60;
+            return `${days}d ${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+        }
+        function registerPreOrderCountdown(entry) {
+            if (!entry || entry.status !== 'pending' || !Number.isFinite(entry.expiryMs)) return;
+            window.preOrderCountdowns[entry.id] = entry;
+        }
+        async function autoCancelExpired(orderId, expiryMs) {
+            try {
+                const ref = firebase.database().ref('preOrders/' + orderId);
+                const snap = await ref.once('value');
+                const order = snap.val();
+                if (!order || (order.status && order.status !== 'pending')) return;
+                const user = firebase.auth().currentUser;
+                const userId = user ? user.uid : null;
+                await ref.update({
+                    status: 'cancelled',
+                    cancelledAt: firebase.database.ServerValue.TIMESTAMP,
+                    cancellationReason: 'expired',
+                    expiredAt: expiryMs
+                });
+                try {
+                    await window.firebaseServices.createAuditLog('UPDATE', 'PREORDER', orderId, {
+                        previousStatus: 'pending',
+                        newStatus: 'cancelled',
+                        reason: 'expired'
+                    }, userId);
+                } catch (auditErr) {
+                    console.warn('Audit log failed:', auditErr);
+                }
+                try {
+                    const notifQuery = firebase.database().ref('notifications').orderByChild('preOrderId').equalTo(orderId);
+                    const snapshot = await notifQuery.once('value');
+                    const removals = [];
+                    snapshot.forEach(child => { removals.push(child.ref.remove()); });
+                    await Promise.all(removals);
+                    if (typeof updateNotificationBadge === 'function') updateNotificationBadge();
+                    if (typeof updateNotificationsList === 'function') updateNotificationsList();
+                } catch (err) {
+                    console.error('Failed to remove notifications for cancelled order:', err);
+                }
+                if (typeof loadPreOrders === 'function') {
+                    loadPreOrders();
+                }
+            } catch (err) {
+                console.error('Auto-cancel expired pre-order failed:', err);
+            }
+        }
+        function startCountdownTick() {
+            if (window.countdownTimerId) return;
+            window.countdownTimerId = setInterval(async () => {
+                const now = Date.now();
+                const entries = window.preOrderCountdowns || {};
+                for (const id in entries) {
+                    const e = entries[id];
+                    if (!e || !e.el) continue;
+                    const rem = e.expiryMs - now;
+                    if (rem <= 0) {
+                        e.el.textContent = 'Expired';
+                        try {
+                            await autoCancelExpired(id, e.expiryMs);
+                            delete window.preOrderCountdowns[id];
+                        } catch (err) {
+                            console.error('Error auto-cancelling order', id, err);
+                        }
+                    } else {
+                        e.el.textContent = 'Expires in: ' + formatDuration(rem);
+                    }
+                }
+            }, 1000);
+        }
+
         // Function to display filtered orders
         function displayFilteredOrders() {
             const filterValue = document.getElementById('orderFilter').value;
@@ -825,6 +907,17 @@
                 const orderDate = new Date(order.date);
                 const formattedDate = orderDate.toISOString().split('T')[0];
 
+                // Compute expiry timestamp
+                const expiryMs = (() => {
+                    if (order.expiresAt) {
+                        const t = Date.parse(order.expiresAt);
+                        if (!Number.isNaN(t)) return t;
+                    }
+                    const base = Date.parse(order.date);
+                    const FIVE_DAYS = 5 * 24 * 60 * 60 * 1000;
+                    return Number.isNaN(base) ? Date.now() + FIVE_DAYS : base + FIVE_DAYS;
+                })();
+
                 // Info section
                 const infoDiv = document.createElement('div');
                 infoDiv.className = 'preorder-info';
@@ -853,6 +946,15 @@
                 const statusEl = document.createElement('p');
                 statusEl.textContent = `Status: ${order.status || 'Pending'}`;
                 infoDiv.appendChild(statusEl);
+
+                // Countdown display for pending orders
+                if ((order.status || 'pending') === 'pending') {
+                    const countdownEl = document.createElement('p');
+                    countdownEl.className = 'countdown';
+                    countdownEl.textContent = 'Expires in: ' + formatDuration(expiryMs - Date.now());
+                    infoDiv.appendChild(countdownEl);
+                    registerPreOrderCountdown({ id: order.id, status: 'pending', expiryMs, el: countdownEl });
+                }
 
                 const qtyEl = document.createElement('p');
                 qtyEl.textContent = `Quantity: ${order.quantity || 1}`;
@@ -892,6 +994,9 @@
 
                 preordersContainer.appendChild(preOrderItem);
             });
+
+            // Start countdown updates once per page lifecycle
+            startCountdownTick();
         }
         
         // Function to filter orders when dropdown changes
