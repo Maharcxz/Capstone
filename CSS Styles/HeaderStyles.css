@@ -33,6 +33,7 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    max-width: 100%;
     background: 
         linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(84, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0.6) 100%),
         radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
@@ -43,9 +44,10 @@
         0 8px 32px rgba(0, 0, 0, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(20px);
-    margin: 0 -20px;
+    margin: 0;
+    box-sizing: border-box;
     position: relative;
-    overflow: visible;
+    overflow: visible; /* ensure inner buttons are not clipped */
     z-index: 100; /* Lower navbar stacking so modals overlay correctly */
 }
 
@@ -147,6 +149,7 @@
     letter-spacing: 0.3px;
     text-decoration: none;
     position: relative;
+    z-index: 1001; /* keep clickable above overlapping UI */
     overflow: hidden;
     backdrop-filter: blur(10px);
     box-shadow: 
@@ -473,9 +476,10 @@ body:not(.admin-mode) .admin-nav-area {
 /* Mobile centering and left padding for nav */
 @media (max-width: 768px) {
     .nav {
-        max-width: 420px;
-        margin: 0 auto;
-        padding: 0 12px; /* add side padding so hover bg isn’t flush */
+        max-width: none;
+        margin: 0;
+        padding: 12px 16px; /* consistent padding without side margins */
+        border-radius: 0; /* full-width appearance */
     }
     .nav-left,
     .nav-right {
@@ -493,5 +497,5 @@ body:not(.admin-mode) .admin-nav-area {
         padding-right: 16px;
         box-sizing: border-box; /* ensure padding doesn’t overflow width */
     }
-    .nav-link { margin: 8px 0; }
+    .nav-link { margin: 4px 0; }
 }
