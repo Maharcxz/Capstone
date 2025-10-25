@@ -194,6 +194,16 @@
         return userCredential.user;
     }
 
+    /**
+     * Sends a password reset email to the given address.
+     * @param {string} email
+     * @returns {Promise<void>}
+     */
+    async function sendPasswordResetEmail(email) {
+        if (!email) throw new Error('Email is required');
+        await firebase.auth().sendPasswordResetEmail(email);
+    }
+
     // --- Notifications Services ---
     
     /**
@@ -313,6 +323,7 @@
         decrementProductStockByTitle,
         // Auth
         signInWithEmailAndPassword,
+        sendPasswordResetEmail,
         // Notifications
         getAllNotifications,
         saveNotificationToFirebase,

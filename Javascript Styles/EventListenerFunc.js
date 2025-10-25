@@ -105,6 +105,66 @@ function initializeEventListeners() {
                 }
             }
         });
+
+        // Inject "Forgot password" UI if not present
+        if (!loginForm.querySelector('.forgot-password-link')) {
+            const forgotContainer = document.createElement('div');
+            forgotContainer.className = 'forgot-password-container';
+
+            const forgotLink = document.createElement('button');
+            forgotLink.type = 'button';
+            forgotLink.className = 'forgot-password-link';
+            forgotLink.textContent = 'Forgot password?';
+
+            const forgotPanel = document.createElement('div');
+            forgotPanel.className = 'forgot-password-panel';
+            forgotPanel.innerHTML = `
+                <input type="email" class="reset-email-input" placeholder="Enter your email" aria-label="Email for password reset">
+                <button type="button" class="reset-password-btn">Send Email</button>
+                <p class="reset-help-text">We’ll send a link to reset your password.</p>
+            `;
+
+            // Prefill reset email from login input if available
+            const loginEmailInput = loginForm.querySelector('input[type="email"], #modalEmailInput');
+            const resetEmailInput = forgotPanel.querySelector('.reset-email-input');
+            if (loginEmailInput && resetEmailInput) {
+                resetEmailInput.value = (loginEmailInput.value || '').trim();
+            }
+
+            forgotContainer.appendChild(forgotLink);
+            forgotContainer.appendChild(forgotPanel);
+
+            // Place near remember-me group if available; else append at end
+            const rememberGroup = loginForm.querySelector('.remember-me-group');
+            if (rememberGroup && rememberGroup.parentNode) {
+                rememberGroup.parentNode.insertBefore(forgotContainer, rememberGroup.nextSibling);
+            } else {
+                loginForm.appendChild(forgotContainer);
+            }
+
+            forgotLink.addEventListener('click', () => {
+                forgotPanel.classList.toggle('active');
+            });
+
+            const sendBtn = forgotPanel.querySelector('.reset-password-btn');
+            sendBtn.addEventListener('click', async () => {
+                const email = (resetEmailInput.value || '').trim();
+                if (!email) {
+                    showLoginErrorModal('Please enter your email to reset your password.');
+                    return;
+                }
+                try {
+                    await firebaseServices.sendPasswordResetEmail(email);
+                    showLoginErrorModal('Password reset email sent. Check your inbox.');
+                    forgotPanel.classList.remove('active');
+                } catch (err) {
+                    const msg = err && err.code === 'auth/user-not-found'
+                        ? 'No account found with this email.'
+                        : (err.message || 'Could not send reset email. Please try again.');
+                    showLoginErrorModal(msg);
+                }
+            });
+        }
     }
 
     // Pre-order form submit is handled in preorder.html with unified save logic

@@ -4,10 +4,11 @@ import mkcert from 'vite-plugin-mkcert';
 // Netlify-friendly Vite config: use mkcert only in dev, plain build for CI
 export default defineConfig(({ command, mode }) => {
   const isDev = command === 'serve';
+  const enableHttps = false;
   return {
     base: '/',
     plugins: [
-      ...(isDev
+      ...(isDev && enableHttps
         ? [
             mkcert({
               hosts: ['localhost', '127.0.0.1', process.env.DEV_HOST || '192.168.100.7']
@@ -18,7 +19,7 @@ export default defineConfig(({ command, mode }) => {
     server: {
       port: 3000,
       host: true,
-      https: isDev,
+      https: enableHttps,
       open: true,
       headers: {
         'Permissions-Policy': 'camera=(self)'

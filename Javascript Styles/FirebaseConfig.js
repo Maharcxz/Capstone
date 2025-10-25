@@ -488,6 +488,17 @@ async function signInWithEmailAndPassword(email, password) {
     }
 }
 
+// Send password reset email
+async function sendPasswordResetEmail(email) {
+    try {
+        if (!email) throw new Error('Email is required');
+        await auth.sendPasswordResetEmail(email);
+    } catch (error) {
+        console.error('Error sending password reset email:', error);
+        throw error;
+    }
+}
+
 // Function to sign out
 async function signOut() {
     try {
@@ -549,6 +560,7 @@ window.firebaseServices = {
     getAuditLogs,
     // Auth
     signInWithEmailAndPassword,
+    sendPasswordResetEmail,
     signOut,
     onAuthStateChanged
 };
