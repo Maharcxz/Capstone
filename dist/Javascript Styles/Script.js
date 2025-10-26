@@ -38,6 +38,47 @@ function setActiveNavLink() {
     }
 }
 
+// Helper: get recipient email with optional admin override via localStorage
+function getRecipientEmail(defaultEmail) {
+    try {
+        const override = (localStorage.getItem('adminEmailOverride') || '').trim();
+        return override || (defaultEmail || '').trim();
+    } catch (e) {
+        return (defaultEmail || '').trim();
+    }
+}
+
+// Disable Gmail compose fallback on preorders page and keep send in-app
+function disableGmailFallbackOnPreorders() {
+    try {
+        const currentFile = (window.location.pathname.split('/').pop() || '').toLowerCase();
+        if (currentFile !== 'preorders.html') return;
+        // If preorders.html defined a Gmail fallback, override it to a no-op with user feedback
+        if (typeof window.openGmailCompose === 'function') {
+            window.openGmailCompose = function(to, subject, bodyText) {
+                // Reset button UI if it was set to "Opening Gmail..."
+                const sendBtn = document.getElementById('sendMailButton');
+                if (sendBtn) sendBtn.textContent = 'Send Mail';
+                // Prefer the page's confirm modal if available; else alert
+                if (typeof window.openConfirmModal === 'function') {
+                    window.openConfirmModal({
+                        title: 'Email Sending Failed',
+                        message: 'Email API is unavailable. Gmail redirect is disabled.',
+                        confirmText: 'OK',
+                        showCancel: false
+                    });
+                } else {
+                    alert('Email API is unavailable. Gmail redirect is disabled.');
+                }
+                // Do not redirect to Gmail or mailto
+                return false;
+            };
+        }
+    } catch (e) {
+        console.warn('disableGmailFallbackOnPreorders error:', e);
+    }
+}
+
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
     // Load saved credentials if available
@@ -56,6 +97,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Set persistent active state for the current nav item
     setActiveNavLink();
+
+    // Ensure Gmail fallback is disabled on preorders page
+    disableGmailFallbackOnPreorders();
     
     // Authentication state is handled by AuthHandlers.js
     // No need for duplicate auth state listener here

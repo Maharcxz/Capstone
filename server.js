@@ -9,7 +9,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 
 app.use(express.json());
 // Allow local dev origins (vite dev, static preview). Adjust as needed.
@@ -25,36 +25,73 @@ const {
   SMTP_PORT,
   SMTP_USER,
   SMTP_PASS,
+  FROM_EMAIL,
 } = process.env;
 
 if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
   console.warn(
-    '[email-api] Missing SMTP env vars. Create a .env file with SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS.'
+    '[email-api] Missing SMTP env vars. Using Ethereal test SMTP for local development.'
   );
 }
 
-const transporter = nodemailer.createTransport({
-  host: SMTP_HOST,
-  port: Number(SMTP_PORT || 465),
-  secure: Number(SMTP_PORT || 465) === 465,
-  auth: {
-    user: SMTP_USER,
-    pass: SMTP_PASS,
-  },
-});
+// Lazy transporter initialization with Ethereal fallback for local testing
+let transporter = null;
+let usingEthereal = false;
+
+if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
+  transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: Number(SMTP_PORT || 587),
+    secure: Number(SMTP_PORT || 587) === 465,
+    auth: {
+      user: SMTP_USER,
+      pass: SMTP_PASS,
+    },
+  });
+} else {
+  usingEthereal = true;
+  nodemailer
+    .createTestAccount()
+    .then((account) => {
+      transporter = nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        secure: false,
+        auth: { user: account.user, pass: account.pass },
+      });
+      console.log(`[email-api] Using Ethereal test SMTP. Login: ${account.user}`);
+    })
+    .catch((err) => {
+      console.error('[email-api] Failed to create Ethereal test account:', err);
+    });
+}
 
 app.post('/api/send-email', async (req, res) => {
   try {
+    if (!transporter) {
+      return res
+        .status(503)
+        .json({ ok: false, error: 'Email transporter not ready. Try again shortly.' });
+    }
     const { to, subject, text, html } = req.body || {};
     if (!to) return res.status(400).json({ ok: false, error: 'Missing recipient (to)' });
+
+    const fromAddress = FROM_EMAIL || SMTP_USER || 'no-reply@trinity.local';
+
     const info = await transporter.sendMail({
-      from: SMTP_USER,
+      from: fromAddress,
       to,
       subject: subject || '',
       text: text || '',
       html: html || undefined,
     });
-    return res.json({ ok: true, messageId: info.messageId });
+
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    if (previewUrl) {
+      console.log('[email-api] Preview URL:', previewUrl);
+    }
+
+    return res.json({ ok: true, messageId: info.messageId, previewUrl: previewUrl || null });
   } catch (err) {
     console.error('[email-api] send-email error:', err);
     return res.status(500).json({ ok: false, error: err?.message || 'Send failed' });

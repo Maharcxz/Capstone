@@ -548,7 +548,7 @@
         async function trySendViaAPI(to, subject, bodyText, htmlContent) {
             const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
             const API_URL = isLocal
-                ? 'http://localhost:3000/api/send-email'
+                ? 'http://localhost:4000/api/send-email'
                 : '/.netlify/functions/send-email';
             try {
                 const resp = await fetch(API_URL, {
@@ -565,7 +565,7 @@
             }
         }
 
-        // Send email to customer (API first, Gmail fallback)
+        // Send email directly via API, with optional admin recipient override
         async function sendMailToCustomer() {
             const sendBtn = document.getElementById('sendMailButton');
             try {
@@ -574,8 +574,12 @@
                     alert('Order data not available.');
                     return;
                 }
-                if (!order.email) {
-                    alert('Customer email is missing.');
+                // Choose recipient: admin override if set, else customer email
+                const recipient = (typeof window.getRecipientEmail === 'function')
+                    ? window.getRecipientEmail(order.email)
+                    : (order.email || '').trim();
+                if (!recipient) {
+                    alert('Recipient email is missing.');
                     return;
                 }
                 // Prefer customized subject/body if provided
@@ -591,17 +595,22 @@
                     sendBtn.textContent = 'Sending...';
                 }
 
-                const sent = await trySendViaAPI(order.email, subject, bodyText, htmlBody);
+                const sent = await trySendViaAPI(recipient, subject, bodyText, htmlBody);
                 if (sent) {
                     openConfirmModal({
                         title: 'Email Sent',
-                        message: 'Your message was sent via the local email API.',
+                        message: 'The Pre-Order Email has been sent.',
                         confirmText: 'OK',
                         showCancel: false
                     });
                 } else {
-                    if (sendBtn) sendBtn.textContent = 'Opening Gmail...';
-                    openGmailCompose(order.email, subject, bodyText);
+                    // Keep UX in-app: no Gmail or mailto, show error modal
+                    openConfirmModal({
+                        title: 'Email Sending Failed',
+                        message: 'Email API is unavailable. Please check the server or SMTP settings.',
+                        confirmText: 'OK',
+                        showCancel: false
+                    });
                 }
             } catch (err) {
                 openConfirmModal({
