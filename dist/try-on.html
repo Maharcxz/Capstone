@@ -90,56 +90,8 @@
                     </div>
                 </div>
                 
-                <a-scene mindar-face embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" style="position: absolute; inset: 0; width: 100%; height: 100%;">
-                     <a-assets>
-                         <a-asset-item id="glassesModel1" src="SampleDropdownAssets/3dglasses.glb"></a-asset-item>
-                         <a-asset-item id="glassesModel2" src="SampleDropdownAssets/glasses1.glb"></a-asset-item>
-                         <a-asset-item id="headOccluder" src="Assets/headOccluder.glb"></a-asset-item>
-                     </a-assets>
-                     
-                     <a-camera 
-                         id="camera"
-                         position="0 0 0" 
-                         look-controls="enabled: false" 
-                         wasd-controls="enabled: false"
-                         cursor="rayOrigin: mouse">
-                     </a-camera>
-                     
-                     <!-- Head occluder for better AR effect -->
-                     <a-entity mindar-face-target="anchorIndex: 168">
-                         <a-gltf-model 
-                             mindar-face-occluder 
-                             position="0 -0.3 0.15"
-                             rotation="0 0 0" 
-                             scale="0.065 0.065 0.065" 
-                             src="#headOccluder">
-                         </a-gltf-model>
-                     </a-entity>
-                     
-                     <!-- Glasses Model 1 - 3D Glasses -->
-                     <a-entity mindar-face-target="anchorIndex: 168">
-                         <a-gltf-model 
-                             rotation="0 0 0" 
-                             position="0 0 0" 
-                             scale="0.010 0.010 0.010" 
-                             src="#glassesModel1" 
-                             class="glasses1-entity" 
-                             visible="true">
-                         </a-gltf-model>
-                     </a-entity>
-                     
-                     <!-- Glasses Model 2 - Glasses1 -->
-                     <a-entity mindar-face-target="anchorIndex: 168">
-                         <a-gltf-model 
-                             rotation="0 0 0" 
-                             position="0 0 0" 
-                             scale="0.010 0.010 0.010" 
-                             src="#glassesModel2" 
-                             class="glasses2-entity" 
-                             visible="false">
-                         </a-gltf-model>
-                     </a-entity>
-                 </a-scene>
+                <!-- AR Scene container - will be populated after camera is ready -->
+                <div id="ar-scene-container" style="position: absolute; inset: 0; width: 100%; height: 100%;"></div>
                  
                  <!-- Controls Panel Removed -->
          </div>
@@ -150,6 +102,144 @@
      </div>
      
      <script>
+         // Camera and scene initialization
+         document.addEventListener('DOMContentLoaded', function() {
+             const loadingOverlay = document.getElementById('loadingOverlay');
+             const statusMessage = document.getElementById('statusMessage');
+             const arSceneContainer = document.getElementById('ar-scene-container');
+             
+             // Show loading overlay initially
+             if (loadingOverlay) loadingOverlay.style.display = 'flex';
+             
+             // Function to create and initialize the AR scene
+             function initializeARScene() {
+                 // Create the a-scene element
+                 const sceneEl = document.createElement('a-scene');
+                 sceneEl.setAttribute('mindar-face', '');
+                 sceneEl.setAttribute('embedded', '');
+                 sceneEl.setAttribute('color-space', 'sRGB');
+                 sceneEl.setAttribute('renderer', 'colorManagement: true, physicallyCorrectLights');
+                 sceneEl.setAttribute('vr-mode-ui', 'enabled: false');
+                 sceneEl.setAttribute('device-orientation-permission-ui', 'enabled: false');
+                 sceneEl.style.position = 'absolute';
+                 sceneEl.style.inset = '0';
+                 sceneEl.style.width = '100%';
+                 sceneEl.style.height = '100%';
+                 
+                 // Create assets
+                 const assetsEl = document.createElement('a-assets');
+                 
+                 const glassesModel1 = document.createElement('a-asset-item');
+                 glassesModel1.id = 'glassesModel1';
+                 glassesModel1.setAttribute('src', 'SampleDropdownAssets/3dglasses.glb');
+                 
+                 const glassesModel2 = document.createElement('a-asset-item');
+                 glassesModel2.id = 'glassesModel2';
+                 glassesModel2.setAttribute('src', 'SampleDropdownAssets/glasses1.glb');
+                 
+                 const headOccluder = document.createElement('a-asset-item');
+                 headOccluder.id = 'headOccluder';
+                 headOccluder.setAttribute('src', 'Assets/headOccluder.glb');
+                 
+                 assetsEl.appendChild(glassesModel1);
+                 assetsEl.appendChild(glassesModel2);
+                 assetsEl.appendChild(headOccluder);
+                 sceneEl.appendChild(assetsEl);
+                 
+                 // Create camera
+                 const cameraEl = document.createElement('a-camera');
+                 cameraEl.id = 'camera';
+                 cameraEl.setAttribute('position', '0 0 0');
+                 cameraEl.setAttribute('look-controls', 'enabled: false');
+                 cameraEl.setAttribute('wasd-controls', 'enabled: false');
+                 cameraEl.setAttribute('cursor', 'rayOrigin: mouse');
+                 sceneEl.appendChild(cameraEl);
+                 
+                 // Create head occluder
+                 const occluderEntity = document.createElement('a-entity');
+                 occluderEntity.setAttribute('mindar-face-target', 'anchorIndex: 168');
+                 
+                 const occluderModel = document.createElement('a-gltf-model');
+                 occluderModel.setAttribute('mindar-face-occluder', '');
+                 occluderModel.setAttribute('position', '0 -0.3 0.15');
+                 occluderModel.setAttribute('rotation', '0 0 0');
+                 occluderModel.setAttribute('scale', '0.065 0.065 0.065');
+                 occluderModel.setAttribute('src', '#headOccluder');
+                 
+                 occluderEntity.appendChild(occluderModel);
+                 sceneEl.appendChild(occluderEntity);
+                 
+                 // Create glasses model 1
+                 const glasses1Entity = document.createElement('a-entity');
+                 glasses1Entity.setAttribute('mindar-face-target', 'anchorIndex: 168');
+                 
+                 const glasses1Model = document.createElement('a-gltf-model');
+                 glasses1Model.setAttribute('rotation', '0 0 0');
+                 glasses1Model.setAttribute('position', '0 0 0');
+                 glasses1Model.setAttribute('scale', '0.010 0.010 0.010');
+                 glasses1Model.setAttribute('src', '#glassesModel1');
+                 glasses1Model.setAttribute('class', 'glasses1-entity');
+                 glasses1Model.setAttribute('visible', 'true');
+                 
+                 glasses1Entity.appendChild(glasses1Model);
+                 sceneEl.appendChild(glasses1Entity);
+                 
+                 // Create glasses model 2
+                 const glasses2Entity = document.createElement('a-entity');
+                 glasses2Entity.setAttribute('mindar-face-target', 'anchorIndex: 168');
+                 
+                 const glasses2Model = document.createElement('a-gltf-model');
+                 glasses2Model.setAttribute('rotation', '0 0 0');
+                 glasses2Model.setAttribute('position', '0 0 0');
+                 glasses2Model.setAttribute('scale', '0.010 0.010 0.010');
+                 glasses2Model.setAttribute('src', '#glassesModel2');
+                 glasses2Model.setAttribute('class', 'glasses2-entity');
+                 glasses2Model.setAttribute('visible', 'false');
+                 
+                 glasses2Entity.appendChild(glasses2Model);
+                 sceneEl.appendChild(glasses2Entity);
+                 
+                 // Add event listeners for scene
+                 sceneEl.addEventListener('loaded', function() {
+                     console.log('A-Frame scene loaded');
+                 });
+                 
+                 sceneEl.addEventListener('arready', function() {
+                     console.log('MindAR is ready');
+                     if (loadingOverlay) loadingOverlay.style.display = 'none';
+                 });
+                 
+                 // Append the scene to the container
+                 arSceneContainer.innerHTML = '';
+                 arSceneContainer.appendChild(sceneEl);
+             }
+             
+             // Handle camera permissions first
+             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                 navigator.mediaDevices.getUserMedia({ video: true })
+                     .then(function(stream) {
+                         // Camera access granted
+                         if (statusMessage) statusMessage.textContent = 'Camera access granted';
+                         
+                         // Clean up the stream to avoid memory leaks
+                         const tracks = stream.getTracks();
+                         tracks.forEach(track => track.stop());
+                         
+                         // Now that we have camera permission, initialize the AR scene
+                         initializeARScene();
+                     })
+                     .catch(function(error) {
+                         console.error('Camera access error:', error);
+                         if (statusMessage) statusMessage.textContent = 'Camera access denied. Please enable camera permissions.';
+                         if (loadingOverlay) loadingOverlay.style.display = 'none';
+                     });
+             } else {
+                 console.error('getUserMedia not supported');
+                 if (statusMessage) statusMessage.textContent = 'Camera not supported on this device or browser.';
+                 if (loadingOverlay) loadingOverlay.style.display = 'none';
+             }
+         });
+         
          // Navigation function
          function navigateToHome() {
              window.location.href = 'index.html';
