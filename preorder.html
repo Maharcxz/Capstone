@@ -178,8 +178,8 @@
                             <div class="form-field">
                                 <label class="field-label">Full Name</label>
                                 <div class="name-inputs">
-                                    <input type="text" placeholder="First Name" class="name-input" name="firstName" id="firstName" required aria-invalid="false" aria-describedby="firstNameError" autocomplete="given-name">
-                                    <input type="text" placeholder="Last Name" class="name-input" name="lastName" id="lastName" required aria-invalid="false" aria-describedby="lastNameError" autocomplete="family-name">
+                                    <input type="text" placeholder="First Name" class="name-input" name="firstName" id="firstName" required aria-invalid="false" aria-describedby="firstNameError" autocomplete="given-name" maxlength="20">
+                                    <input type="text" placeholder="Last Name" class="name-input" name="lastName" id="lastName" required aria-invalid="false" aria-describedby="lastNameError" autocomplete="family-name" maxlength="32">
                                 </div>
                                 <div class="field-errors">
                                     <span class="input-error" id="firstNameError" role="alert" aria-live="polite"></span>
@@ -327,7 +327,8 @@
                 return /^[A-Za-z0-9._%+-]+@gmail\.com$/.test(val.trim());
             }
             function isValidName(val) {
-                return /^[A-Za-z\s]+$/.test(val.trim()) && val.trim().length > 0;
+                const trimmed = val.trim();
+                return /^[A-Za-z\s]+$/.test(trimmed) && trimmed.length > 0 && trimmed.length <= 32;
             }
             function normalizePhoneToE164PH(val) {
                 const raw = String(val || '').trim();

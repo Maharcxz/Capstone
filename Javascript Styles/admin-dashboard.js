@@ -118,6 +118,56 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         console.warn('Product image input not found; change handler not bound.');
     }
+
+    // Real-time constraints for product price and stock
+    const priceEl = document.getElementById('productPrice');
+    const stockEl = document.getElementById('productStock');
+
+    function enforcePriceConstraints(el) {
+        let raw = (el.value || '').replace(/[^\d.]/g, '');
+        const firstDot = raw.indexOf('.');
+        if (firstDot !== -1) {
+            raw = raw.slice(0, firstDot + 1) + raw.slice(firstDot + 1).replace(/\./g, '');
+        }
+        let [intPart, decPart = ''] = raw.split('.');
+        intPart = intPart.replace(/^0+(?=\d)/, '');
+        if (intPart === '') intPart = '0';
+        intPart = intPart.slice(0, 6);
+        decPart = decPart.slice(0, 2);
+        let formatted = intPart;
+        if (raw.includes('.')) formatted += '.' + decPart;
+        let num = parseFloat(formatted);
+        if (!isNaN(num)) {
+            if (num < 0) num = 0;
+            if (num > 999999.99) num = 999999.99;
+            formatted = num.toString();
+        }
+        el.value = formatted;
+    }
+
+    function enforceStockConstraints(el) {
+        let raw = (el.value || '').replace(/\D/g, '');
+        raw = raw.slice(0, 4);
+        el.value = raw;
+    }
+
+    if (priceEl) {
+        priceEl.addEventListener('input', () => enforcePriceConstraints(priceEl));
+        priceEl.addEventListener('keydown', (e) => {
+            const blocked = ['e', 'E', '-', '+'];
+            if (blocked.includes(e.key)) e.preventDefault();
+        });
+        priceEl.addEventListener('blur', () => enforcePriceConstraints(priceEl));
+    }
+
+    if (stockEl) {
+        stockEl.addEventListener('input', () => enforceStockConstraints(stockEl));
+        stockEl.addEventListener('keydown', (e) => {
+            const blocked = ['e', 'E', '-', '+', '.'];
+            if (blocked.includes(e.key)) e.preventDefault();
+        });
+        stockEl.addEventListener('blur', () => enforceStockConstraints(stockEl));
+    }
     
     // Bind Add Category form submit to handler
     const addCategoryForm = document.getElementById('addCategoryForm');
@@ -549,6 +599,22 @@ async function handleProductSubmit(event) {
         // Validation
         if (!formData.title || !formData.category || isNaN(formData.price) || formData.price < 0 || isNaN(formData.stock) || formData.stock < 0) {
             showNotification('Please fill in all required fields correctly', 'error');
+            return;
+        }
+        
+        // Additional validation for character/digit limits
+        if (formData.title.length > 32) {
+            showNotification('Product title cannot exceed 32 characters', 'error');
+            return;
+        }
+        
+        if (formData.price > 999999.99) {
+            showNotification('Price cannot exceed 999,999.99 (6 digits + 2 decimals)', 'error');
+            return;
+        }
+        
+        if (formData.stock > 9999) {
+            showNotification('Stock quantity cannot exceed 9999 (4 digits)', 'error');
             return;
         }
         
@@ -985,6 +1051,11 @@ async function addCategoryFromForm() {
 
     if (!categoryName) {
         showNotification('Please enter a category name', 'error');
+        return;
+    }
+
+    if (categoryName.length > 32) {
+        showNotification('Brand name must be 32 characters or less', 'error');
         return;
     }
 
