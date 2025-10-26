@@ -123,24 +123,40 @@ document.addEventListener('DOMContentLoaded', function() {
     const priceEl = document.getElementById('productPrice');
     const stockEl = document.getElementById('productStock');
 
-    function enforcePriceConstraints(el) {
+    function enforcePriceConstraints(el, mode = 'input') {
         let raw = (el.value || '').replace(/[^\d.]/g, '');
         const firstDot = raw.indexOf('.');
         if (firstDot !== -1) {
             raw = raw.slice(0, firstDot + 1) + raw.slice(firstDot + 1).replace(/\./g, '');
         }
+        const endsWithDot = raw.endsWith('.');
         let [intPart, decPart = ''] = raw.split('.');
         intPart = intPart.replace(/^0+(?=\d)/, '');
         if (intPart === '') intPart = '0';
-        intPart = intPart.slice(0, 6);
+        intPart = intPart.slice(0, 5);
         decPart = decPart.slice(0, 2);
+
         let formatted = intPart;
-        if (raw.includes('.')) formatted += '.' + decPart;
-        let num = parseFloat(formatted);
-        if (!isNaN(num)) {
-            if (num < 0) num = 0;
-            if (num > 999999.99) num = 999999.99;
-            formatted = num.toString();
+        if (firstDot !== -1) {
+            if (mode === 'input' && endsWithDot) {
+                formatted = intPart + '.'; // keep trailing dot while typing
+            } else {
+                formatted = intPart + (decPart ? '.' + decPart : '');
+            }
+        }
+
+        if (mode === 'blur') {
+            if (formatted === '.' || formatted === '') formatted = '0';
+            let num = parseFloat(formatted);
+            if (!isNaN(num)) {
+                if (num < 0) num = 0;
+                if (num > 99999.99) num = 99999.99;
+                // keep decimals only up to 2 if present
+                const decimals = decPart ? Math.min(decPart.length, 2) : 0;
+                formatted = decimals > 0 ? num.toFixed(decimals) : num.toString();
+            } else {
+                formatted = '0';
+            }
         }
         el.value = formatted;
     }
@@ -154,10 +170,15 @@ document.addEventListener('DOMContentLoaded', function() {
     if (priceEl) {
         priceEl.addEventListener('input', () => enforcePriceConstraints(priceEl));
         priceEl.addEventListener('keydown', (e) => {
-            const blocked = ['e', 'E', '-', '+'];
-            if (blocked.includes(e.key)) e.preventDefault();
+            const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','Home','End','Tab'];
+            if (allowed.includes(e.key)) return;
+            if (e.key === '.' || e.key === 'Decimal' || e.key === 'NumpadDecimal') {
+                if (priceEl.value.includes('.')) e.preventDefault();
+                return;
+            }
+            if (!/^[0-9]$/.test(e.key)) e.preventDefault();
         });
-        priceEl.addEventListener('blur', () => enforcePriceConstraints(priceEl));
+        priceEl.addEventListener('blur', () => enforcePriceConstraints(priceEl, 'blur'));
     }
 
     if (stockEl) {
@@ -608,8 +629,8 @@ async function handleProductSubmit(event) {
             return;
         }
         
-        if (formData.price > 999999.99) {
-            showNotification('Price cannot exceed 999,999.99 (6 digits + 2 decimals)', 'error');
+        if (formData.price > 99999.99) {
+            showNotification('Price cannot exceed 99,999.99 (5 digits + 2 decimals)', 'error');
             return;
         }
         
