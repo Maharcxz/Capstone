@@ -432,7 +432,7 @@
             const productLine = modelNo ? `${productBase} (Model No. ${modelNo})` : productBase;
 
             // Pre-fill message with requested template
-            messageEl.value = `Hi ${((order.firstName || '') + ' ' + (order.lastName || '')).trim() || 'Customer'},\n\nThank you for choosing Trinity Optimum Vision Center ! We’re excited to let you know that your pre-order has been successfully placed. Below are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n\nYour item is now available for pickup at the store or delivery.\n\nPlease do not reply to this email.\n\n— Trinity Optimum Vision Center`;
+            messageEl.value = `Hi ${((order.firstName || '') + ' ' + (order.lastName || '')).trim() || 'Customer'},\n\nThank you for choosing Trinity Optimum Vision Center ! We’re excited to let you know that your pre-order has been successfully placed. Below are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n\nYour item is now queued for processing. We’ll notify you once it’s ready for pickup or delivery.\n\nIf you have any questions or changes to your order, feel free to reply to this message.\n\n— Trinity Optimum Vision Center`;
             templateEl.value = 'default';
 
             templateEl.onchange = function() {
@@ -453,7 +453,7 @@
                 } else if (tpl === 'completed') {
                     messageEl.value = `Hi ${((order.firstName || '') + ' ' + (order.lastName || '')).trim() || 'Customer'},\n\nYour order for ${order.productName || order.frameName || 'your selected frame'} has been marked Completed.\n\nThank you for choosing Trinity Optimum Vision Center.\n\n— Trinity Optimum Vision Center`;
                 } else {
-                    messageEl.value = `Hi ${((order.firstName || '') + ' ' + (order.lastName || '')).trim() || 'Customer'},\n\nThank you for choosing Trinity Optimum Vision Center ! We’re excited to let you know that your pre-order has been successfully placed. Below are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n\nYour item is now available for pickup at the store or delivery.\n\nPlease do not reply to this email.\n\n— Trinity Optimum Vision Center`;
+                    messageEl.value = `Hi ${((order.firstName || '') + ' ' + (order.lastName || '')).trim() || 'Customer'},\n\nThank you for choosing Trinity Optimum Vision Center ! We’re excited to let you know that your pre-order has been successfully placed. Below are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n\nYour item is now queued for processing. We’ll notify you once it’s ready for pickup or delivery.\n\nIf you have any questions or changes to your order, feel free to reply to this message.\n\n— Trinity Optimum Vision Center`;
                 }
             };
         }
@@ -491,8 +491,8 @@
                   <p>Thank you for choosing Trinity Optimum Vision Center ! We’re excited to let you know that your pre-order has been successfully placed. Below are the details of your order:</p>
                   <p><strong>Product Name:</strong> ${productLine}</p>
                   <p><strong>Order Date:</strong> ${formattedDateDash}</p>
-                  <p>Your item is now available for pickup at the store or delivery.</p>
-                  <p>Please do not reply to this email.</p>
+                  <p>Your item is now queued for processing. We’ll notify you once it’s ready for pickup or delivery.</p>
+                  <p>If you have any questions or changes to your order, feel free to reply to this message.</p>
                   <p>— Trinity Optimum Vision Center</p>
                 </div>
             `;
@@ -527,7 +527,7 @@
                 return `Hi ${name},\n\nYour order for ${productBase} has been marked Completed on ${formattedDateDash}.\n${notes ? `Notes: ${notes}\n` : ''}\nThank you for choosing Trinity Optimum Vision Center.\n\n— Trinity Optimum Vision Center`;
             }
             // default detailed summary (requested wording)
-            return `Hi ${name},\n\nThank you for choosing Trinity Optimum Vision Center ! We’re excited to let you know that your pre-order has been successfully placed. Below are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n\nYour item is now available for pickup at the store or delivery.\n\nPlease do not reply to this email.\n\n— Trinity Optimum Vision Center`;
+            return `Hi ${name},\n\nThank you for choosing Trinity Optimum Vision Center ! We’re excited to let you know that your pre-order has been successfully placed. Below are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n\nYour item is now queued for processing. We’ll notify you once it’s ready for pickup or delivery.\n\nIf you have any questions or changes to your order, feel free to reply to this message.\n\n— Trinity Optimum Vision Center`;
         }
 
         // Open Gmail compose with prefilled fields; fallback to mailto
@@ -546,7 +546,7 @@
 
         // Try sending via local API first; fallback to Gmail compose
         async function trySendViaAPI(to, subject, bodyText, htmlContent) {
-            const isLocal = ['localhost', '127.0.0.1', ''].includes(window.location.hostname) || (window.location && window.location.protocol === 'file:');
+            const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
             const API_URL = isLocal
                 ? 'http://localhost:4000/api/send-email'
                 : '/.netlify/functions/send-email';
