@@ -204,10 +204,16 @@
                      console.log('A-Frame scene loaded');
                  });
                  
-                 sceneEl.addEventListener('arready', function() {
-                     console.log('MindAR is ready');
-                     if (loadingOverlay) loadingOverlay.style.display = 'none';
-                 });
+                // Fallback: auto-hide overlay if AR ready event delays
+                const overlayAutoHide = setTimeout(() => {
+                    if (loadingOverlay) loadingOverlay.style.display = 'none';
+                }, 2500);
+
+                sceneEl.addEventListener('arready', function() {
+                    console.log('MindAR is ready');
+                    clearTimeout(overlayAutoHide);
+                    if (loadingOverlay) loadingOverlay.style.display = 'none';
+                });
                  
                  // Append the scene to the container
                  arSceneContainer.innerHTML = '';

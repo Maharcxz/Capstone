@@ -476,7 +476,8 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    /* Lighten overlay to avoid dark camera appearance */
+    background: rgba(0, 0, 0, 0.25);
     color: white;
     display: flex;
     flex-direction: column;
@@ -589,14 +590,4 @@ body {
     background: rgba(70, 70, 70, 0.9);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-/* Camera brightness enhancement */
-a-scene video {
-    filter: brightness(1.15) contrast(1.05) saturate(1.1) !important;
-}
-
-/* Ensure AR scene has optimal lighting */
-a-scene {
-    filter: brightness(1.05) !important;
 }
