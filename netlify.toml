@@ -60,3 +60,8 @@ status = 200
 from = "/try-on"
 to = "/try-on.html"
 status = 200
+
+# Ensure Netlify Functions have the desired default From header
+[functions]
+  [functions.environment]
+  FROM_EMAIL = "\"Trinity Optimum Vision Center\" <noreply@trinityoptinumvisioncenter.shop>"
