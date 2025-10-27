@@ -590,3 +590,13 @@ body {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
+
+/* Camera brightness enhancement */
+a-scene video {
+    filter: brightness(1.15) contrast(1.05) saturate(1.1) !important;
+}
+
+/* Ensure AR scene has optimal lighting */
+a-scene {
+    filter: brightness(1.05) !important;
+}

@@ -396,25 +396,113 @@
              const dropdown = document.getElementById('glassesDropdown');
              if (!dropdown) return;
              dropdown.innerHTML = '';
-             const visibleProducts = (products || []).filter(p => p && p.visible !== false);
-             if (visibleProducts.length === 0) {
-                 dropdown.innerHTML = '<div class="dropdown-item" style="opacity:0.7;">No products available</div>';
+
+             const items = Array.isArray(products) ? products : [];
+             if (items.length === 0) {
+                 dropdown.innerHTML = '<div class="dropdown-item" style="opacity:0.8;">No matching suggestions</div>';
                  return;
              }
-             visibleProducts.forEach(product => {
+
+             items.forEach(product => {
                  const btn = document.createElement('button');
                  btn.className = 'dropdown-item';
                  btn.textContent = product.title || 'Untitled';
                  btn.dataset.productId = product.id;
                  btn.onclick = async () => {
-                     const name = product.title || 'Selected Product';
-                     document.getElementById('selected-glasses').textContent = name;
-                     await loadProductModelById(product.id);
-                     document.getElementById('glassesDropdown').classList.remove('show');
-                     document.querySelector('.dropdown-btn')?.classList.remove('open');
+                     try {
+                         const name = product.title || 'Selected Product';
+                         document.getElementById('selected-glasses').textContent = name;
+                         currentSelectedProduct = product;
+                         await loadProductModelById(product.id);
+                         // After selecting a product, refresh suggestions to match brand/category
+                         await updateSuggestions();
+                     } catch (e) {
+                         console.warn('Dropdown selection error:', e);
+                     } finally {
+                         document.getElementById('glassesDropdown').classList.remove('show');
+                         document.querySelector('.dropdown-btn')?.classList.remove('open');
+                     }
                  };
                  dropdown.appendChild(btn);
              });
+         }
+
+         // Cache and filtering helpers
+         let allProductsCache = [];
+         let currentSelectedProduct = null;
+
+         function normalizeBrand(p) {
+             return String((p && (p.brandType || p.brand || ''))).trim().toLowerCase();
+         }
+
+         function normalizeCategory(p) {
+             return String((p && p.category || '')).trim().toLowerCase();
+         }
+
+         function isVisible(p) {
+             return p && p.visible === true; // strictly include only visible
+         }
+
+         function filterSuggestionsClientSide() {
+             try {
+                 const selectedBrand = normalizeBrand(currentSelectedProduct || {});
+                 const selectedCategory = normalizeCategory(currentSelectedProduct || {});
+                 if (!selectedBrand && !selectedCategory) {
+                     console.warn('Missing brand and category on selected product; no suggestions.');
+                     return [];
+                 }
+                 const candidates = allProductsCache.filter(isVisible);
+                 let filtered = candidates.filter(p => {
+                     const b = normalizeBrand(p);
+                     const c = normalizeCategory(p);
+                     if (selectedBrand && selectedCategory) return b === selectedBrand && c === selectedCategory;
+                     if (selectedBrand && !selectedCategory) return b === selectedBrand;
+                     if (!selectedBrand && selectedCategory) return c === selectedCategory;
+                     return false;
+                 });
+                 // Sort by relevance: brand, then category, then title
+                 filtered.sort((a, b) => {
+                     const aBrandMatch = normalizeBrand(a) === selectedBrand ? 1 : 0;
+                     const bBrandMatch = normalizeBrand(b) === selectedBrand ? 1 : 0;
+                     const aCatMatch = normalizeCategory(a) === selectedCategory ? 1 : 0;
+                     const bCatMatch = normalizeCategory(b) === selectedCategory ? 1 : 0;
+                     if (bBrandMatch !== aBrandMatch) return bBrandMatch - aBrandMatch;
+                     if (bCatMatch !== aCatMatch) return bCatMatch - aCatMatch;
+                     return String(a.title).localeCompare(String(b.title));
+                 });
+                 return filtered.map(p => ({ id: p.id, title: p.title, brand: p.brand || p.brandType, category: p.category }));
+             } catch (e) {
+                 console.error('Client-side filtering error:', e);
+                 return [];
+             }
+         }
+
+         async function fetchServerSuggestions() {
+             try {
+                 const base = '/.netlify/functions/product-suggestions';
+                 const qp = new URLSearchParams();
+                 if (currentSelectedProduct && currentSelectedProduct.id) qp.set('productId', currentSelectedProduct.id);
+                 else {
+                     const b = normalizeBrand(currentSelectedProduct || {});
+                     const c = normalizeCategory(currentSelectedProduct || {});
+                     if (b) qp.set('brand', b);
+                     if (c) qp.set('category', c);
+                 }
+                 const res = await fetch(`${base}?${qp.toString()}`);
+                 const data = await res.json().catch(() => ({ ok: false }));
+                 if (data && data.ok && Array.isArray(data.suggestions)) return data.suggestions;
+                 return [];
+             } catch (e) {
+                 console.warn('Server suggestions fetch failed; falling back to client filtering.', e);
+                 return [];
+             }
+         }
+
+         async function updateSuggestions() {
+             // Try server-side filtered suggestions first; fallback to client-side
+             const serverList = await fetchServerSuggestions();
+             const finalList = serverList.length > 0 ? serverList : filterSuggestionsClientSide();
+             renderDropdownProducts(finalList);
          }
 
          async function loadProductsToDropdown() {
@@ -430,10 +518,20 @@
                          products.push(p);
                      });
                  }
-                 renderDropdownProducts(products);
+                 allProductsCache = products;
+                 await updateSuggestions();
+
                  // Live updates
+                 const onUpdate = (list) => {
+                     try {
+                         allProductsCache = list.map(p => ({ ...p }));
+                         updateSuggestions();
+                     } catch (e) {
+                         console.warn('Suggestion update error:', e);
+                     }
+                 };
                  if (typeof listenForProductChanges === 'function') {
-                     listenForProductChanges((list) => renderDropdownProducts(list));
+                     listenForProductChanges(onUpdate);
                  } else {
                      firebase.database().ref('products').on('value', snap => {
                          const list = [];
@@ -442,11 +540,12 @@
                              p.id = child.key;
                              list.push(p);
                          });
-                         renderDropdownProducts(list);
+                         onUpdate(list);
                      });
                  }
              } catch (e) {
                  console.error('Failed to load products for dropdown:', e);
+                 renderDropdownProducts([]);
              }
          }
 
@@ -463,6 +562,12 @@
              try {
                  showStatus('Loading 3D model...', 'info');
                  await loadProductModelById(productId);
+                 // After loading model, set currentSelectedProduct from cache if available and refresh suggestions
+                 const match = allProductsCache.find(p => p && p.id === productId);
+                 if (match) {
+                     currentSelectedProduct = match;
+                     await updateSuggestions();
+                 }
              } catch (e) {
                  console.error(e);
                  showStatus('Failed to load model', 'error');
