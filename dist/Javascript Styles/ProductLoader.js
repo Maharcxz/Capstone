@@ -385,11 +385,41 @@ function openProductDetailModal(productId) {
     // Handle images
     const mainImage = document.getElementById('mainProductImage');
     const thumbnailContainer = document.getElementById('thumbnailContainer');
+    const mainImageContainer = document.querySelector('#productDetailModal .main-image-container');
+    const existingPlaceholder = mainImageContainer ? mainImageContainer.querySelector('#noImagePreviewPlaceholder') : null;
+
+    // Attach handlers to manage placeholder visibility based on image load state
+    if (mainImage) {
+        mainImage.onerror = () => {
+            mainImage.style.display = 'none';
+            if (mainImageContainer) {
+                let ph = mainImageContainer.querySelector('#noImagePreviewPlaceholder');
+                if (!ph) {
+                    ph = document.createElement('div');
+                    ph.id = 'noImagePreviewPlaceholder';
+                    ph.className = 'no-image-placeholder';
+                    ph.textContent = 'No Image Preview';
+                    mainImageContainer.appendChild(ph);
+                } else {
+                    ph.style.display = 'block';
+                    ph.textContent = 'No Image Preview';
+                }
+            }
+        };
+        mainImage.onload = () => {
+            mainImage.style.display = 'block';
+            const ph = mainImageContainer ? mainImageContainer.querySelector('#noImagePreviewPlaceholder') : null;
+            if (ph) ph.remove();
+        };
+    }
     
     if (product.images && product.images.length > 0) {
         // Set main image
         mainImage.src = product.images[0];
         mainImage.alt = product.title;
+        // Ensure main image is visible and remove any placeholder
+        if (mainImage) mainImage.style.display = 'block';
+        if (existingPlaceholder) existingPlaceholder.remove();
         
         // Create thumbnails
         thumbnailContainer.innerHTML = product.images.map((image, index) => `
@@ -401,6 +431,9 @@ function openProductDetailModal(productId) {
         // Fallback to single image
         mainImage.src = product.image;
         mainImage.alt = product.title;
+        // Ensure main image is visible and remove any placeholder
+        if (mainImage) mainImage.style.display = 'block';
+        if (existingPlaceholder) existingPlaceholder.remove();
         thumbnailContainer.innerHTML = `
             <img src="${product.image}" alt="${product.title}" 
                  class="thumbnail-image active">
@@ -409,6 +442,20 @@ function openProductDetailModal(productId) {
         // No image available
         mainImage.src = '';
         mainImage.alt = 'No image available';
+        if (mainImage) mainImage.style.display = 'none';
+        // Show centered placeholder in main image area
+        if (mainImageContainer) {
+            if (!existingPlaceholder) {
+                const placeholder = document.createElement('div');
+                placeholder.id = 'noImagePreviewPlaceholder';
+                placeholder.className = 'no-image-placeholder';
+                placeholder.textContent = 'No Image Preview';
+                mainImageContainer.appendChild(placeholder);
+            } else {
+                existingPlaceholder.style.display = 'block';
+                existingPlaceholder.textContent = 'No Image Preview';
+            }
+        }
         thumbnailContainer.innerHTML = '<div class="no-image-placeholder">No images available</div>';
     }
 
@@ -436,6 +483,31 @@ function openProductDetailModal(productId) {
 // Set main image in product modal
 function setMainImage(imageSrc, index) {
     document.getElementById('mainProductImage').src = imageSrc;
+    const mainImage = document.getElementById('mainProductImage');
+    const mainImageContainer = document.querySelector('#productDetailModal .main-image-container');
+    if (mainImage) {
+        mainImage.onerror = () => {
+            mainImage.style.display = 'none';
+            if (mainImageContainer) {
+                let ph = mainImageContainer.querySelector('#noImagePreviewPlaceholder');
+                if (!ph) {
+                    ph = document.createElement('div');
+                    ph.id = 'noImagePreviewPlaceholder';
+                    ph.className = 'no-image-placeholder';
+                    ph.textContent = 'No Image Preview';
+                    mainImageContainer.appendChild(ph);
+                } else {
+                    ph.style.display = 'block';
+                    ph.textContent = 'No Image Preview';
+                }
+            }
+        };
+        mainImage.onload = () => {
+            mainImage.style.display = 'block';
+            const ph = mainImageContainer ? mainImageContainer.querySelector('#noImagePreviewPlaceholder') : null;
+            if (ph) ph.remove();
+        };
+    }
     
     // Update active thumbnail
     document.querySelectorAll('.thumbnail-image').forEach((thumb, i) => {
