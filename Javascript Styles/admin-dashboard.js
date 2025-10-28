@@ -686,6 +686,8 @@ async function deleteProduct(productId, productTitle) {
     const confirmBtn = document.getElementById('confirmDeleteBtn');
     const cancelBtn = document.getElementById('cancelDeleteBtn');
     const closeBtn = document.getElementById('closeConfirmDeleteBtn');
+    const titleEl = document.querySelector('#confirmDeleteModal .modal-title');
+    const originalConfirmClass = confirmBtn.className;
 
     // Fallback to native confirm if modal elements are missing
     if (!overlay || !messageEl || !confirmBtn || !cancelBtn || !closeBtn) {
@@ -701,6 +703,9 @@ async function deleteProduct(productId, productTitle) {
     }
 
     // Configure message and show modal
+    if (titleEl) titleEl.textContent = 'Confirm Deletion';
+    if (confirmBtn) confirmBtn.textContent = 'Delete';
+    if (cancelBtn) cancelBtn.style.display = '';
     messageEl.textContent = `Are you sure you want to delete "${productTitle}"? This action cannot be undone.`;
     overlay.classList.add('active');
 
@@ -711,6 +716,8 @@ async function deleteProduct(productId, productTitle) {
         cancelBtn.onclick = null;
         closeBtn.onclick = null;
         overlay.onclick = null;
+        confirmBtn.className = originalConfirmClass;
+        if (messageEl) messageEl.classList.remove('boxed');
     };
 
     // Click-outside closes modal
@@ -729,11 +736,27 @@ async function deleteProduct(productId, productTitle) {
             showNotification('Product deleted successfully', 'success');
             // Re-render products list after deletion
             await loadProducts();
+
+            // Show success state inside the same modal
+            if (titleEl) titleEl.textContent = 'Deleted Successfully';
+            messageEl.textContent = 'Product deleted successfully';
+            if (messageEl) messageEl.classList.add('boxed');
+            confirmBtn.textContent = 'OK';
+            cancelBtn.style.display = 'none';
+            // Apply nav-style OK button look
+            confirmBtn.classList.remove('delete');
+            confirmBtn.classList.add('ok-nav');
+
+            // Clicking OK closes and restores default state for next open
+            confirmBtn.onclick = function () {
+                cancelBtn.style.display = '';
+                cleanupAndClose();
+            };
         } catch (error) {
             console.error('Error deleting product:', error);
             showNotification('Error deleting product', 'error');
+            cleanupAndClose();
         }
-        cleanupAndClose();
     };
 }
 
@@ -1461,6 +1484,8 @@ async function deleteCategory(categoryId) {
     const confirmBtn = document.getElementById('confirmDeleteBtn');
     const cancelBtn = document.getElementById('cancelDeleteBtn');
     const closeBtn = document.getElementById('closeConfirmDeleteBtn');
+    const titleEl = document.querySelector('#confirmDeleteModal .modal-title');
+    const originalConfirmClassCat = confirmBtn.className;
 
     // Fallback to native confirm if modal elements are missing
     if (!overlay || !messageEl || !confirmBtn || !cancelBtn || !closeBtn) {
@@ -1485,6 +1510,9 @@ async function deleteCategory(categoryId) {
     }
 
     // Configure and show the modal
+    if (titleEl) titleEl.textContent = 'Confirm Deletion';
+    if (confirmBtn) confirmBtn.textContent = 'Delete';
+    if (cancelBtn) cancelBtn.style.display = '';
     messageEl.textContent = `Are you sure you want to delete "${category.name}"?`;
     overlay.classList.add('active');
 
@@ -1495,6 +1523,8 @@ async function deleteCategory(categoryId) {
         cancelBtn.onclick = null;
         closeBtn.onclick = null;
         overlay.onclick = null;
+        confirmBtn.className = originalConfirmClassCat;
+        if (messageEl) messageEl.classList.remove('boxed');
     };
 
     // Close modal when clicking outside content
@@ -1532,7 +1562,22 @@ async function deleteCategory(categoryId) {
         renderExistingCategories();
         populateCategoryDropdowns(); // Refresh dropdowns after deletion
         showNotification(`Category "${category.name}" deleted successfully!`, 'success');
-        cleanupAndClose();
+
+        // Show success state inside the same modal
+        if (titleEl) titleEl.textContent = 'Deleted Successfully';
+        messageEl.textContent = `Category "${category.name}" deleted successfully!`;
+        if (messageEl) messageEl.classList.add('boxed');
+        confirmBtn.textContent = 'OK';
+        cancelBtn.style.display = 'none';
+        // Apply nav-style OK button look
+        confirmBtn.classList.remove('delete');
+        confirmBtn.classList.add('ok-nav');
+
+        // Clicking OK closes and restores default state for next open
+        confirmBtn.onclick = function () {
+            cancelBtn.style.display = '';
+            cleanupAndClose();
+        };
     };
 }
 

@@ -1339,6 +1339,23 @@
                     if (typeof loadPreOrders === 'function') {
                         loadPreOrders();
                     }
+
+                    // Show success modal with OK button
+                    currentConfirmHandler = async function() {
+                        closeConfirmActionModal();
+                        if (typeof loadPreOrders === 'function') {
+                            await loadPreOrders();
+                        }
+                    };
+                    openConfirmModal({
+                        title: 'Deleted Successfully',
+                        message: 'The order has been deleted.',
+                        confirmText: 'OK',
+                        confirmClass: 'ok-nav',
+                        showCancel: false,
+                        deferClose: true,
+                        showSuccessIcon: true
+                    });
                 } catch (error) {
                     console.error('Error deleting order:', error);
                     alert('Error deleting order: ' + error.message);
