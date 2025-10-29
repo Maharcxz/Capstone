@@ -172,7 +172,7 @@
             <h2 class="preorder-page-title">PRE-ORDERING</h2>
             
             <div class="preorder-form-container">
-                <form class="preorder-page-form" id="preorderForm">
+            <form class="preorder-page-form" id="preorderForm" novalidate>
                     <div class="form-row">
                         <div class="form-column">
                             <div class="form-field">
@@ -189,7 +189,7 @@
                             
                             <div class="form-field">
                                 <label class="field-label" for="email">Email</label>
-                                <input type="email" placeholder="email@gmail.com" class="full-input" name="email" id="email" required aria-invalid="false" aria-describedby="emailError" pattern="^[A-Za-z0-9._%+-]+@gmail\\.com$" title="Enter a valid Gmail address ending with @gmail.com">
+                                <input type="email" placeholder="email@gmail.com" class="full-input" name="email" id="email" required aria-invalid="false" aria-describedby="emailError" pattern="^[A-Za-z0-9._%+-]+@gmail\\.com$" title="Enter a valid Gmail address ending with @gmail.com" inputmode="email" autocapitalize="none" autocorrect="off" autocomplete="email">
                                 <span class="input-error" id="emailError" role="alert" aria-live="polite"></span>
                             </div>
                             
@@ -324,7 +324,7 @@
             }
 
             function isValidGmail(val) {
-                return /^[A-Za-z0-9._%+-]+@gmail\.com$/.test(val.trim());
+                return /^[A-Za-z0-9._%+-]+@gmail\.com$/.test(val.trim().toLowerCase());
             }
             function isValidName(val) {
                 const trimmed = val.trim();
@@ -411,10 +411,17 @@
                 });
             });
 
-            // Email: real-time Gmail check
+            // Email: normalize and real-time Gmail check
             if (emailInput) {
                 const emailErr = document.getElementById('emailError');
                 emailInput.addEventListener('input', () => {
+                    // Remove whitespace only; preserve user-intended casing
+                    const cleaned = emailInput.value.replace(/\s+/g, '');
+                    if (cleaned !== emailInput.value) {
+                        const pos = emailInput.selectionStart || cleaned.length;
+                        emailInput.value = cleaned;
+                        try { emailInput.setSelectionRange(pos, pos); } catch {}
+                    }
                     const valid = isValidGmail(emailInput.value);
                     setValidity(emailInput, valid, emailErr, 'Email must end with @gmail.com');
                 });

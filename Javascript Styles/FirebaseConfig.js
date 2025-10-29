@@ -68,7 +68,7 @@ function validatePreOrderData(preOrder) {
     
     if (!preOrder.email || typeof preOrder.email !== 'string') {
         errors.push('Email is required');
-    } else if (!/^[A-Za-z0-9._%+-]+@gmail\.com$/.test(preOrder.email.trim())) {
+    } else if (!/^[A-Za-z0-9._%+-]+@gmail\.com$/.test(preOrder.email.trim().toLowerCase())) {
         errors.push('Email must be a valid Gmail address');
     }
     
