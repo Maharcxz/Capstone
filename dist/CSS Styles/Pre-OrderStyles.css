@@ -368,14 +368,14 @@
     margin-top: 2.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    max-width: 400px;
+    max-width: 520px; /* allow wider buttons side-by-side on tablet/desktop */
     margin-left: auto;
     margin-right: auto;
 }
 
 .cancel-btn, .submit-btn {
     padding: 0.9rem 2rem;
-    border-radius: 14px;
+    border-radius: 10px; /* reduce rounding */
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
@@ -383,8 +383,9 @@
     border: 1.5px solid rgba(255, 255, 255, 0.3);
     font-family: 'Poppins', sans-serif;
     letter-spacing: 0.3px;
-    min-width: 140px;
+    min-width: 160px; /* widen buttons for better presence */
     height: 48px;
+    box-sizing: border-box; /* ensure height includes padding on all devices */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -394,9 +395,9 @@
     background: rgba(255, 255, 255, 0.1);
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 25px;
+    border-radius: 10px; /* reduce rounding */
     padding: 8px 20px;
-    min-width: 100px;
+    min-width: 160px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
     flex: 0 0 auto;
@@ -416,7 +417,7 @@
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 0.9rem 2rem;
-    border-radius: 14px;
+    border-radius: 10px; /* reduce rounding */
     font-family: inherit;
     font-size: 15px;
     font-weight: normal;
@@ -424,7 +425,7 @@
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     flex: 1;
-    max-width: 250px;
+    max-width: 320px; /* allow a wider submit button */
     height: 48px;
     margin-top: 0;
     position: relative;
@@ -604,13 +605,17 @@
         margin-top: 1.5rem;
         padding-top: 1.5rem;
         max-width: none;
+        width: 100%;
+        align-self: stretch; /* ensure the actions block spans full width */
+        margin-left: 0;
+        margin-right: 0;
     }
     
     .cancel-btn, .submit-btn {
         width: 100%;
         max-width: none;
-        padding: 1rem 2rem;
-        height: 52px;
+        padding: 0 1.6rem; /* remove vertical padding; rely on fixed height */
+        height: 46px; /* slimmer buttons on phones/tablets */
         font-size: 15px;
         flex: none;
     }
@@ -658,11 +663,21 @@
     .preorder-form-container {
         padding: 1.5rem 1rem;
         border-radius: 16px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
     
     .preorder-page-title {
         font-size: 24px;
         letter-spacing: 1px;
+    }
+
+    /* Extra-small phones: keep full width but slimmer height */
+    .cancel-btn, .submit-btn {
+        padding: 0 1.5rem;
+        height: 46px;
+        font-size: 15px;
     }
 }
 

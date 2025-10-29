@@ -236,9 +236,10 @@
     background: rgba(255, 255, 255, 0.1);
     color: #ffffff;
     border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 8px;
-    padding: 8px 16px;
-    min-width: 90px;
+    border-radius: 10px; /* reduce rounding */
+    padding: 12px 24px; /* consistent padding */
+    min-width: 120px; /* consistent min width */
+    height: 40px; /* consistent height silhouette */
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
 }
 .confirmation-modal .modal-actions .admin-btn.ok-nav:hover {
