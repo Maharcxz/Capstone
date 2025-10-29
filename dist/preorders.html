@@ -337,6 +337,64 @@
             
             // Prescription Details section removed
             
+            // Expiration Information
+            const expirationSection = document.getElementById('modal-expiration-section');
+            if (order.status === 'pending' || !order.status) {
+                expirationSection.style.display = 'block';
+                
+                // Calculate expiration timestamp (same logic as in the main display)
+                const expiryMs = (() => {
+                    if (order.expiresAt) {
+                        const t = Date.parse(order.expiresAt);
+                        if (!Number.isNaN(t)) return t;
+                    }
+                    const base = Date.parse(order.date);
+                    const FIVE_DAYS = 5 * 24 * 60 * 60 * 1000;
+                    return Number.isNaN(base) ? Date.now() + FIVE_DAYS : base + FIVE_DAYS;
+                })();
+                
+                // Format expiration date
+                const expiryDate = new Date(expiryMs);
+                const formattedExpiryDate = expiryDate.toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                // Calculate time remaining
+                const timeRemaining = expiryMs - Date.now();
+                const formatDuration = (ms) => {
+                    if (ms <= 0) return 'Expired';
+                    const days = Math.floor(ms / (24 * 60 * 60 * 1000));
+                    const hours = Math.floor((ms % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+                    const minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
+                    
+                    if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+                    if (hours > 0) return `${hours}h ${minutes}m`;
+                    return `${minutes}m`;
+                };
+                
+                document.getElementById('modal-expiration-date').textContent = formattedExpiryDate;
+                const timeRemainingElement = document.getElementById('modal-time-remaining');
+                timeRemainingElement.textContent = formatDuration(timeRemaining);
+                
+                // Style based on time remaining
+                if (timeRemaining <= 0) {
+                    timeRemainingElement.style.color = '#dc3545';
+                    timeRemainingElement.style.fontWeight = 'bold';
+                } else if (timeRemaining < 24 * 60 * 60 * 1000) { // Less than 1 day
+                    timeRemainingElement.style.color = '#ffc107';
+                    timeRemainingElement.style.fontWeight = 'bold';
+                } else {
+                    timeRemainingElement.style.color = '#28a745';
+                    timeRemainingElement.style.fontWeight = 'normal';
+                }
+            } else {
+                expirationSection.style.display = 'none';
+            }
+            
             // Additional Notes (if available)
             const notesSection = document.getElementById('modal-notes-section');
             if (order.notes && order.notes.trim()) {
@@ -871,29 +929,30 @@
             if (!entry || entry.status !== 'pending' || !Number.isFinite(entry.expiryMs)) return;
             window.preOrderCountdowns[entry.id] = entry;
         }
-        async function autoCancelExpired(orderId, expiryMs) {
+        async function autoDeleteExpired(orderId, expiryMs) {
             try {
                 const ref = firebase.database().ref('preOrders/' + orderId);
                 const snap = await ref.once('value');
                 const order = snap.val();
                 if (!order || (order.status && order.status !== 'pending')) return;
+                
                 const user = firebase.auth().currentUser;
                 const userId = user ? user.uid : null;
-                await ref.update({
-                    status: 'cancelled',
-                    cancelledAt: firebase.database.ServerValue.TIMESTAMP,
-                    cancellationReason: 'expired',
-                    expiredAt: expiryMs
-                });
+                
+                // Create audit log before deletion
                 try {
-                    await window.firebaseServices.createAuditLog('UPDATE', 'PREORDER', orderId, {
+                    await window.firebaseServices.createAuditLog('DELETE', 'PREORDER', orderId, {
                         previousStatus: 'pending',
-                        newStatus: 'cancelled',
-                        reason: 'expired'
+                        reason: 'expired_auto_deletion',
+                        customerName: `${order.firstName || ''} ${order.lastName || ''}`.trim(),
+                        productName: order.productName || order.frameName || 'N/A',
+                        expiredAt: expiryMs
                     }, userId);
                 } catch (auditErr) {
                     console.warn('Audit log failed:', auditErr);
                 }
+                
+                // Remove associated notifications
                 try {
                     const notifQuery = firebase.database().ref('notifications').orderByChild('preOrderId').equalTo(orderId);
                     const snapshot = await notifQuery.once('value');
@@ -903,13 +962,19 @@
                     if (typeof updateNotificationBadge === 'function') updateNotificationBadge();
                     if (typeof updateNotificationsList === 'function') updateNotificationsList();
                 } catch (err) {
-                    console.error('Failed to remove notifications for cancelled order:', err);
+                    console.error('Failed to remove notifications for expired order:', err);
                 }
+                
+                // Delete the pre-order
+                await ref.remove();
+                
+                console.log(`Pre-order ${orderId} automatically deleted due to expiration`);
+                
                 if (typeof loadPreOrders === 'function') {
                     loadPreOrders();
                 }
             } catch (err) {
-                console.error('Auto-cancel expired pre-order failed:', err);
+                console.error('Auto-delete expired pre-order failed:', err);
             }
         }
         function startCountdownTick() {
@@ -924,10 +989,10 @@
                     if (rem <= 0) {
                         e.el.textContent = 'Expired';
                         try {
-                            await autoCancelExpired(id, e.expiryMs);
+                            await autoDeleteExpired(id, e.expiryMs);
                             delete window.preOrderCountdowns[id];
                         } catch (err) {
-                            console.error('Error auto-cancelling order', id, err);
+                            console.error('Error auto-deleting expired order', id, err);
                         }
                     } else {
                         e.el.textContent = 'Expires in: ' + formatDuration(rem);
@@ -1485,6 +1550,18 @@
                     </div>
                 </div>
                 
+                <div class="order-detail-section" id="modal-expiration-section">
+                    <h3>Expiration Information</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Expires On:</span>
+                        <span id="modal-expiration-date"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Time Remaining:</span>
+                        <span id="modal-time-remaining"></span>
+                    </div>
+                    <small class="form-help-text">Pre-orders are automatically deleted after expiration.</small>
+                </div>
                 
                 <div class="order-detail-section" id="modal-notes-section">
                     <h3>Additional Notes</h3>

@@ -2540,3 +2540,104 @@
     padding: 6px;
   }
 }
+
+/* Loading message styles */
+.loading-message {
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    color: #666;
+    font-size: 16px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+/* Expiration Section Styles */
+.expiration-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.expiration-section h4 {
+    color: #495057;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.expiration-section h4::before {
+    content: "⏰";
+    font-size: 18px;
+}
+
+.expiration-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.expiration-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.expiration-field label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.expiration-field span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #212529;
+    padding: 6px 8px;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+}
+
+.time-remaining.critical {
+    color: #dc3545 !important;
+    background: #fff5f5 !important;
+    border-color: #f5c6cb !important;
+}
+
+.time-remaining.warning {
+    color: #fd7e14 !important;
+    background: #fff8f0 !important;
+    border-color: #ffeaa7 !important;
+}
+
+.time-remaining.safe {
+    color: #28a745 !important;
+    background: #f8fff9 !important;
+    border-color: #c3e6cb !important;
+}
+
+
+
+@media (max-width: 768px) {
+    .expiration-info {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Form help text styles (matching AdminDashboardStyles.css) */
+.form-help-text {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #b8a082;
+    font-style: italic;
+}
