@@ -671,7 +671,7 @@
 #sidebarManagerModal .close-btn { display: inline-flex; }
 
 #confirmDeleteModal .modal-content {
-    padding: 20px;
+    padding: 16px 20px 8px 20px;
     text-align: center;
     display: flex;
     align-items: center;
@@ -698,7 +698,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 8px;
-    padding: 16px 20px 20px 20px;
+    padding: 6px 20px 12px 20px;
 }
 
 /* Add admin-style animations to modal buttons */
@@ -719,7 +719,7 @@
     padding: 12px 22px;
     min-height: 44px;
     font-size: 16px;
-    border-radius: 12px;
+    border-radius: 6px;
 }
 #confirmDeleteModal .modal-btn::before {
     content: '';
@@ -746,7 +746,7 @@
     background: linear-gradient(135deg, #540000 0%, #6d0000 100%);
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.18); /* subtle outline to match Cancel */
-    border-radius: 12px; /* slightly larger pill for better touch target */
+    border-radius: 6px;
     padding: 12px 24px;
     font-weight: 600;
     box-shadow: 
@@ -765,7 +765,7 @@
     background: rgba(255, 255, 255, 0.1);
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px; /* slightly larger pill for better touch target */
+    border-radius: 6px;
     padding: 12px 24px;
     font-weight: 600;
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
@@ -781,7 +781,7 @@
     background: rgba(255, 255, 255, 0.1);
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 25px; /* unify to pill shape */
+    border-radius: 6px;
     padding: 12px 24px;
     min-width: 120px;
     min-height: 44px;
@@ -959,7 +959,7 @@
     background: rgba(255, 255, 255, 0.05);
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 25px;
+    border-radius: 6px;
     padding: 12px 24px;
     min-width: 100px;
     font-weight: 600;
@@ -1134,7 +1134,7 @@
     display: flex;
     gap: 16px;
     justify-content: flex-end;
-    padding: 20px 30px;
+    padding: 12px 20px;
     background: transparent;
     border-top: none;
     margin: 0;
@@ -1162,7 +1162,7 @@
 /* Reduce rounding specifically for product form actions */
 .modal-actions .modal-btn.save-btn,
 .modal-actions .modal-btn.cancel-btn {
-    border-radius: 10px;
+    border-radius: 6px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
