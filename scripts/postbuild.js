@@ -73,8 +73,8 @@ function patchHtmlCss(distHtmlPath, sourceHtmlPath) {
   const projectRoot = path.resolve(__dirname, '..');
   const distDir = path.join(projectRoot, 'dist');
 
-  // 1) Copy static folders into dist
-  ['Javascript Styles', 'CSS Styles', 'Assets', 'SampleDropdownAssets'].forEach((folderName) => {
+  // 1) Copy static folders into dist (legacy and new paths)
+  ['Javascript Styles', 'JavaScriptFunction', 'CSS Styles', 'Assets', 'SampleDropdownAssets'].forEach((folderName) => {
     const src = path.join(projectRoot, folderName);
     const dest = path.join(distDir, folderName);
     copyFolderSync(src, dest);
