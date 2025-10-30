@@ -342,55 +342,48 @@
             // Expiration Information
             const expirationSection = document.getElementById('modal-expiration-section');
             if (order.status === 'pending' || !order.status) {
+                // Check if email was sent (emailSentAt exists) rather than just expiresAt
+                const emailWasSent = !!(order.emailSentAt && !Number.isNaN(Date.parse(order.emailSentAt)));
                 expirationSection.style.display = 'block';
-                
-                // Calculate expiration timestamp (same logic as in the main display)
-                const expiryMs = (() => {
-                    if (order.expiresAt) {
-                        const t = Date.parse(order.expiresAt);
-                        if (!Number.isNaN(t)) return t;
+                if (emailWasSent && order.expiresAt) {
+                    const expiryMs = Date.parse(order.expiresAt);
+                    const expiryDate = new Date(expiryMs);
+                    const formattedExpiryDate = expiryDate.toLocaleString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    const timeRemaining = expiryMs - Date.now();
+                    const formatDuration = (ms) => {
+                        if (ms <= 0) return 'Expired';
+                        const days = Math.floor(ms / (24 * 60 * 60 * 1000));
+                        const hours = Math.floor((ms % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+                        const minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
+                        if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+                        if (hours > 0) return `${hours}h ${minutes}m`;
+                        return `${minutes}m`;
+                    };
+                    document.getElementById('modal-expiration-date').textContent = formattedExpiryDate;
+                    const timeRemainingElement = document.getElementById('modal-time-remaining');
+                    timeRemainingElement.textContent = formatDuration(timeRemaining);
+                    if (timeRemaining <= 0) {
+                        timeRemainingElement.style.color = '#dc3545';
+                        timeRemainingElement.style.fontWeight = 'bold';
+                    } else if (timeRemaining < 24 * 60 * 60 * 1000) {
+                        timeRemainingElement.style.color = '#ffc107';
+                        timeRemainingElement.style.fontWeight = 'bold';
+                    } else {
+                        timeRemainingElement.style.color = '#28a745';
+                        timeRemainingElement.style.fontWeight = 'normal';
                     }
-                    const base = Date.parse(order.date);
-                    const FIVE_DAYS = 5 * 24 * 60 * 60 * 1000;
-                    return Number.isNaN(base) ? Date.now() + FIVE_DAYS : base + FIVE_DAYS;
-                })();
-                
-                // Format expiration date
-                const expiryDate = new Date(expiryMs);
-                const formattedExpiryDate = expiryDate.toLocaleString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                
-                // Calculate time remaining
-                const timeRemaining = expiryMs - Date.now();
-                const formatDuration = (ms) => {
-                    if (ms <= 0) return 'Expired';
-                    const days = Math.floor(ms / (24 * 60 * 60 * 1000));
-                    const hours = Math.floor((ms % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
-                    const minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
-                    
-                    if (days > 0) return `${days}d ${hours}h ${minutes}m`;
-                    if (hours > 0) return `${hours}h ${minutes}m`;
-                    return `${minutes}m`;
-                };
-                
-                document.getElementById('modal-expiration-date').textContent = formattedExpiryDate;
-                const timeRemainingElement = document.getElementById('modal-time-remaining');
-                timeRemainingElement.textContent = formatDuration(timeRemaining);
-                
-                // Style based on time remaining
-                if (timeRemaining <= 0) {
-                    timeRemainingElement.style.color = '#dc3545';
-                    timeRemainingElement.style.fontWeight = 'bold';
-                } else if (timeRemaining < 24 * 60 * 60 * 1000) { // Less than 1 day
-                    timeRemainingElement.style.color = '#ffc107';
-                    timeRemainingElement.style.fontWeight = 'bold';
                 } else {
-                    timeRemainingElement.style.color = '#28a745';
+                    // Not started until email is sent
+                    document.getElementById('modal-expiration-date').textContent = 'Not started';
+                    const timeRemainingElement = document.getElementById('modal-time-remaining');
+                    timeRemainingElement.textContent = '—';
+                    timeRemainingElement.style.color = '';
                     timeRemainingElement.style.fontWeight = 'normal';
                 }
             } else {
@@ -731,6 +724,36 @@
                         confirmText: 'OK',
                         showCancel: false
                     });
+                    // Start expiration countdown only after email is sent
+                    try {
+                        const FIVE_DAYS = 5 * 24 * 60 * 60 * 1000;
+                        const now = Date.now();
+                        const expiresAtISO = new Date(now + FIVE_DAYS).toISOString();
+                        const emailSentAtISO = new Date(now).toISOString();
+                        if (order.id) {
+                            const ref = firebase.database().ref('preOrders/' + order.id);
+                            await ref.update({ expiresAt: expiresAtISO, emailSentAt: emailSentAtISO });
+                            // Update local order copy and modal UI
+                            window.currentOrderDetails.expiresAt = expiresAtISO;
+                            const expiryMs = Date.parse(expiresAtISO);
+                            const expiryDate = new Date(expiryMs);
+                            const formattedExpiryDate = expiryDate.toLocaleString('en-US', {
+                                year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                            });
+                            const timeRemainingEl = document.getElementById('modal-time-remaining');
+                            const expirationDateEl = document.getElementById('modal-expiration-date');
+                            if (expirationDateEl) expirationDateEl.textContent = formattedExpiryDate;
+                            if (timeRemainingEl) timeRemainingEl.textContent = formatDuration(expiryMs - Date.now());
+                            // Refresh the list to reflect new countdown
+                            if (typeof loadPreOrders === 'function') {
+                                loadPreOrders();
+                            }
+                        } else {
+                            console.warn('Order ID missing; cannot set expiresAt');
+                        }
+                    } catch (dbErr) {
+                        console.warn('Failed to start expiration after email send:', dbErr);
+                    }
                 } else {
                     // Keep UX in-app: no Gmail or mailto, show error modal
                     openConfirmModal({
@@ -1051,15 +1074,15 @@
                 const orderDate = new Date(order.date);
                 const formattedDate = orderDate.toISOString().split('T')[0];
 
-                // Compute expiry timestamp
+                // Compute expiry timestamp (only after email is sent)
                 const expiryMs = (() => {
-                    if (order.expiresAt) {
+                    // Check if email was sent first
+                    const emailWasSent = !!(order.emailSentAt && !Number.isNaN(Date.parse(order.emailSentAt)));
+                    if (emailWasSent && order.expiresAt) {
                         const t = Date.parse(order.expiresAt);
                         if (!Number.isNaN(t)) return t;
                     }
-                    const base = Date.parse(order.date);
-                    const FIVE_DAYS = 5 * 24 * 60 * 60 * 1000;
-                    return Number.isNaN(base) ? Date.now() + FIVE_DAYS : base + FIVE_DAYS;
+                    return NaN; // Do not start countdown until email is sent
                 })();
 
                 // Info section
@@ -1095,9 +1118,13 @@
                 if ((order.status || 'pending') === 'pending') {
                     const countdownEl = document.createElement('p');
                     countdownEl.className = 'countdown';
-                    countdownEl.textContent = 'Expires in: ' + formatDuration(expiryMs - Date.now());
+                    if (Number.isFinite(expiryMs)) {
+                        countdownEl.textContent = 'Expires in: ' + formatDuration(expiryMs - Date.now());
+                        registerPreOrderCountdown({ id: order.id, status: 'pending', expiryMs, el: countdownEl });
+                    } else {
+                        countdownEl.textContent = 'Expiration not started';
+                    }
                     infoDiv.appendChild(countdownEl);
-                    registerPreOrderCountdown({ id: order.id, status: 'pending', expiryMs, el: countdownEl });
                 }
 
                 const qtyEl = document.createElement('p');

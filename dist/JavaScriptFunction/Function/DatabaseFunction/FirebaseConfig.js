@@ -185,7 +185,7 @@ async function savePreOrderToFirebase(preOrder) {
         specialRequestKeywordsMatched: Boolean(preOrder.specialRequestKeywordsMatched),
         date: new Date().toISOString(),
         status: 'pending',
-        expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+        // Do NOT set expiresAt on creation; start only after email is sent
         expiryPolicyDays: 5
     };
     
