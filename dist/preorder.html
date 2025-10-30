@@ -230,6 +230,12 @@
                                     <option value="2850">Polycarbonate Multicoated Lens: + ₱ 2,850</option>
                                 </select>
                             </div>
+
+                            <div class="form-field">
+                                <label class="field-label" for="lensUpgradeQty">Units With Upgrade</label>
+                                <input type="number" class="full-input" name="lensUpgradeQty" id="lensUpgradeQty" value="0" min="0" onchange="updateTotalPrice()">
+                                <p class="field-note">How many of the ordered frames should have this upgrade.</p>
+                            </div>
                             
                             <div class="form-field">
                                 <label class="field-label">Additional Notes</label>
@@ -666,10 +672,13 @@
 
                     // Billing calculation
                     const lensUpgradeSelect = document.getElementById('lensUpgrade');
+                    const upgradeQtyEl = document.getElementById('lensUpgradeQty');
                     const unitBasePrice = Number.isFinite(Number(currentBasePrice)) ? Number(currentBasePrice) : 0;
                     const unitLensUpgrade = lensUpgradeSelect ? (parseInt(lensUpgradeSelect.value, 10) || 0) : 0;
+                    const lensUpgradeLabel = lensUpgradeSelect ? (lensUpgradeSelect.options[lensUpgradeSelect.selectedIndex]?.text || '') : '';
+                    const lensUpgradeQty = upgradeQtyEl ? Math.min(Math.max(parseInt(upgradeQtyEl.value, 10) || 0, 0), qtyNum) : 0;
                     const totalFramePrice = unitBasePrice * qtyNum;
-                    const totalLensUpgradePrice = unitLensUpgrade * qtyNum;
+                    const totalLensUpgradePrice = unitLensUpgrade * lensUpgradeQty;
                     const grandTotal = totalFramePrice + totalLensUpgradePrice;
 
                     // Create pre-order object
@@ -691,6 +700,8 @@
                             quantity: qtyNum,
                             frameUnitPrice: unitBasePrice,
                             lensUnitUpgrade: unitLensUpgrade,
+                            lensUpgradeQuantity: lensUpgradeQty,
+                            lensUpgradeLabel: lensUpgradeLabel,
                             totalFramePrice: totalFramePrice,
                             totalLensUpgradePrice: totalLensUpgradePrice,
                             totalPrice: grandTotal,
@@ -1024,6 +1035,7 @@
         function updateTotalPrice() {
             const lensUpgradeSelect = document.getElementById('lensUpgrade');
             const quantityInput = document.getElementById('quantity');
+            const upgradeQtyInput = document.getElementById('lensUpgradeQty');
             const basePriceEl = document.getElementById('basePrice');
             const lensUpgradePriceEl = document.getElementById('lensUpgradePrice');
             const totalPriceEl = document.getElementById('totalPrice');
@@ -1034,11 +1046,16 @@
             
             const quantity = parseInt(quantityInput.value) || 1;
             const lensUpgradeCost = parseInt(lensUpgradeSelect.value) || 0;
+            const rawUpgradeQty = upgradeQtyInput ? parseInt(upgradeQtyInput.value) || 0 : 0;
+            const upgradeQty = Math.min(Math.max(rawUpgradeQty, 0), quantity);
+            if (upgradeQtyInput && upgradeQtyInput.value !== String(upgradeQty)) {
+                upgradeQtyInput.value = String(upgradeQty);
+            }
             
             // Calculate prices
             const unitBasePrice = currentBasePrice; // Show the frame glasses price per unit
             const totalBasePrice = unitBasePrice * quantity;
-            const totalLensUpgrade = lensUpgradeCost * quantity;
+            const totalLensUpgrade = lensUpgradeCost * upgradeQty;
             const totalPrice = totalBasePrice + totalLensUpgrade;
             
             // Update display with proper formatting
@@ -1068,6 +1085,21 @@
             if (quantityInput) {
                 quantityInput.addEventListener('input', updateTotalPrice);
                 quantityInput.addEventListener('change', updateTotalPrice);
+            }
+
+            // Keep upgrade quantity constrained to overall quantity
+            const upgradeQtyInput = document.getElementById('lensUpgradeQty');
+            if (upgradeQtyInput && quantityInput) {
+                const clampUpgradeQty = () => {
+                    const qty = parseInt(quantityInput.value) || 1;
+                    const raw = parseInt(upgradeQtyInput.value) || 0;
+                    const clamped = Math.min(Math.max(raw, 0), qty);
+                    if (String(clamped) !== String(raw)) upgradeQtyInput.value = String(clamped);
+                };
+                upgradeQtyInput.addEventListener('input', () => { clampUpgradeQty(); updateTotalPrice(); });
+                upgradeQtyInput.addEventListener('change', () => { clampUpgradeQty(); updateTotalPrice(); });
+                quantityInput.addEventListener('input', () => { clampUpgradeQty(); });
+                quantityInput.addEventListener('change', () => { clampUpgradeQty(); });
             }
             
             // Initial calculation

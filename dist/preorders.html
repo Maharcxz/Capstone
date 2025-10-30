@@ -316,6 +316,7 @@
             };
             const billing = order.billing || null;
             const qty = Number(order.quantity) || Number(billing && billing.quantity) || 1;
+            const upgradeQtyStored = Number(billing && billing.lensUpgradeQuantity);
             let frameTotal = null;
             let upgradeTotal = null;
             let grandTotal = null;
@@ -326,7 +327,8 @@
                 const totalUpgrade = Number(billing.totalLensUpgradePrice);
                 const total = Number(billing.totalPrice);
                 frameTotal = Number.isFinite(totalFrame) ? totalFrame : (Number.isFinite(unitBase) ? unitBase * qty : null);
-                upgradeTotal = Number.isFinite(totalUpgrade) ? totalUpgrade : (Number.isFinite(unitUpgrade) ? unitUpgrade * qty : null);
+                const effectiveUpgradeQty = Number.isFinite(upgradeQtyStored) ? upgradeQtyStored : qty;
+                upgradeTotal = Number.isFinite(totalUpgrade) ? totalUpgrade : (Number.isFinite(unitUpgrade) ? unitUpgrade * effectiveUpgradeQty : null);
                 grandTotal = Number.isFinite(total) && Number.isFinite(frameTotal) && Number.isFinite(upgradeTotal)
                     ? total
                     : (Number.isFinite(frameTotal) && Number.isFinite(upgradeTotal) ? frameTotal + upgradeTotal : null);
