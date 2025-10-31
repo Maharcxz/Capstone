@@ -402,8 +402,7 @@
 
         // Default subject includes pickup availability
         function getDefaultEmailSubject(order) {
-            const productName = order.productName || order.frameName || 'your order';
-            return `${productName} is Available for Pickup at the Store – Trinity Optimum Vision Center`;
+            return `Your Pre-Order is Ready for Pickup – Trinity Optimum Vision Center`;
         }
 
         // Compose template variants
@@ -429,24 +428,52 @@
             const notes = (order.notes && order.notes.trim()) ? order.notes.trim() : null;
 
             if (templateId === 'simple') {
+                const { addressHtml, hoursHtml } = getContactDataForHtml();
                 return `
                     <div style="font-family:Poppins,Arial,sans-serif; color:#333; line-height:1.6;">
                       <p>Hi ${fullName},</p>
-                      <p>Thanks for your pre-order of <strong>${productName}</strong> on ${formattedDate}. Current status: ${status}.</p>
-                      ${notes ? `<p>Notes: ${notes}</p>` : ''}
-                      <p>We’ll keep you updated. Reply if you need anything.</p>
-                      <p>— Trinity Optimum Vision Center</p>
+                      <p>Thank you for choosing Trinity Optimum Vision Center!</p>
+                      <p>We’re excited to let you know that your pre-order has been successfully processed and your item is now available for pickup or delivery.</p>
+                      <p>If you’ve selected in-store pickup, please bring a valid ID and your order confirmation number for verification.</p>
+                      <p>Below are the details of your order:</p>
+                      <p><strong>Product Name:</strong> ${productName}</p>
+                      <p><strong>Order Date:</strong> ${formattedDate}</p>
+                      ${notes ? `<p><strong>Notes:</strong> ${escapeHtml(notes)}</p>` : ''}
+                      <p>You can now pick up your item at our store or choose to have it delivered right to your doorstep. Our staff will be happy to assist you with fitting, adjustments, or any questions you may have about your new eyewear.</p>
+                      <p><span style="font-size:18px;">📍</span> <strong>Store Location:</strong><br>
+                      Trinity Optimum Vision Center<br>
+                      ${addressHtml}</p>
+                      <p><span style="font-size:18px;">🕒</span> <strong>Store Hours:</strong><br>
+                      ${hoursHtml}</p>
+                      <p><strong>⚠️ Please note:</strong> You have 5 days from the time you receive this email to claim your pre-order. If you’re unable to pick it up within this period, please email us at <a href="mailto:trinityoptinumvision@gmail.com">trinityoptinumvision@gmail.com</a> to make further arrangements.</p>
+                      <p>We truly appreciate your trust in us and hope you enjoy your new eyewear.</p>
+                      <p><i>Please do not reply to this automated email.<i></p>
+                      <p>Warm regards,<br>Trinity Optimum Vision Center @</p>
                     </div>
                 `;
             }
             if (templateId === 'completed') {
+                const { addressHtml, hoursHtml } = getContactDataForHtml();
                 return `
                     <div style="font-family:Poppins,Arial,sans-serif; color:#333; line-height:1.6;">
                       <p>Hi ${fullName},</p>
-                      <p>Your Order for <strong>${productName}</strong> has been marked <strong>Completed</strong> on ${formattedDate}.</p>
-                      ${notes ? `<p>Notes: ${notes}</p>` : ''}
-                      <p>Thank you for choosing Trinity Optimum Vision Center.</p>
-                      <p>— Trinity Optimum Vision Center</p>
+                      <p>Thank you for choosing Trinity Optimum Vision Center!</p>
+                      <p>We’re excited to let you know that your pre-order has been successfully processed and your item is now available for pickup or delivery.</p>
+                      <p>If you’ve selected in-store pickup, please bring a valid ID and your order confirmation number for verification.</p>
+                      <p>Below are the details of your order:</p>
+                      <p><strong>Product Name:</strong> ${productName}</p>
+                      <p><strong>Order Date:</strong> ${formattedDate}</p>
+                      ${notes ? `<p><strong>Notes:</strong> ${escapeHtml(notes)}</p>` : ''}
+                      <p>You can now pick up your item at our store or choose to have it delivered right to your doorstep. Our staff will be happy to assist you with fitting, adjustments, or any questions you may have about your new eyewear.</p>
+                      <p><span style="font-size:18px;">📍</span> <strong>Store Location:</strong><br>
+                      Trinity Optimum Vision Center<br>
+                      ${addressHtml}</p>
+                      <p><span style="font-size:18px;">🕒</span> <strong>Store Hours:</strong><br>
+                      ${hoursHtml}</p>
+                      <p><strong>⚠️ Please note:</strong> You have 5 days from the time you receive this email to claim your pre-order. If you’re unable to pick it up within this period, please email us at <a href="mailto:trinityoptinumvision@gmail.com">trinityoptinumvision@gmail.com</a> to make further arrangements.</p>
+                      <p>We truly appreciate your trust in us and hope you enjoy your new eyewear.</p>
+                      <p><i>Please do not reply to this automated email.<i></p>
+                      <p>Warm regards,<br>Trinity Optimum Vision Center @</p>
                     </div>
                 `;
             }
@@ -486,28 +513,20 @@
             const { addressText, hoursText } = getContactDataForEmail();
 
             // Pre-fill message with requested template
-            messageEl.value = `Hi ${((order.firstName || '') + ' ' + (order.lastName || '')).trim() || 'Customer'},\n\nThank you for choosing Trinity Optimum Vision Center!\nWe’re excited to let you know that your pre-order has been successfully processed and your item is now available for pickup or delivery.\n\nIf you’ve selected in-store pickup, please bring a valid ID and your order confirmation number for verification.\n\nBelow are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n\nYou can now pick up your item at our store or choose to have it delivered right to your doorstep.\nOur staff will be happy to assist you with fitting, adjustments, or any questions you may have about your new eyewear.\n\n📍 Store Location:\nTrinity Optimum Vision Center\n${addressText}\n\n🕒 Store Hours:\n${hoursText}\n\nWe truly appreciate your trust in us and hope you enjoy your new eyewear.\n\nPlease do not reply to this automated email.\n\nWarm regards,\nTrinity Optimum Vision Center`;
+            messageEl.value = `Hi ${((order.firstName || '') + ' ' + (order.lastName || '')).trim() || 'Customer'},\n\nThank you for choosing Trinity Optimum Vision Center!\nWe’re excited to let you know that your pre-order has been successfully processed and your item is now available for pickup or delivery.\n\nIf you’ve selected in-store pickup, please bring a valid ID and your order confirmation number for verification.\n\nBelow are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n\nYou can now pick up your item at our store or choose to have it delivered right to your doorstep.\nOur staff will be happy to assist you with fitting, adjustments, or any questions you may have about your new eyewear.\n\n📍 Store Location:\nTrinity Optimum Vision Center\n${addressText}\n\n🕒 Store Hours:\n${hoursText}\n\n⚠️ Please note: You have 5 days from the time you receive this email to claim your pre-order. If you’re unable to pick it up within this period, please email us at trinityoptinumvision@gmail.com to make further arrangements.\n\nWe truly appreciate your trust in us and hope you enjoy your new eyewear.\n\nPlease do not reply to this automated email.\n\nWarm regards,\nTrinity Optimum Vision Center @`;
             templateEl.value = 'default';
 
             templateEl.onchange = function() {
                 const tpl = templateEl.value;
-                // Update subject when template changes (include pickup availability)
-                if (tpl === 'completed') {
-                    const productName = order.productName || order.frameName || 'your order';
-                    subjectEl.value = `${productName} is Available for Pickup at the Store – Trinity Optimum Vision Center`;
-                } else if (tpl === 'simple') {
-                    const productName = order.productName || order.frameName || 'your order';
-                    subjectEl.value = `Pre-Order Update: ${productName} is Available for Pickup at the Store`;
-                } else {
-                    subjectEl.value = getDefaultEmailSubject(order);
-                }
+                // Use a consistent subject across templates per requested format
+                subjectEl.value = getDefaultEmailSubject(order);
                 // Update message (plain text version)
                 if (tpl === 'simple') {
                     messageEl.value = `Hi ${((order.firstName || '') + ' ' + (order.lastName || '')).trim() || 'Customer'},\n\nThanks for your pre-order of ${order.productName || order.frameName || 'your selected frame'}.\nCurrent status: ${(order.status || 'pending').toUpperCase()}.\n\nWe’ll keep you updated. Reply if you need anything.\n\n— Trinity Optimum Vision Center`;
                 } else if (tpl === 'completed') {
                     messageEl.value = `Hi ${((order.firstName || '') + ' ' + (order.lastName || '')).trim() || 'Customer'},\n\nYour order for ${order.productName || order.frameName || 'your selected frame'} has been marked Completed.\n\nThank you for choosing Trinity Optimum Vision Center.\n\n— Trinity Optimum Vision Center`;
                 } else {
-                    messageEl.value = `Hi ${((order.firstName || '') + ' ' + (order.lastName || '')).trim() || 'Customer'},\n\nThank you for choosing Trinity Optimum Vision Center!\nWe’re excited to let you know that your pre-order has been successfully processed and your item is now available for pickup or delivery.\n\nIf you’ve selected in-store pickup, please bring a valid ID and your order confirmation number for verification.\n\nBelow are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n\nYou can now pick up your item at our store or choose to have it delivered right to your doorstep.\nOur staff will be happy to assist you with fitting, adjustments, or any questions you may have about your new eyewear.\n\n📍 Store Location:\nTrinity Optimum Vision Center\n${addressText}\n\n🕒 Store Hours:\n${hoursText}\n\nWe truly appreciate your trust in us and hope you enjoy your new eyewear.\n\nPlease do not reply to this automated email.\n\nWarm regards,\nTrinity Optimum Vision Center`;
+                    messageEl.value = `Hi ${((order.firstName || '') + ' ' + (order.lastName || '')).trim() || 'Customer'},\n\nThank you for choosing Trinity Optimum Vision Center!\nWe’re excited to let you know that your pre-order has been successfully processed and your item is now available for pickup or delivery.\n\nIf you’ve selected in-store pickup, please bring a valid ID and your order confirmation number for verification.\n\nBelow are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n\nYou can now pick up your item at our store or choose to have it delivered right to your doorstep.\nOur staff will be happy to assist you with fitting, adjustments, or any questions you may have about your new eyewear.\n\n📍 Store Location:\nTrinity Optimum Vision Center\n${addressText}\n\n🕒 Store Hours:\n${hoursText}\n\n⚠️ Please note: You have 5 days from the time you receive this email to claim your pre-order. If you’re unable to pick it up within this period, please email us at trinityoptinumvision@gmail.com to make further arrangements.\n\nWe truly appreciate your trust in us and hope you enjoy your new eyewear.\n\nPlease do not reply to this automated email.\n\nWarm regards,\nTrinity Optimum Vision Center @`;
                 }
             };
         }
@@ -611,9 +630,10 @@
                   ${addressHtml}</p>
                   <p><span style="font-size:18px;">🕒</span> <strong>Store Hours:</strong><br>
                   ${hoursHtml}</p>
+                  <p><strong>⚠️ Please note:</strong> You have 5 days from the time you receive this email to claim your pre-order. If you’re unable to pick it up within this period, please email us at <a href="mailto:trinityoptinumvision@gmail.com">trinityoptinumvision@gmail.com</a> to make further arrangements.</p>
                   <p>We truly appreciate your trust in us and hope you enjoy your new eyewear.</p>
                   <p><i>Please do not reply to this automated email.<i></p>
-                  <p>Warm regards,<br>Trinity Optimum Vision Center</p>
+                  <p>Warm regards,<br>Trinity Optimum Vision Center @</p>
                 </div>
             `;
         }
@@ -642,13 +662,13 @@
             const notes = (order.notes && order.notes.trim()) ? order.notes.trim() : '';
             const { addressText, hoursText } = getContactDataForEmail();
             if (templateId === 'simple') {
-                return `Hi ${name},\n\nThanks for your pre-order of ${productBase} on ${formattedDateDash}. Current status: ${(order.status || 'pending').toUpperCase()}.\n${notes ? `Notes: ${notes}\n` : ''}\nWe’ll keep you updated. Reply if you need anything.\n\n— Trinity Optimum Vision Center`;
+                return `Hi ${name},\n\nThank you for choosing Trinity Optimum Vision Center!\nWe’re excited to let you know that your pre-order has been successfully processed and your item is now available for pickup or delivery.\n\nIf you’ve selected in-store pickup, please bring a valid ID and your order confirmation number for verification.\n\nBelow are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n${notes ? `\nNotes: ${notes}\n` : ''}\nYou can now pick up your item at our store or choose to have it delivered right to your doorstep.\nOur staff will be happy to assist you with fitting, adjustments, or any questions you may have about your new eyewear.\n\n📍 Store Location:\nTrinity Optimum Vision Center\n${addressText}\n\n🕒 Store Hours:\n${hoursText}\n\n⚠️ Please note: You have 5 days from the time you receive this email to claim your pre-order. If you’re unable to pick it up within this period, please email us at trinityoptinumvision@gmail.com to make further arrangements.\n\nWe truly appreciate your trust in us and hope you enjoy your new eyewear.\n\nPlease do not reply to this automated email.\n\nWarm regards,\nTrinity Optimum Vision Center @`;
             }
             if (templateId === 'completed') {
-                return `Hi ${name},\n\nYour order for ${productBase} has been marked Completed on ${formattedDateDash}.\n${notes ? `Notes: ${notes}\n` : ''}\nThank you for choosing Trinity Optimum Vision Center.\n\n— Trinity Optimum Vision Center`;
+                return `Hi ${name},\n\nThank you for choosing Trinity Optimum Vision Center!\nWe’re excited to let you know that your pre-order has been successfully processed and your item is now available for pickup or delivery.\n\nIf you’ve selected in-store pickup, please bring a valid ID and your order confirmation number for verification.\n\nBelow are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n${notes ? `\nNotes: ${notes}\n` : ''}\nYou can now pick up your item at our store or choose to have it delivered right to your doorstep.\nOur staff will be happy to assist you with fitting, adjustments, or any questions you may have about your new eyewear.\n\n📍 Store Location:\nTrinity Optimum Vision Center\n${addressText}\n\n🕒 Store Hours:\n${hoursText}\n\n⚠️ Please note: You have 5 days from the time you receive this email to claim your pre-order. If you’re unable to pick it up within this period, please email us at trinityoptinumvision@gmail.com to make further arrangements.\n\nWe truly appreciate your trust in us and hope you enjoy your new eyewear.\n\nPlease do not reply to this automated email.\n\nWarm regards,\nTrinity Optimum Vision Center @`;
             }
             // default detailed summary (requested wording)
-            return `Hi ${name},\n\nThank you for choosing Trinity Optimum Vision Center!\nWe’re excited to let you know that your pre-order has been successfully processed and your item is now available for pickup or delivery.\n\nIf you’ve selected in-store pickup, please bring a valid ID and your order confirmation number for verification.\n\nBelow are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n\nYou can now pick up your item at our store or choose to have it delivered right to your doorstep.\nOur staff will be happy to assist you with fitting, adjustments, or any questions you may have about your new eyewear.\n\n📍 Store Location:\nTrinity Optimum Vision Center\n${addressText}\n\n🕒 Store Hours:\n${hoursText}\n\nWe truly appreciate your trust in us and hope you enjoy your new eyewear.\n\nPlease do not reply to this automated email.\n\nWarm regards,\nTrinity Optimum Vision Center`;
+            return `Hi ${name},\n\nThank you for choosing Trinity Optimum Vision Center!\nWe’re excited to let you know that your pre-order has been successfully processed and your item is now available for pickup or delivery.\n\nIf you’ve selected in-store pickup, please bring a valid ID and your order confirmation number for verification.\n\nBelow are the details of your order:\n\nProduct Name: ${productLine}\nOrder Date: ${formattedDateDash}\n\nYou can now pick up your item at our store or choose to have it delivered right to your doorstep.\nOur staff will be happy to assist you with fitting, adjustments, or any questions you may have about your new eyewear.\n\n📍 Store Location:\nTrinity Optimum Vision Center\n${addressText}\n\n🕒 Store Hours:\n${hoursText}\n\n⚠️ Please note: You have 5 days from the time you receive this email to claim your pre-order. If you’re unable to pick it up within this period, please email us at trinityoptinumvision@gmail.com to make further arrangements.\n\nWe truly appreciate your trust in us and hope you enjoy your new eyewear.\n\nPlease do not reply to this automated email.\n\nWarm regards,\nTrinity Optimum Vision Center @`;
         }
 
         // Open Gmail compose with prefilled fields; fallback to mailto
